@@ -89,7 +89,7 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 .fmt .btn.on { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
 .fmt svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; }
 /* ---- Cinta de opciones ---- */
-.ribbon { grid-area: ribbon; background: var(--panel); border-bottom: 1px solid var(--line); min-width: 0; position: relative; z-index: 20; }
+.ribbon { display: flex; grid-area: ribbon; background: var(--panel); border-bottom: 1px solid var(--line); min-width: 0; position: relative; z-index: 20; }
 .rtabs { display: flex; gap: 2px; padding: 4px 10px 0; align-items: flex-end; background: var(--panel-2); border-bottom: 1px solid var(--line); }
 .rtab { border: 1px solid transparent; border-bottom: 0; background: transparent; padding: 6px 18px; font-weight: 700; color: var(--muted); border-radius: 7px 7px 0 0; }
 .rtab:hover { color: var(--fg); }
@@ -223,7 +223,9 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .modal.story { background: var(--bg); color: var(--fg); inset: 46px 0 0 0; }
 .modesw { display: flex; flex-direction: column; width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 2px; }
 .modesw button { display: flex; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--fg); border-radius: 9px; padding: 7px 10px; font-weight: 700; font-size: 12.5px; text-align: left; }
-.stribbon .modesw { width: 170px; align-self: center; margin: 0 8px; }
+.modeslot { flex: none; width: 188px; display: flex; align-items: flex-start; padding: 8px 8px; border-right: 1px solid var(--line); }
+.rcolumn { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+@media (max-width: 900px) { .ribbon { flex-direction: column; } .modeslot { width: auto; border-right: 0; border-bottom: 1px solid var(--line); } .modesw { flex-direction: row; } .modesw button { flex: 1; justify-content: center; } }
 .stwrap { position: relative; flex: 1; min-width: 0; display: flex; } .stwrap .stbody { flex: 1; }
 .stfloat { position: absolute; right: 14px; bottom: 14px; display: flex; align-items: center; gap: 2px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px; box-shadow: 0 4px 16px rgba(0,0,0,.2); z-index: 5; }
 .stfloat button { display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent; color: var(--fg); border-radius: 8px; padding: 6px 8px; font-weight: 700; font-size: 12px; }
@@ -235,8 +237,9 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .modesw button.on { background: var(--brand); color: var(--brand-ink); } .modesw button.on svg.ic { stroke: var(--brand-ink); }
 .stbody.hand, .stbody.hand * { cursor: grab !important; } .stbody.panning, .stbody.panning * { cursor: grabbing !important; }
 .stlinks circle.hd { pointer-events: all; cursor: move; fill: var(--panel); stroke-width: 2.5; }
-.modal.story { padding: 8px 10px 10px; gap: 8px; }
-.stribbon { display: flex; align-items: stretch; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; flex: none; overflow-x: auto; }
+.modal.story { padding: 0 0 10px; gap: 0; }
+.stmain { padding: 10px 10px 0; }
+.stribbon { display: flex; align-items: stretch; background: var(--panel); border-bottom: 1px solid var(--line); flex: none; overflow-x: auto; min-height: 100px; }
 .stribbon .rpanes { display: flex; align-items: stretch; padding: 4px 4px 2px; }
 .stribbon .rpin { align-items: center; padding-right: 8px; }
 .stribbon .ttl { align-self: center; font-weight: 800; padding: 0 12px; color: var(--brand); white-space: nowrap; }
@@ -419,16 +422,17 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     <input class="title" id="courseTitle" type="text" aria-label="Título del curso">
     <button class="btn icon" id="undoBtn" title="Deshacer (Ctrl+Z)" aria-label="Deshacer"></button>
     <button class="btn icon" id="redoBtn" title="Rehacer (Ctrl+Y)" aria-label="Rehacer"></button>
+    <button class="btn icon" id="saveBtn" title="Guardar el proyecto (Ctrl+S)" aria-label="Guardar el proyecto"></button>
     <span class="toast" id="toast" role="status"></span>
     <span class="sp"></span>
     <input type="file" id="openFile" accept=".zip,.json" hidden>
     <input type="file" id="mediaFile" hidden>
   </header>
 
-  <div class="ribbon" id="ribbon"><div class="rtabs" id="rtabs"></div><div class="rbody" id="rbody"></div></div>
+  <div class="ribbon" id="ribbon"><div class="modeslot"><div class="modesw" id="modeSw" role="group" aria-label="Modo de trabajo"></div></div><div class="rcolumn"><div class="rtabs" id="rtabs"></div><div class="rbody" id="rbody"></div></div></div>
 
   <aside class="slides" aria-label="Diapositivas">
-    <div class="head"><div class="modesw" id="modeSw" role="group" aria-label="Modo de trabajo"></div></div>
+    <div class="head"><h2>Diapositivas</h2></div>
     <div class="scenebar" id="sceneBar"></div>
     <ol id="slideList"></ol>
     <div class="foot" id="slideFoot"></div>
@@ -1947,7 +1951,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     const r = $('#stRibbon'); r.textContent = '';
     const si = S.sc, isS = startIdx() === si;
     r.append(
-      h('div', { class: 'modesw', role: 'group', 'aria-label': 'Modo de trabajo' }),
+      h('div', { class: 'modeslot' }, h('div', { class: 'modesw', role: 'group', 'aria-label': 'Modo de trabajo' })),
       h('div', { class: 'rpanes' },
         rgroup('Escenas', rbtn('plus', 'Nueva escena', newScene, { title: 'Añadir una escena al curso' }),
           rbtn('play', 'Escena inicial', () => setStartScene(si), { title: 'El curso empieza por la primera diapositiva de esta escena', cls: isS ? 'primary' : '' }),
@@ -2929,6 +2933,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
   function bind() {
     buildRibbon();
     $('#undoBtn').append(ic('undo')); $('#redoBtn').append(ic('redo'));
+    $('#saveBtn').append(ic('save')); $('#saveBtn').addEventListener('click', saveProject);
     $('#undoBtn').addEventListener('click', undo); $('#redoBtn').addEventListener('click', redo);
     $('#previewBtn').addEventListener('click', () => openPreview(true));
     $('#pvHere').addEventListener('click', () => openPreview(true));
@@ -2991,7 +2996,8 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
       if (typing) return;
       if (ev.key === ' ') { ev.preventDefault(); togglePlayT(); return; }
       const e = selEl(), ms = selEls(), k = ev.key.toLowerCase();
-      if (mod && k === 'b') { ev.preventDefault(); splitAtPlayhead(); }
+      if (mod && k === 's') { ev.preventDefault(); saveProject(); }
+      else if (mod && k === 'b') { ev.preventDefault(); splitAtPlayhead(); }
       else if (!mod && !ev.altKey && k === 'v') setTool('sel');
       else if (!mod && !ev.altKey && k === 'c') setTool('razor');
       else if (!mod && !ev.altKey && k === 'n') toggleMagnet();
