@@ -224,6 +224,11 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .modesw { display: flex; flex-direction: column; width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 2px; }
 .modesw button { display: flex; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--fg); border-radius: 9px; padding: 7px 10px; font-weight: 700; font-size: 12.5px; text-align: left; }
 .modeslot { flex: none; width: 188px; display: flex; align-items: flex-start; padding: 8px 8px; border-right: 1px solid var(--line); }
+.slotcol { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.quickbar { display: flex; flex-wrap: wrap; gap: 4px; justify-content: space-between; align-items: center; }
+.quickbar .qb { width: 36px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.quickbar .qb svg.ic { width: 16px; height: 16px; }
+.quickbar .themetog { margin: 0 auto; }
 .rcolumn { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 @media (max-width: 900px) { .ribbon { flex-direction: column; } .modeslot { width: auto; border-right: 0; border-bottom: 1px solid var(--line); } .modesw { flex-direction: row; } .modesw button { flex: 1; justify-content: center; } }
 .stwrap { position: relative; flex: 1; min-width: 0; display: flex; } .stwrap .stbody { flex: 1; }
@@ -420,16 +425,13 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
   <header class="top">
     <span class="logo">SUAcademy · Editor</span>
     <input class="title" id="courseTitle" type="text" aria-label="Título del curso">
-    <button class="btn icon" id="undoBtn" title="Deshacer (Ctrl+Z)" aria-label="Deshacer"></button>
-    <button class="btn icon" id="redoBtn" title="Rehacer (Ctrl+Y)" aria-label="Rehacer"></button>
-    <button class="btn icon" id="saveBtn" title="Guardar el proyecto (Ctrl+S)" aria-label="Guardar el proyecto"></button>
     <span class="toast" id="toast" role="status"></span>
     <span class="sp"></span>
     <input type="file" id="openFile" accept=".zip,.json" hidden>
     <input type="file" id="mediaFile" hidden>
   </header>
 
-  <div class="ribbon" id="ribbon"><div class="modeslot"><div class="modesw" id="modeSw" role="group" aria-label="Modo de trabajo"></div></div><div class="rcolumn"><div class="rtabs" id="rtabs"></div><div class="rbody" id="rbody"></div></div></div>
+  <div class="ribbon" id="ribbon"><div class="modeslot"><div class="slotcol"><div class="quickbar" id="quick"></div><div class="modesw" id="modeSw" role="group" aria-label="Modo de trabajo"></div></div></div><div class="rcolumn"><div class="rtabs" id="rtabs"></div><div class="rbody" id="rbody"></div></div></div>
 
   <aside class="slides" aria-label="Diapositivas">
     <div class="head"><h2>Diapositivas</h2></div>
@@ -687,7 +689,16 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     history.push(JSON.stringify(course));
     course = JSON.parse(future.pop()); lastKey = null; fixState(); refreshAll(); dirty(); paintUndo();
   }
-  function paintUndo() { $('#undoBtn').disabled = !history.length; $('#redoBtn').disabled = !future.length; }
+  function paintUndo() { document.querySelectorAll('.qundo').forEach((b) => { b.disabled = !history.length; }); document.querySelectorAll('.qredo').forEach((b) => { b.disabled = !future.length; }); }
+  function newProject() { snap(null); course = newCourse(); S.sc = 0; S.si = 0; S.ctx = 'base'; S.sel = null; S.t = 0; fitPps(); refreshAll(); dirty(); }
+  function paintQuick(box, main) {
+    if (!box) return; box.textContent = '';
+    const qb = (icon, title, cls, id, fn) => h('button', Object.assign({ class: 'btn icon qb ' + cls, type: 'button', title, 'aria-label': title, onclick: fn }, main && id ? { id } : {}), ic(icon));
+    box.append(qb('doc', 'Proyecto nuevo', 'qnew', 'newBtn', newProject), qb('save', 'Guardar el proyecto (Ctrl+S)', 'qsave', 'saveBtn', saveProject),
+      qb('undo', 'Deshacer (Ctrl+Z)', 'qundo', 'undoBtn', undo), qb('redo', 'Rehacer (Ctrl+Y)', 'qredo', 'redoBtn', redo),
+      h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', 'aria-label': 'Modo noche', title: 'Cambiar entre modo día y modo noche', onclick: toggleTheme }, main ? { id: 'themeBtn' } : {}), ic('sun', 'sun'), ic('moon', 'moon'), h('i', { class: 'knob' })));
+    paintUndo(); paintThemeBtn();
+  }
   // Cambia el curso: guarda para deshacer, aplica y vuelve a pintar lo necesario.
   function edit(fn, key, o) {
     o = o || {};
@@ -1405,7 +1416,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     if (stretched) { fitPps(); refreshTimeline(); toast('Línea de tiempo ajustada a ' + stretched + ' s.'); }
     S.tab = 'props'; renderPanel();
   }
-  async function addMediaElement(type) {
+  async function addMediaElement(type, pt) {
     const accept = { image: 'image/*', audio: 'audio/*', video: 'video/*' }[type];
     const f = await pickFile(accept);
     if (!f) return;
@@ -1421,6 +1432,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
       m.onerror = () => res(0);
       m.src = url;
     });
+    const place = (o, w, hh) => pt ? Object.assign(o, { x: Math.round(clamp(pt.x, 0, Math.max(0, W - w))), y: Math.round(clamp(pt.y, 0, Math.max(0, H - hh))) }) : o;
     if (type === 'audio') return addElement({ type, src, volume: 1 }, secs);
     const dims = await new Promise((res) => {
       const done = (w, hh) => res([w || 960, hh || 540]);
@@ -1429,7 +1441,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     });
     let w = dims[0], hh = dims[1];
     const k = Math.min(1, (W * 0.6) / w, (H * 0.6) / hh); w = Math.round(w * k); hh = Math.round(hh * k);
-    addElement({ type, src, x: Math.round((W - w) / 2), y: Math.round((H - hh) / 2), w, h: hh, volume: 1 }, secs);
+    addElement(place({ type, src, x: Math.round((W - w) / 2), y: Math.round((H - hh) / 2), w, h: hh, volume: 1 }, w, hh), secs);
   }
   function closeShapes(keepSticky) { document.querySelectorAll('#shapePop, #newPop, #ctxPop, #bgPop' + (keepSticky ? '' : ', #arrPop')).forEach((o) => o.remove()); }
   function toggleShapes(btn) {
@@ -1563,17 +1575,20 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     if (!node && (S.sel || S.multi.length)) select(null);
     if (node && nid !== '__q' && !isSel(nid)) { const e0 = findEl(nid); if (e0) { if (e0.group) { setMulti(groupMates(e0)); S.sel = e0.id; afterSel(); } else select(nid); } }
     const at = stagePt(ev), l = selEls(), n = l.length, items = [];
+    const put = (props) => { const w = props.w || 0, hh = props.h || 0; return Object.assign(props, { x: Math.round(clamp(at.x, 0, Math.max(0, course.width - w))), y: Math.round(clamp(at.y, 0, Math.max(0, course.height - hh))) }); };
+    items.push(['Portapapeles']);
     if (n) items.push(['cut', 'Cortar', cutSel], ['copy', 'Copiar', () => copySel()]);
     items.push(['paste', 'Pegar', () => pasteClip(), !clip], ['paste', 'Pegar aquí', () => pasteClip(at), !clip]);
-    items.push({ sep: true }, ['play', 'Accionadores…', () => { S.tab = 'trig'; renderPanel(); }]);
-    if (!n) items.push({ sep: true }, ['group', 'Seleccionar todo', selectAll]);
+    items.push(['Insertar aquí'], ['text', 'Texto', () => addElement(put(defaults('text')))], ['image', 'Imagen…', () => addMediaElement('image', at)], ['audio', 'Audio…', () => addMediaElement('audio', at)], ['video', 'Vídeo…', () => addMediaElement('video', at)], ['button', 'Botón', () => addElement(put(defaults('button')))]);
+    items.push(['Interactividad'], ['play', 'Accionadores…', () => { S.tab = 'trig'; renderPanel(); }]);
+    if (!n) items.push(['Selección'], ['group', 'Seleccionar todo', selectAll]);
     else {
-      items.push({ sep: true }, ['tofront', 'Traer al frente', () => orderSel('front')], ['toback', 'Enviar al fondo', () => orderSel('back')], ['front', 'Traer adelante', () => orderSel('forward')], ['back', 'Enviar hacia atrás', () => orderSel('backward')]);
-      if (n > 1 || l.some((e) => e.group)) items.push({ sep: true });
+      items.push(['Orden'], ['tofront', 'Traer al frente', () => orderSel('front')], ['toback', 'Enviar al fondo', () => orderSel('back')], ['front', 'Traer adelante', () => orderSel('forward')], ['back', 'Enviar hacia atrás', () => orderSel('backward')]);
+      if (n > 1 || l.some((e) => e.group)) items.push(['Agrupar y alinear']);
       if (n > 1) items.push(['group', 'Agrupar', groupSel]);
       if (l.some((e) => e.group)) items.push(['ungroup', 'Desagrupar', ungroupSel]);
       if (n > 1) items.push(alignRow());
-      items.push({ sep: true }, ['copy', 'Duplicar', duplicateSel], ['trash', 'Eliminar', deleteSel]);
+      items.push(['Objeto'], ['copy', 'Duplicar', duplicateSel], ['trash', 'Eliminar', deleteSel]);
     }
     ctxPop(ev.clientX, ev.clientY, items);
   }
@@ -1583,11 +1598,11 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     ev.preventDefault();
     const sid = li.dataset.sid, i = slides().findIndex((x) => x.id === sid);
     if (i >= 0 && i !== S.si) gotoSlide(i);
-    ctxPop(ev.clientX, ev.clientY, [
+    ctxPop(ev.clientX, ev.clientY, [['Diapositiva'],
       ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['copy', 'Duplicar', dupSlide],
-      ['edit', 'Cambiar nombre', () => renameSlide(sid, () => document.querySelector('#slideList li[data-sid="' + sid + '"] .nm'))], ['play', 'Accionadores de la diapositiva…', () => { S.sel = null; S.multi = []; S.tab = 'trig'; refreshAll(); }], { sep: true },
-      ['up', 'Subir', () => moveSlideBy(-1), S.si === 0], ['down', 'Bajar', () => moveSlideBy(1), S.si >= slides().length - 1], { sep: true },
-      ['trash', 'Eliminar', delSlide, slides().length < 2]]);
+      ['edit', 'Cambiar nombre', () => renameSlide(sid, () => document.querySelector('#slideList li[data-sid="' + sid + '"] .nm'))], ['Interactividad'], ['play', 'Accionadores de la diapositiva…', () => { S.sel = null; S.multi = []; S.tab = 'trig'; refreshAll(); }],
+      ['Orden'], ['up', 'Subir', () => moveSlideBy(-1), S.si === 0], ['down', 'Bajar', () => moveSlideBy(1), S.si >= slides().length - 1],
+      ['Eliminar'], ['trash', 'Eliminar diapositiva', delSlide, slides().length < 2]]);
   }
   const isDark = () => { const r = document.documentElement; return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
   function paintThemeBtn() { document.querySelectorAll('.themetog').forEach((b) => b.setAttribute('aria-checked', isDark() ? 'true' : 'false')); }
@@ -1610,9 +1625,8 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     tabs.append(h('div', { class: 'menu' }, h('button', { class: 'rtab file', id: 'projBtn', type: 'button' }, 'Archivo'), drop),
       h('button', { class: 'rtab', type: 'button', 'data-rt': 'edit', onclick: () => showRibTab('edit') }, 'Edición'),
       h('button', { class: 'rtab', type: 'button', 'data-rt': 'ins', onclick: () => showRibTab('ins') }, 'Insertar'),
-      h('span', { class: 'sp' }),
-      h('button', { class: 'themetog', id: 'themeBtn', type: 'button', role: 'switch', 'aria-label': 'Modo noche', title: 'Cambiar entre modo día y modo noche', onclick: toggleTheme }, ic('sun', 'sun'), ic('moon', 'moon'), h('i', { class: 'knob' })));
-    paintThemeBtn();
+      h('span', { class: 'sp' }));
+    paintQuick($('#quick'), true);
     const edicion = h('div', { class: 'rpane', 'data-pane': 'edit' },
       rgroup('Portapapeles', rbtn('paste', 'Pegar', pasteClip, { title: 'Pegar (Ctrl+V)' }), rcol(rsm('cut', 'Cortar', cutSel, { title: 'Cortar el objeto' }), rsm('copy', 'Copiar', copySel, { title: 'Copiar el objeto (Ctrl+C)' }))),
       rgroup('Diapositiva',
@@ -1951,17 +1965,15 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     const r = $('#stRibbon'); r.textContent = '';
     const si = S.sc, isS = startIdx() === si;
     r.append(
-      h('div', { class: 'modeslot' }, h('div', { class: 'modesw', role: 'group', 'aria-label': 'Modo de trabajo' })),
+      h('div', { class: 'modeslot' }, h('div', { class: 'slotcol' }, h('div', { class: 'quickbar', id: 'quick2' }), h('div', { class: 'modesw', role: 'group', 'aria-label': 'Modo de trabajo' }))),
       h('div', { class: 'rpanes' },
         rgroup('Escenas', rbtn('plus', 'Nueva escena', newScene, { title: 'Añadir una escena al curso' }),
           rbtn('play', 'Escena inicial', () => setStartScene(si), { title: 'El curso empieza por la primera diapositiva de esta escena', cls: isS ? 'primary' : '' }),
           rbtn('edit', 'Nombre', () => { const n = document.querySelector('#stBody .sh .nm[data-sn="' + si + '"]'); if (n) renameScene(si, n); }, { title: 'Cambiar el nombre de la escena' }),
           rbtn('trash', 'Eliminar escena', () => deleteScene(si), { title: 'Eliminar la escena seleccionada' })),
         rgroup('Diapositiva', rbtn('newslide', 'Nueva diapositiva', () => insertSlideKind('content'), { title: 'Añadir una diapositiva después de la seleccionada' }),
-          rbtn('copy', 'Duplicar', dupSlide, { title: 'Duplicar la diapositiva' }), rbtn('trash', 'Eliminar', delSlide, { title: 'Eliminar la diapositiva' }))),
-      h('span', { style: 'flex:1' }),
-      h('div', { class: 'rpin' },
-        h('button', { class: 'themetog', type: 'button', role: 'switch', 'aria-label': 'Modo noche', title: 'Cambiar entre modo día y modo noche', onclick: toggleTheme }, ic('sun', 'sun'), ic('moon', 'moon'), h('i', { class: 'knob' }))));
+          rbtn('copy', 'Duplicar', dupSlide, { title: 'Duplicar la diapositiva' }), rbtn('trash', 'Eliminar', delSlide, { title: 'Eliminar la diapositiva' }))));
+    paintQuick($('#quick2'), false);
     paintThemeBtn(); paintModeSw();
     const f = $('#stFloat'); f.textContent = '';
     const fb = (icon, label, fn, on) => h('button', { type: 'button', class: on ? 'on' : '', title: label, 'aria-label': label, onclick: fn }, ic(icon));
@@ -2932,9 +2944,6 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
   /* ---------- Arranque ---------- */
   function bind() {
     buildRibbon();
-    $('#undoBtn').append(ic('undo')); $('#redoBtn').append(ic('redo'));
-    $('#saveBtn').append(ic('save')); $('#saveBtn').addEventListener('click', saveProject);
-    $('#undoBtn').addEventListener('click', undo); $('#redoBtn').addEventListener('click', redo);
     $('#previewBtn').addEventListener('click', () => openPreview(true));
     $('#pvHere').addEventListener('click', () => openPreview(true));
     $('#pvStart').addEventListener('click', () => openPreview(false));
@@ -2950,11 +2959,11 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
       if (!c && !sh) return; ev.preventDefault();
       if (c) {
         const id = c.dataset.cid; gotoSlideId(id, true);
-        ctxPop(ev.clientX, ev.clientY, [['edit', 'Abrir para editar', () => { gotoSlideId(id); closeStory(); }], ['play', 'Accionadores…', () => { S.sel = null; S.multi = []; S.tab = 'trig'; gotoSlideId(id); closeStory(); }], { sep: true },
-          ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['copy', 'Duplicar', dupSlide], { sep: true }, ['trash', 'Eliminar', delSlide, slides().length < 2]]);
+        ctxPop(ev.clientX, ev.clientY, [['Diapositiva'], ['edit', 'Abrir para editar', () => { gotoSlideId(id); closeStory(); }], ['Interactividad'], ['play', 'Accionadores…', () => { S.sel = null; S.multi = []; S.tab = 'trig'; gotoSlideId(id); closeStory(); }],
+          ['Estructura'], ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['copy', 'Duplicar', dupSlide], ['trash', 'Eliminar', delSlide, slides().length < 2]]);
       } else {
         const si = Number(sh.parentNode.dataset.scene); S.sc = si; S.si = 0; refreshAll();
-        ctxPop(ev.clientX, ev.clientY, [['play', 'Escena inicial', () => setStartScene(si)], ['edit', 'Cambiar nombre', () => renameScene(si, sh.querySelector('.nm'))], { sep: true }, ['trash', 'Eliminar escena', () => deleteScene(si)]]);
+        ctxPop(ev.clientX, ev.clientY, [['Escena'], ['play', 'Escena inicial', () => setStartScene(si)], ['edit', 'Cambiar nombre', () => renameScene(si, sh.querySelector('.nm'))], ['Eliminar'], ['trash', 'Eliminar escena', () => deleteScene(si)]]);
       }
     });
     $('#stBody').addEventListener('click', (ev) => {
@@ -2976,7 +2985,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     drop.addEventListener('click', (ev) => {
       const b = ev.target.closest('button'); if (!b) return;
       const p = b.dataset.p;
-      if (p === 'new') { snap(null); course = newCourse(); S.sc = 0; S.si = 0; S.ctx = 'base'; S.sel = null; S.t = 0; fitPps(); refreshAll(); dirty(); }
+      if (p === 'new') newProject();
       else if (p === 'open') { const f = $('#openFile'); f.value = ''; f.onchange = () => f.files[0] && openProject(f.files[0]); f.click(); }
       else if (p === 'save') saveProject();
       else if (p === 'export') exportScorm();
