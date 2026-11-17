@@ -104,12 +104,12 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 .rpin { flex: none; display: flex; align-items: stretch; border-left: 2px solid var(--line); margin-left: 4px; padding-left: 4px; background: var(--panel); }
 .rpin .rg:last-child { border-right: 0; }
 .rtabs .sp { flex: 1; }
-.themetog { position: relative; width: 30px; height: 66px; margin: 0; border-radius: 15px; border: 1px solid var(--line); background: var(--panel); padding: 0; flex: none; }
+.themetog { position: relative; width: 30px; height: 100%; min-height: 66px; margin: 0; border-radius: 15px; border: 1px solid var(--line); background: var(--panel); padding: 0; flex: none; }
 .themetog:hover { border-color: var(--muted); }
 .themetog svg.ic { position: absolute; left: 6px; width: 16px; height: 16px; z-index: 2; stroke: var(--muted); transition: stroke .15s; }
-.themetog .sun { top: 8px; } .themetog .moon { bottom: 8px; }
-.themetog .knob { position: absolute; top: 2px; left: 2px; width: 24px; height: 30px; border-radius: 12px; background: var(--brand); z-index: 1; transition: transform .18s; }
-.themetog[aria-checked=true] .knob { transform: translateY(30px); }
+.themetog .sun { top: calc(25% - 8px); } .themetog .moon { bottom: calc(25% - 8px); }
+.themetog .knob { position: absolute; top: 2px; left: 2px; width: 24px; height: calc(50% - 2px); border-radius: 12px; background: var(--brand); z-index: 1; transition: transform .18s; }
+.themetog[aria-checked=true] .knob { transform: translateY(100%); }
 .themetog[aria-checked=false] .sun, .themetog[aria-checked=true] .moon { stroke: #fff; }
 .prow { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 6px 4px; }
 .newpop .pib { display: inline-flex; align-items: center; gap: 6px; width: auto; border: 1px solid var(--line); background: var(--panel-2); border-radius: 7px; padding: 6px 8px; font-size: 12px; font-weight: 600; }
@@ -223,14 +223,15 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .modal.story { background: var(--bg); color: var(--fg); inset: 46px 0 0 0; }
 .modesw { display: flex; flex-direction: column; flex: 1; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 2px; }
 .modesw button { display: flex; align-items: center; gap: 5px; border: 0; background: transparent; color: var(--fg); border-radius: 9px; padding: 6px 6px; font-weight: 700; font-size: 11px; text-align: left; white-space: nowrap; flex: 1; }
-.modeslot { flex: none; width: 190px; display: flex; align-items: flex-start; padding: 8px 8px; border-right: 1px solid var(--line); }
-.slotcol { display: flex; flex-direction: column; gap: 6px; width: 100%; }
-.quickbar { display: flex; flex-wrap: wrap; gap: 4px; justify-content: space-between; align-items: center; }
-.quickbar .qb { width: 36px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
-.quickbar .qb svg.ic { width: 16px; height: 16px; }
+.modeslot { flex: none; width: 190px; display: flex; align-items: stretch; padding: 8px 8px; border-right: 1px solid var(--line); }
+.slotcol { display: grid; grid-template-columns: 30px 1fr; grid-template-rows: auto 1fr; gap: 6px; width: 100%; }
+.slotcol .quickbar { grid-column: 2; grid-row: 1; } .slotcol .slotrow { display: contents; } .slotcol .tgslot { grid-column: 1; grid-row: 1 / 3; } .slotcol .modesw { grid-column: 2; grid-row: 2; }
+.quickbar { display: flex; gap: 4px; align-items: stretch; }
+.quickbar .qb { flex: 1; min-width: 0; height: 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.quickbar .qb svg.ic { width: 20px; height: 20px; }
 .slotrow { display: flex; align-items: stretch; gap: 6px; } .tgslot { display: flex; }
 .rcolumn { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-@media (max-width: 900px) { .ribbon { flex-direction: column; } .modeslot { width: auto; border-right: 0; border-bottom: 1px solid var(--line); } .modesw { flex-direction: row; } .modesw button { justify-content: center; } }
+@media (max-width: 900px) { .ribbon { flex-direction: column; } .modeslot { width: auto; border-right: 0; border-bottom: 1px solid var(--line); } .slotcol { grid-template-rows: auto auto; } .themetog { height: 56px; min-height: 0; } .modesw { flex-direction: row; } .modesw button { justify-content: center; } }
 .stwrap { position: relative; flex: 1; min-width: 0; display: flex; } .stwrap .stbody { flex: 1; }
 .stfloat { position: absolute; right: 14px; bottom: 14px; display: flex; align-items: center; gap: 2px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px; box-shadow: 0 4px 16px rgba(0,0,0,.2); z-index: 5; }
 .stfloat button { display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent; color: var(--fg); border-radius: 8px; padding: 6px 8px; font-weight: 700; font-size: 12px; }
@@ -1113,7 +1114,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     stage.setPointerCapture(ev.pointerId);
     const items = (hd || S.multi.length < 2) ? [{ e, x: e.x, y: e.y }] : selEls().map((m) => ({ e: m, x: m.x, y: m.y }));
     drag = { tgt: ev.target, wasSel, e, mode: hd ? 'resize' : 'move', hd: hd && hd.dataset.h, sx: ev.clientX, sy: ev.clientY, x: e.x, y: e.y, w: e.w, h: e.h, moved: false,
-      items, bb: bboxOf(items.map((i) => i.e)), collapse: inMulti && !e.group, nid };
+      items, bb: bboxOf(items.map((i) => i.e)), collapse: inMulti && !e.group, nid, clone: !hd && ev.altKey };
   });
   stage.addEventListener('pointermove', (ev) => {
     if (!drag) return;
@@ -1125,12 +1126,20 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       return;
     }
     const dx = (ev.clientX - drag.sx) / S.scale, dy = (ev.clientY - drag.sy) / S.scale;
-    if (!drag.moved) { if (Math.hypot(dx, dy) * S.scale < 3) return; snap('drag' + Date.now()); drag.moved = true; }
-    const sn = (v) => (ev.altKey ? Math.round(v) : Math.round(v / 10) * 10);
+    if (!drag.moved) {
+      if (Math.hypot(dx, dy) * S.scale < 3) return; snap('drag' + Date.now()); drag.moved = true;
+      if (drag.clone && drag.mode === 'move') {   // Alt + arrastrar: el original se queda y se arrastra una copia
+        const ids = cloneInto(drag.items.map((i) => i.e), 0, false), made = ids.map((id) => elements().find((x) => x.id === id));
+        setMulti(ids); drag.items = made.map((m) => ({ e: m, x: m.x, y: m.y })); drag.e = made[0]; drag.collapse = false; drag.wasSel = false;
+        refreshCanvas(); refreshTimeline(); renderPanel();
+      }
+    }
+    const alt = ev.altKey && !drag.clone;
+    const sn = (v) => (alt ? Math.round(v) : Math.round(v / 10) * 10);
     const e = drag.e;
     if (drag.mode === 'move') {
       let bx = sn(drag.bb.x + dx), by = sn(drag.bb.y + dy), g = null;
-      if (!ev.altKey) { g = snapMove({ x: bx, y: by, w: drag.bb.w, h: drag.bb.h }, drag.items.map((i) => i.e.id)); bx = g.x; by = g.y; }
+      if (!alt) { g = snapMove({ x: bx, y: by, w: drag.bb.w, h: drag.bb.h }, drag.items.map((i) => i.e.id)); bx = g.x; by = g.y; }
       const ddx = bx - drag.bb.x, ddy = by - drag.bb.y;
       drag.items.forEach((i) => { i.e.x = i.x + ddx; i.e.y = i.y + ddy; });
       liveItems(drag.items); showGuides(g);
@@ -1154,7 +1163,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
         x = Math.round(x); y = Math.round(y); w = Math.round(w); hh = Math.round(hh);
       } else { x = sn(x); y = sn(y); w = sn(w); hh = sn(hh); }
       let g = null;
-      if (!ev.altKey && !keepAR) {
+      if (!alt && !keepAR) {
         const T = lineTargets([e.id]); g = { vx: [], hy: [] };
         if (k.includes('e')) { const d = bestSnap([x + w], T.X); if (d != null) { w += d; g.vx = matchLines([x + w], T.X); } }
         if (k.includes('w')) { const d = bestSnap([x], T.X); if (d != null) { x += d; w -= d; g.vx = matchLines([x], T.X); } }
@@ -1609,6 +1618,14 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
   }
   const alignRow = () => ({ row: [['alignL', 'Alinear a la izquierda', () => alignSel('l')], ['alignCH', 'Centrar horizontalmente', () => alignSel('ch')], ['alignR', 'Alinear a la derecha', () => alignSel('r')],
     ['alignT', 'Alinear arriba', () => alignSel('t')], ['alignM', 'Centrar verticalmente', () => alignSel('cv')], ['alignB', 'Alinear abajo', () => alignSel('b')]] });
+  // Botones «respecto a: Selección / Diapositiva» (con un solo objeto siempre se alinea a la diapositiva).
+  const alignRel = (n) => {
+    const rel = (v, label) => ['', 'Alinear respecto a: ' + label, (ev) => {
+      S.alignTo = v; toast('Alinear respecto a: ' + (v === 'slide' ? 'la diapositiva' : 'la selección'));
+      if (ev && ev.currentTarget) { ev.currentTarget.parentNode.querySelectorAll('.pib').forEach((b) => b.classList.remove('on')); ev.currentTarget.classList.add('on'); }
+    }, (n < 2 ? 'slide' : S.alignTo) === v, label];
+    return { row: [rel('sel', 'Selección'), rel('slide', 'Diapositiva')] };
+  };
   function arrangeMenu(anchor) {
     const rel = (v, label) => ['', 'Alinear respecto a: ' + label, (ev) => {
       S.alignTo = v; toast('Alinear respecto a: ' + (v === 'slide' ? 'la diapositiva' : 'la selección'));
@@ -1642,7 +1659,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     else {
       const ord = [['Capas'], ['tofront', 'Traer al frente', () => orderSel('front')], ['toback', 'Enviar al fondo', () => orderSel('back')], ['front', 'Traer adelante', () => orderSel('forward')], ['back', 'Enviar hacia atrás', () => orderSel('backward')],
         ['Agrupar'], ['group', 'Agrupar', groupSel, n < 2], ['ungroup', 'Desagrupar', ungroupSel, !l.some((e) => e.group)],
-        ['Alinear' + (n === 1 ? ' (a la diapositiva)' : '')], alignRow()];
+        ['Alinear'], alignRow(), alignRel(n)];
       items.push({ sub: ['tofront', 'Orden', ord] });
       items.push(['Objeto'], ['copy', 'Duplicar', duplicateSel], ['trash', 'Eliminar', deleteSel]);
     }
