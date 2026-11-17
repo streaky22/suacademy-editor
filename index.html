@@ -221,24 +221,47 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .tlrow.v-audio .tlname, .tlrow.lane .tlname { box-shadow: inset 3px 0 0 var(--bar-audio); }
 .bar.wave { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.38) 0 2px, transparent 2px 5px); }
 .modal.story { background: var(--bg); color: var(--fg); }
-.modal.story .mh { color: var(--fg); padding: 4px 4px 10px; }
-.modal.story .hint2 { color: var(--muted); font-size: 12px; flex: 1; min-width: 200px; }
-.stbody { position: relative; flex: 1; min-height: 0; overflow: auto; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 18px; padding: 8px 4px 24px; }
-.stscene { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; min-width: 300px; max-width: 100%; box-shadow: 0 2px 10px rgba(0,0,0,.08); position: relative; z-index: 1; }
-.stscene .sh { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-bottom: 1px solid var(--line); font-weight: 700; }
-.stscene .sh .nm { margin-right: auto; cursor: text; }
-.stscene .sb { display: flex; flex-wrap: wrap; gap: 26px 22px; padding: 16px; min-height: 120px; align-items: flex-start; }
+.modal.story { padding: 8px 10px 10px; gap: 8px; }
+.stribbon { display: flex; align-items: stretch; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; flex: none; overflow-x: auto; }
+.stribbon .rpanes { display: flex; align-items: stretch; padding: 4px 4px 2px; }
+.stribbon .rpin { align-items: center; padding-right: 8px; }
+.stribbon .ttl { align-self: center; font-weight: 800; padding: 0 12px; color: var(--brand); white-space: nowrap; }
+.stribbon .rb.primary.close { min-width: 64px; }
+.stribbon .zl { align-self: center; font-weight: 700; min-width: 46px; text-align: center; font-size: 12px; }
+.stmain { flex: 1; min-height: 0; display: flex; gap: 8px; }
+.stbody { position: relative; flex: 1; min-width: 0; overflow: auto; border: 1px solid var(--line); border-radius: 10px; background-color: var(--panel-2); background-image: radial-gradient(var(--line) 1px, transparent 1px); background-size: 22px 22px; }
+.stsizer { position: relative; }
+.stworld { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.stside { flex: none; width: 270px; overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 12.5px; }
+.stside h3 { margin: 0 0 8px; font-size: 13px; }
+.stside h4 { margin: 14px 0 4px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.stside label.f { display: block; margin: 6px 0; } .stside label.f span { display: block; color: var(--muted); font-size: 11px; margin-bottom: 2px; }
+.stside input[type=text], .stside input[type=number] { width: 100%; }
+.stside .lk { display: flex; gap: 6px; align-items: center; width: 100%; text-align: left; border: 1px solid var(--line); background: transparent; border-radius: 6px; padding: 4px 7px; margin: 3px 0; font-size: 12px; color: inherit; }
+.stside .lk:hover { background: var(--panel-2); }
+.stside .lk i { width: 9px; height: 9px; border-radius: 50%; flex: none; background: #E84039; } .stside .lk i.ok { background: #2E7D32; } .stside .lk i.bad { background: #C62828; }
+.stscene { position: absolute; width: 214px; background: var(--panel); border: 2px solid var(--line); border-radius: 12px; box-shadow: 0 3px 12px rgba(0,0,0,.12); }
+.stscene.start { border-color: #2E7D32; box-shadow: 0 0 0 3px rgba(46,125,50,.18), 0 3px 12px rgba(0,0,0,.12); }
+.stscene.cur { border-color: var(--brand); }
+.stscene .sh { display: flex; align-items: center; gap: 4px; padding: 7px 8px; border-bottom: 1px solid var(--line); font-weight: 700; cursor: grab; touch-action: none; }
+.stscene .sh .nm { margin-right: auto; cursor: text; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stscene .startbadge { display: inline-flex; align-items: center; gap: 3px; background: #2E7D32; color: #fff; border-radius: 10px; padding: 1px 8px 1px 5px; font-size: 11px; font-weight: 800; }
+.stscene .startbadge svg.ic { width: 12px; height: 12px; stroke: #fff; fill: #fff; }
+.stscene .sb { display: flex; flex-direction: column; align-items: center; padding: 14px 0 16px; min-height: 120px; }
 .stscene.over { outline: 3px solid var(--sel); }
+.stnext { height: 24px; width: 2px; background: var(--muted); position: relative; margin: 4px 0 8px; opacity: .6; }
+.stnext::after { content: ""; position: absolute; left: -4px; bottom: -6px; border: 5px solid transparent; border-top: 7px solid var(--muted); border-bottom: 0; }
 .stcard { width: 160px; cursor: pointer; position: relative; }
 .stcard .th { width: 160px; height: 90px; overflow: hidden; border: 2px solid var(--line); border-radius: 6px; background: #fff; position: relative; pointer-events: none; }
-.stcard.on .th { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand); }
+.stcard.on .th { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand); }
+.stcard.rel .th { border-color: #E84039; box-shadow: 0 0 0 2px rgba(232,64,57,.4); }
 .stcard .th > div { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .stcard .cap { font-size: 12px; margin-top: 4px; display: flex; gap: 4px; align-items: center; }
+.stcard .cap b { color: var(--brand); }
 .stcard .cap .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-.stcard .flag { position: absolute; left: -8px; top: -10px; z-index: 2; border: 0; background: var(--panel); border-radius: 12px; padding: 2px 5px; font-size: 13px; box-shadow: 0 1px 4px rgba(0,0,0,.3); opacity: .55; }
-.stcard .flag.on { opacity: 1; color: var(--brand); }
 .stcard.drag { opacity: .4; } .stcard.over .th { outline: 3px solid var(--sel); }
 .stlinks { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 2; overflow: visible; }
+.stlinks text { font-size: 11px; font-weight: 700; paint-order: stroke; stroke: var(--panel-2); stroke-width: 4px; stroke-linejoin: round; }
 .layers li.over, .tlrow.over .tlname { box-shadow: inset 0 3px 0 var(--sel); }
 .layers li.drag, .tlrow.drag { opacity: .45; }
 .stage .qbox { position: absolute; left: 8%; right: 8%; top: 230px; bottom: 150px; overflow: auto; color: #222; display: flex; flex-direction: column; gap: 22px; pointer-events: auto; padding: 6px; }
@@ -408,11 +431,8 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
 </div>
 
 <div class="modal story" id="story" hidden>
-  <div class="mh"><b>Vista de historia</b>
-    <span class="hint2">Doble clic en un nombre para cambiarlo · arrastra las diapositivas entre escenas · la bandera marca la diapositiva inicial</span>
-    <button class="btn small" id="stNew">+ Escena</button>
-    <button class="btn small" id="stClose">Cerrar</button></div>
-  <div class="stbody" id="stBody"></div>
+  <div class="stribbon" id="stRibbon"></div>
+  <div class="stmain"><div class="stbody" id="stBody"></div><aside class="stside" id="stSide" aria-label="Propiedades de la diapositiva"></aside></div>
 </div>
 
 <div class="modal" id="pv" hidden>
@@ -455,7 +475,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     undo: 'M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3', redo: 'M15 14l5-5-5-5M20 9H10a6 6 0 0 0 0 12h3',
     play: 'M7 4l13 8-13 8z', pause: 'M7 4v16M17 4v16', plus: 'M12 5v14M5 12h14', trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
     up: 'M6 15l6-6 6 6', down: 'M6 9l6 6 6-6', copy: 'M8 8h11v12H8zM5 16V4h11', text: 'M5 6V4h14v2M12 4v16M9 20h6',
-    shape: 'M4 4h16v16H4z', button: 'M3 8h18v8H3zM8 12h8', image: 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4', cursor: 'M5 4l14 7-6 2-2 6z', razor: 'M4 20L20 4M13 4h7v7M4 4l6 6', magnet: 'M6 4v8a6 6 0 0 0 12 0V4h-4v8a2 2 0 0 1-4 0V4z', split: 'M12 3v18M8 7l-4 5 4 5M16 7l4 5-4 5',
+    shape: 'M4 4h16v16H4z', button: 'M3 8h18v8H3zM8 12h8', image: 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4', minus: 'M5 12h14', fit: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5', close: 'M6 6l12 12M18 6L6 18', cursor: 'M5 4l14 7-6 2-2 6z', razor: 'M4 20L20 4M13 4h7v7M4 4l6 6', magnet: 'M6 4v8a6 6 0 0 0 12 0V4h-4v8a2 2 0 0 1-4 0V4z', split: 'M12 3v18M8 7l-4 5 4 5M16 7l4 5-4 5',
     audio: 'M4 10v4h4l5 4V6L8 10zM16 9a4 4 0 0 1 0 6', video: 'M3 6h13v12H3zM16 10l5-3v10l-5-3', layer: 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5',
     start: 'M6 5v14M18 5L9 12l9 7z', end: 'M18 5v14M6 5l9 7-9 7z', eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z', eyeoff: 'M3 3l18 18M10.6 6.2A9.6 9.6 0 0 1 12 6c6 0 10 6 10 6a17 17 0 0 1-3.2 3.7M6.6 7.6A17 17 0 0 0 2 12s4 6 10 6a9.7 9.7 0 0 0 4-.9', front: 'M8 8h12v12H8zM4 16V4h12', back: 'M4 4h12v12H4zM8 20h12V8',
     paste: 'M9 4h6v3H9zM7 5.5H5V21h14V5.5h-2M9 12h6M9 16h6', cut: 'M4 6a2 2 0 1 0 4 0 2 2 0 1 0-4 0M4 18a2 2 0 1 0 4 0 2 2 0 1 0-4 0M8 7.5 20 18M8 16.5 20 6',
@@ -624,6 +644,10 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     S.multi = S.multi.filter(inCtx);
     if (S.multi.length < 2 || !S.sel || S.multi.indexOf(S.sel) < 0) S.multi = [];
     S.t = clamp(S.t, 0, ctxDur());
+    if (course.startScene && !course.scenes.some((x) => x.id === course.startScene)) delete course.startScene;
+    if (!course.startScene && course.start) { const q = course.scenes.find((x) => x.slides.some((y) => y.id === course.start)); if (q) course.startScene = q.id; }
+    const ss = course.scenes.find((x) => x.id === course.startScene);
+    if (ss && ss !== course.scenes[0] && ss.slides[0]) course.start = ss.slides[0].id; else delete course.start;
   }
   function undo() {
     if (!history.length) return;
@@ -1502,7 +1526,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
       ['trash', 'Eliminar', delSlide, slides().length < 2]]);
   }
   const isDark = () => { const r = document.documentElement; return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
-  function paintThemeBtn() { const b = $('#themeBtn'); if (b) b.setAttribute('aria-checked', isDark() ? 'true' : 'false'); }
+  function paintThemeBtn() { document.querySelectorAll('.themetog').forEach((b) => b.setAttribute('aria-checked', isDark() ? 'true' : 'false')); }
   function toggleTheme() {
     const root = document.documentElement;
     root.dataset.theme = isDark() ? 'light' : 'dark';
@@ -1716,25 +1740,137 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     });
     return out;
   }
+  const startIdx = () => { const k = course.scenes.findIndex((x) => x.id === course.startScene); return k < 0 ? 0 : k; };
+  function setStartScene(si) { edit(() => { course.startScene = course.scenes[si].id; }, null, { full: true }); }
+  const scPos = (sc, si) => sc.pos || { x: 30 + si * 262, y: 30 };
+  const stZ = () => S.stZoom || 1;
+  function storyEdges() {
+    const out = [], seen = new Set();
+    const add = (sl, to, tr, owner) => {
+      if (!to || to === sl.id) return;
+      const key = sl.id + '>' + to + '>' + (tr.event || '') + '>' + owner; if (seen.has(key)) return; seen.add(key);
+      const ev = tr.event;
+      out.push({ a: sl.id, b: to, kind: ev === 'questionCorrect' ? 'ok' : ev === 'questionIncorrect' ? 'bad' : 'go', label: ev === 'questionCorrect' ? 'Correcto' : ev === 'questionIncorrect' ? 'Incorrecto' : (owner || '') });
+    };
+    allSlides().forEach((sl) => {
+      (function walk(o, owner) {
+        if (Array.isArray(o)) { o.forEach((x) => walk(x, owner)); return; }
+        if (!o || typeof o !== 'object') return;
+        const ow = o.type && o.id && Array.isArray(o.triggers) ? elLabel(o) : owner;
+        if (o.action === 'jumpToSlide' && o.target && slideById(o.target)) add(sl, o.target, o, ow);
+        else if (o.action === 'jumpToScene' && o.target) { const sc = course.scenes.find((x) => x.id === o.target); if (sc && sc.slides[0]) add(sl, sc.slides[0].id, o, ow); }
+        Object.keys(o).forEach((k) => { if (o[k] && typeof o[k] === 'object') walk(o[k], ow); });
+      })([sl.triggers, sl.elements, sl.layers], '');
+    });
+    return out;
+  }
+  const slideNum = (id) => { for (let a = 0; a < course.scenes.length; a++) { const k = course.scenes[a].slides.findIndex((x) => x.id === id); if (k >= 0) return (a + 1) + '.' + (k + 1); } return '?'; };
+  function applyStZoom() {
+    const w = $('#stWorld'), sz = $('#stSizer'); if (!w) return;
+    const z = stZ(); w.style.transform = 'scale(' + z + ')';
+    let mx = 400, my = 300;
+    w.querySelectorAll('.stscene').forEach((n) => { mx = Math.max(mx, n.offsetLeft + n.offsetWidth); my = Math.max(my, n.offsetTop + n.offsetHeight); });
+    sz.style.width = (mx + 80) * z + 'px'; sz.style.height = (my + 80) * z + 'px';
+    const zl = $('#stZl'); if (zl) zl.textContent = Math.round(z * 100) + '%';
+  }
+  function setStZoom(z) { S.stZoom = clamp(Math.round(z * 100) / 100, 0.3, 1.6); applyStZoom(); drawStoryEdges(); }
+  function fitStory() {
+    const body = $('#stBody'), w = $('#stWorld'); let mx = 1, my = 1;
+    w.querySelectorAll('.stscene').forEach((n) => { mx = Math.max(mx, n.offsetLeft + n.offsetWidth); my = Math.max(my, n.offsetTop + n.offsetHeight); });
+    setStZoom(Math.min(1, (body.clientWidth - 40) / (mx + 30), (body.clientHeight - 40) / (my + 30)));
+    body.scrollLeft = 0; body.scrollTop = 0;
+  }
+  function drawStoryEdges() {
+    const w = $('#stWorld'); if (!w) return;
+    const old = w.querySelector('.stlinks'); if (old) old.remove();
+    const edges = storyEdges(), cur = slide() && slide().id, z = stZ();
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'stlinks');
+    const wr = w.getBoundingClientRect();
+    const COL = { go: '#E84039', ok: '#2E7D32', bad: '#C62828' };
+    let defs = '';
+    Object.keys(COL).forEach((k) => { defs += '<marker id="stA-' + k + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="' + COL[k] + '"/></marker>'; });
+    svg.innerHTML = '<defs>' + defs + '</defs>';
+    const box = (id) => { const c = w.querySelector('[data-cid="' + id + '"] .th'); if (!c) return null; const r = c.getBoundingClientRect(); return { x: (r.left - wr.left) / z, y: (r.top - wr.top) / z, w: r.width / z, h: r.height / z }; };
+    let mx = 0, my = 0;
+    edges.forEach((e) => {
+      const A = box(e.a), B = box(e.b); if (!A || !B) return;
+      const same = A.x === B.x;
+      let x1, y1, x2, y2, d;
+      y1 = A.y + A.h / 2; y2 = B.y + B.h / 2;
+      if (same) { x1 = A.x + A.w; x2 = B.x + B.w; const o = 46; d = 'M' + x1 + ' ' + y1 + ' C' + (x1 + o) + ' ' + y1 + ' ' + (x2 + o) + ' ' + y2 + ' ' + x2 + ' ' + y2; }
+      else if (B.x > A.x) { x1 = A.x + A.w; x2 = B.x; const o = Math.max(40, (x2 - x1) / 2); d = 'M' + x1 + ' ' + y1 + ' C' + (x1 + o) + ' ' + y1 + ' ' + (x2 - o) + ' ' + y2 + ' ' + x2 + ' ' + y2; }
+      else { x1 = A.x; x2 = B.x + B.w; const o = Math.max(40, (x1 - x2) / 2); d = 'M' + x1 + ' ' + y1 + ' C' + (x1 - o) + ' ' + y1 + ' ' + (x2 + o) + ' ' + y2 + ' ' + x2 + ' ' + y2; }
+      const inv = e.a === cur || e.b === cur;
+      const path = document.createElementNS(NS, 'path');
+      path.setAttribute('d', d); path.setAttribute('fill', 'none'); path.setAttribute('stroke', COL[e.kind]); path.setAttribute('stroke-width', inv ? 3.5 : 2); path.setAttribute('opacity', inv ? 1 : (cur && edges.some((q) => q.a === cur || q.b === cur) ? .4 : .85)); path.setAttribute('marker-end', 'url(#stA-' + e.kind + ')');
+      path.setAttribute('data-edge', e.a + '>' + e.b);
+      svg.append(path);
+      if (e.label) {
+        const t = document.createElementNS(NS, 'text'); t.setAttribute('x', (x1 + x2) / 2 + (same ? 46 : 0)); t.setAttribute('y', (y1 + y2) / 2 - 4); t.setAttribute('text-anchor', 'middle'); t.setAttribute('fill', COL[e.kind]); t.textContent = e.label; svg.append(t);
+      }
+      mx = Math.max(mx, x1 + 120, x2 + 120); my = Math.max(my, y1, y2);
+    });
+    svg.setAttribute('width', Math.max(mx, 100) + 200); svg.setAttribute('height', Math.max(my, 100) + 100);
+    w.append(svg);
+    w.querySelectorAll('.stcard').forEach((c) => c.classList.remove('rel'));
+    edges.forEach((e) => { if (e.a === cur) { const c = w.querySelector('[data-cid="' + e.b + '"]'); if (c) c.classList.add('rel'); } if (e.b === cur) { const c = w.querySelector('[data-cid="' + e.a + '"]'); if (c) c.classList.add('rel'); } });
+  }
+  function paintStoryRibbon() {
+    const r = $('#stRibbon'); r.textContent = '';
+    const si = S.sc, isS = startIdx() === si;
+    r.append(
+      h('span', { class: 'ttl' }, 'Vista de historia'),
+      h('div', { class: 'rpanes' },
+        rgroup('Escenas', rbtn('plus', 'Nueva escena', newScene, { title: 'Añadir una escena al curso' }),
+          rbtn('play', 'Escena inicial', () => setStartScene(si), { title: 'El curso empieza por la primera diapositiva de esta escena', cls: isS ? 'primary' : '' }),
+          rbtn('edit', 'Nombre', () => { const n = document.querySelector('#stBody .sh .nm[data-sn="' + si + '"]'); if (n) renameScene(si, n); }, { title: 'Cambiar el nombre de la escena' }),
+          rbtn('trash', 'Eliminar escena', () => deleteScene(si), { title: 'Eliminar la escena seleccionada' })),
+        rgroup('Diapositiva', rbtn('newslide', 'Nueva diapositiva', () => insertSlideKind('content'), { title: 'Añadir una diapositiva después de la seleccionada' }),
+          rbtn('copy', 'Duplicar', dupSlide, { title: 'Duplicar la diapositiva' }), rbtn('trash', 'Eliminar', delSlide, { title: 'Eliminar la diapositiva' }),
+          rbtn('edit', 'Abrir', () => { closeStory(); }, { title: 'Cerrar la vista y editar la diapositiva seleccionada' })),
+        rgroup('Vista', rbtn('plus', 'Acercar', () => setStZoom(stZ() + 0.1), { title: 'Acercar (Ctrl + rueda)' }), h('span', { class: 'zl', id: 'stZl' }, Math.round(stZ() * 100) + '%'),
+          rbtn('minus', 'Alejar', () => setStZoom(stZ() - 0.1), { title: 'Alejar' }), rbtn('fit', 'Ajustar', fitStory, { title: 'Ver todo el curso en pantalla' }))),
+      h('span', { style: 'flex:1' }),
+      h('div', { class: 'rpin' },
+        h('button', { class: 'themetog', type: 'button', role: 'switch', 'aria-label': 'Modo noche', title: 'Cambiar entre modo día y modo noche', onclick: toggleTheme }, ic('sun', 'sun'), ic('moon', 'moon'), h('i', { class: 'knob' })),
+        rbtn('close', 'Cerrar', closeStory, { title: 'Cerrar la vista de historia (Esc)', cls: 'primary close' })));
+    paintThemeBtn();
+  }
+  function paintStorySide(edges) {
+    const sd = $('#stSide'); sd.textContent = '';
+    const sl = slide(); if (!sl) return;
+    const lk = (e, other, dir) => h('button', { class: 'lk', type: 'button', onclick: () => gotoSlideId(other, true) }, h('i', { class: e.kind }), h('span', null, dir + ' ' + slideNum(other) + ' ' + ((slideById(other) || {}).title || '')), e.label ? h('span', { style: 'color:var(--muted);margin-left:auto' }, e.label) : null);
+    const ins = edges.filter((e) => e.b === sl.id), outs = edges.filter((e) => e.a === sl.id);
+    const ti = h('input', { type: 'text', value: sl.title || '' }); ti.addEventListener('change', () => edit(() => { sl.title = ti.value; }, null, { full: true }));
+    const du = h('input', { type: 'number', min: 1, step: 0.5, value: sl.duration }); du.addEventListener('change', () => { const v = Number(du.value); if (v > 0) edit(() => { sl.duration = v; }, null, { full: true }); });
+    sd.append(h('h3', null, 'Diapositiva ' + slideNum(sl.id)),
+      h('label', { class: 'f' }, h('span', null, 'Título'), ti), h('label', { class: 'f' }, h('span', null, 'Duración (s)'), du),
+      h('button', { class: 'btn small', type: 'button', style: 'margin-top:6px', onclick: () => { gotoSlideId(sl.id); closeStory(); } }, ic('edit'), 'Abrir para editar'),
+      h('h4', null, 'Entradas'), ...(ins.length ? ins.map((e) => lk(e, e.a, '←')) : [h('div', { class: 'hint' }, 'Ningún salto llega aquí. Se llega con «Siguiente» desde la diapositiva anterior.')]),
+      h('h4', null, 'Salidas'), ...(outs.length ? outs.map((e) => lk(e, e.b, '→')) : [h('div', { class: 'hint' }, 'Sin saltos. Sigue con «Siguiente».')]),
+      h('div', { class: 'hint', style: 'margin-top:12px' }, 'Verde: respuesta correcta · Rojo: incorrecta · Naranja/rojo de marca: otros saltos.'));
+  }
   function paintStory() {
+    paintStoryRibbon();
     const body = $('#stBody'), top = body.scrollTop, left = body.scrollLeft; body.textContent = '';
+    const world = h('div', { class: 'stworld', id: 'stWorld' }), sizer = h('div', { class: 'stsizer', id: 'stSizer' }, world);
+    body.append(sizer);
     const cur = slide() && slide().id;
     let dragId = null;
     course.scenes.forEach((sc, si) => {
       const sb = h('div', { class: 'sb' });
-      const panel = h('div', { class: 'stscene', 'data-scene': String(si) },
-        h('div', { class: 'sh' },
+      const start = startIdx() === si, pos = scPos(sc, si);
+      const panel = h('div', { class: 'stscene' + (start ? ' start' : '') + (si === S.sc ? ' cur' : ''), 'data-scene': String(si), style: 'left:' + pos.x + 'px;top:' + pos.y + 'px' },
+        h('div', { class: 'sh', title: 'Arrastra la cabecera para colocar la escena' },
+          start ? h('span', { class: 'startbadge', title: 'Escena inicial: el curso empieza aquí' }, ic('play'), 'Inicio') : null,
           h('span', { class: 'nm', 'data-sn': String(si), title: 'Doble clic para cambiar el nombre' }, (si + 1) + '. ' + sc.title),
-          h('span', { style: 'font-weight:400;color:var(--muted);font-size:12px' }, sc.slides.length + ' diap.'),
-          iconBtn('plus', 'Añadir una diapositiva a esta escena', () => edit(() => { S.sc = si; const ns = slideFromKind('content'); sc.slides.push(ns); S.si = sc.slides.length - 1; S.ctx = 'base'; S.sel = null; S.t = 0; }, null, { full: true }), 'icon'),
-          iconBtn('up', 'Subir la escena', () => moveScene(si, -1), 'icon'), iconBtn('down', 'Bajar la escena', () => moveScene(si, 1), 'icon'),
-          iconBtn('trash', 'Eliminar la escena', () => deleteScene(si), 'icon danger')), sb);
+          iconBtn('plus', 'Añadir una diapositiva a esta escena', () => edit(() => { S.sc = si; const ns = slideFromKind('content'); sc.slides.push(ns); S.si = sc.slides.length - 1; S.ctx = 'base'; S.sel = null; S.t = 0; }, null, { full: true }), 'icon')), sb);
       sc.slides.forEach((sl, k) => {
-        const start = isStart(si, k, sl);
-        const card = h('div', { class: 'stcard' + (sl.id === cur ? ' on' : ''), draggable: 'true', 'data-cid': sl.id, title: 'Clic: seleccionar · doble clic: abrir · arrastra para mover' },
-          h('button', { class: 'flag' + (start ? ' on' : ''), title: start ? 'Diapositiva inicial del curso' : 'Marcar como diapositiva inicial', 'aria-label': 'Diapositiva inicial', onclick: (ev) => { ev.stopPropagation(); edit(() => { if (si === 0 && k === 0) delete course.start; else course.start = sl.id; }, null, { panel: true }); } }, '⚑'),
+        if (k > 0) sb.append(h('div', { class: 'stnext', title: 'Siguiente' }));
+        const card = h('div', { class: 'stcard' + (sl.id === cur ? ' on' : ''), draggable: 'true', 'data-cid': sl.id, title: 'Clic: seleccionar y ver sus enlaces · doble clic: abrir · arrastra para mover' },
           thumbOf(sl),
-          h('div', { class: 'cap' }, h('span', null, (si + 1) + '.' + (k + 1)), h('span', { class: 'nm' }, sl.title || sl.id)));
+          h('div', { class: 'cap' }, h('b', null, (si + 1) + '.' + (k + 1)), h('span', { class: 'nm' }, sl.title || sl.id)));
         card.addEventListener('dragstart', (ev) => { dragId = sl.id; ev.dataTransfer.setData('text/plain', sl.id); ev.dataTransfer.effectAllowed = 'move'; setTimeout(() => card.classList.add('drag'), 0); });
         card.addEventListener('dragend', () => { dragId = null; body.querySelectorAll('.drag, .over').forEach((n) => n.classList.remove('drag', 'over')); });
         card.addEventListener('dragover', (ev) => { if (dragId && dragId !== sl.id) { ev.preventDefault(); ev.stopPropagation(); card.classList.add('over'); } });
@@ -1745,29 +1881,26 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
       panel.addEventListener('dragover', (ev) => { if (dragId) { ev.preventDefault(); panel.classList.add('over'); } });
       panel.addEventListener('dragleave', (ev) => { if (!panel.contains(ev.relatedTarget)) panel.classList.remove('over'); });
       panel.addEventListener('drop', (ev) => { ev.preventDefault(); panel.classList.remove('over'); const f = dragId; dragId = null; if (f) moveSlideTo(f, si, null); });
-      body.append(panel);
-    });
-    body.scrollTop = top; body.scrollLeft = left;
-    // flechas de los saltos entre diapositivas
-    requestAnimationFrame(() => {
-      const edges = jumpEdges(); if (!edges.length) return;
-      const NS = 'http://www.w3.org/2000/svg';
-      const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'stlinks');
-      svg.setAttribute('width', body.scrollWidth); svg.setAttribute('height', body.scrollHeight);
-      svg.innerHTML = '<defs><marker id="stArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#E84039"/></marker></defs>';
-      const br = body.getBoundingClientRect();
-      const pos = (id) => { const c = body.querySelector('[data-cid="' + id + '"] .th'); if (!c) return null; const r = c.getBoundingClientRect(); return { x: r.left - br.left + body.scrollLeft, y: r.top - br.top + body.scrollTop, w: r.width, h: r.height }; };
-      edges.forEach(([a, b]) => {
-        const p = pos(a), q = pos(b); if (!p || !q) return;
-        const x1 = p.x + p.w / 2, y1 = p.y + p.h, x2 = q.x + q.w / 2, y2 = q.y;
-        const path = document.createElementNS(NS, 'path');
-        const dy = Math.max(40, Math.abs(y2 - y1) / 2);
-        path.setAttribute('d', 'M' + x1 + ' ' + y1 + ' C' + x1 + ' ' + (y1 + dy) + ' ' + x2 + ' ' + (y2 - dy) + ' ' + x2 + ' ' + y2);
-        path.setAttribute('fill', 'none'); path.setAttribute('stroke', '#E84039'); path.setAttribute('stroke-width', '2'); path.setAttribute('marker-end', 'url(#stArrow)'); path.setAttribute('opacity', '.85');
-        svg.append(path);
+      // colocar la escena arrastrando la cabecera
+      const sh = panel.querySelector('.sh');
+      sh.addEventListener('pointerdown', (ev) => {
+        if (ev.button !== 0 || ev.target.closest('button')) return;
+        const o = { x: ev.clientX, y: ev.clientY, px: pos.x, py: pos.y, moved: false };
+        sh.setPointerCapture(ev.pointerId);
+        const mv = (e2) => {
+          const dx = (e2.clientX - o.x) / stZ(), dy = (e2.clientY - o.y) / stZ();
+          if (!o.moved) { if (Math.abs(dx) + Math.abs(dy) < 4) return; snap('sp' + si); o.moved = true; }
+          sc.pos = { x: Math.max(0, Math.round(o.px + dx)), y: Math.max(0, Math.round(o.py + dy)) };
+          panel.style.left = sc.pos.x + 'px'; panel.style.top = sc.pos.y + 'px'; drawStoryEdges();
+        };
+        const up = () => { sh.removeEventListener('pointermove', mv); sh.removeEventListener('pointerup', up); if (o.moved) { dirty(); applyStZoom(); } };
+        sh.addEventListener('pointermove', mv); sh.addEventListener('pointerup', up);
       });
-      body.append(svg);
+      world.append(panel);
     });
+    body.onwheel = (ev) => { if (!(ev.ctrlKey || ev.metaKey)) return; ev.preventDefault(); setStZoom(stZ() + (ev.deltaY < 0 ? 0.1 : -0.1)); };
+    requestAnimationFrame(() => { applyStZoom(); drawStoryEdges(); body.scrollTop = top; body.scrollLeft = left; });
+    paintStorySide(storyEdges());
   }
   function gotoSlide(i) { stopT(); S.si = i; S.ctx = 'base'; S.sel = null; S.t = 0; fitPps(); refreshAll(); dirty(); }
   function paintSlideFoot() {
@@ -2630,8 +2763,6 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     $('#previewBtn').addEventListener('click', () => openPreview(true));
     $('#pvHere').addEventListener('click', () => openPreview(true));
     $('#pvStart').addEventListener('click', () => openPreview(false));
-    $('#stClose').addEventListener('click', closeStory);
-    $('#stNew').addEventListener('click', newScene);
     // El doble clic se detecta con el segundo clic (detail >= 2) porque las listas se redibujan al hacer clic.
     const q = (sel) => () => document.querySelector(sel);
     $('#slideList').addEventListener('click', (ev) => { if (ev.detail < 2) return; const li = ev.target.closest('li[data-sid]'); if (li) renameSlide(li.dataset.sid, q('#slideList li[data-sid="' + li.dataset.sid + '"] .nm')); });
