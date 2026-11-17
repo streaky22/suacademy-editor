@@ -221,8 +221,16 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .tlrow.v-audio .tlname, .tlrow.lane .tlname { box-shadow: inset 3px 0 0 var(--bar-audio); }
 .bar.wave { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.38) 0 2px, transparent 2px 5px); }
 .modal.story { background: var(--bg); color: var(--fg); inset: 46px 0 0 0; }
-.modesw { display: inline-flex; background: var(--bg); border: 1px solid var(--line); border-radius: 22px; padding: 3px; gap: 2px; }
-.modesw button { display: inline-flex; align-items: center; gap: 7px; border: 0; background: transparent; color: var(--fg); border-radius: 18px; padding: 6px 16px; font-weight: 700; font-size: 13px; }
+.modesw { display: flex; flex-direction: column; width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 2px; }
+.modesw button { display: flex; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--fg); border-radius: 9px; padding: 7px 10px; font-weight: 700; font-size: 12.5px; text-align: left; }
+.stribbon .modesw { width: 170px; align-self: center; margin: 0 8px; }
+.stwrap { position: relative; flex: 1; min-width: 0; display: flex; } .stwrap .stbody { flex: 1; }
+.stfloat { position: absolute; right: 14px; bottom: 14px; display: flex; align-items: center; gap: 2px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px; box-shadow: 0 4px 16px rgba(0,0,0,.2); z-index: 5; }
+.stfloat button { display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent; color: var(--fg); border-radius: 8px; padding: 6px 8px; font-weight: 700; font-size: 12px; }
+.stfloat button:hover { background: var(--panel-2); } .stfloat button.on { background: var(--brand); color: var(--brand-ink); } .stfloat button.on svg.ic { stroke: var(--brand-ink); }
+.stfloat .zl { min-width: 44px; text-align: center; font-weight: 700; font-size: 12px; }
+.stfloat .vs { width: 1px; align-self: stretch; background: var(--line); margin: 0 3px; }
+.stlinks path.hit { pointer-events: stroke; cursor: copy; stroke: transparent; fill: none; }
 .modesw button svg.ic { width: 17px; height: 17px; }
 .modesw button.on { background: var(--brand); color: var(--brand-ink); } .modesw button.on svg.ic { stroke: var(--brand-ink); }
 .stbody.hand, .stbody.hand * { cursor: grab !important; } .stbody.panning, .stbody.panning * { cursor: grabbing !important; }
@@ -336,6 +344,10 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .bar .lb { position: relative; pointer-events: none; white-space: nowrap; }
 .bar.on { outline: 2px solid var(--sel); outline-offset: 1px; z-index: 2; }
 .diamond { position: absolute; top: 8px; width: 11px; height: 11px; transform: translateX(-5px) rotate(45deg); background: #f2a900; border: 1px solid rgba(0,0,0,.35); cursor: pointer; padding: 0; }
+.tlbeyond { position: absolute; top: 0; bottom: 0; right: 0; background: repeating-linear-gradient(135deg, rgba(120,120,120,.16) 0 6px, rgba(120,120,120,.06) 6px 12px); z-index: 3; pointer-events: none; }
+.endline { position: absolute; top: 0; bottom: 0; width: 12px; margin-left: -6px; cursor: ew-resize; z-index: 6; }
+.endline i { position: absolute; left: 5px; top: 0; bottom: 0; width: 2px; background: var(--brand); opacity: .85; }
+.endline::before { content: ""; position: absolute; left: 1px; top: 50%; width: 10px; height: 26px; margin-top: -13px; border-radius: 5px; background: var(--brand); opacity: .9; }
 .tlhead .tsep { width: 1px; align-self: stretch; background: var(--line); margin: 0 2px; }
 .btn.small.on { background: var(--brand); color: #fff; border-color: var(--brand); } .btn.small.on svg.ic { stroke: #fff; }
 #tlinner.razor .bar { cursor: crosshair; }
@@ -409,8 +421,6 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     <button class="btn icon" id="redoBtn" title="Rehacer (Ctrl+Y)" aria-label="Rehacer"></button>
     <span class="toast" id="toast" role="status"></span>
     <span class="sp"></span>
-    <div class="modesw" id="modeSw" role="group" aria-label="Modo de trabajo"></div>
-    <span class="sp"></span>
     <input type="file" id="openFile" accept=".zip,.json" hidden>
     <input type="file" id="mediaFile" hidden>
   </header>
@@ -418,7 +428,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
   <div class="ribbon" id="ribbon"><div class="rtabs" id="rtabs"></div><div class="rbody" id="rbody"></div></div>
 
   <aside class="slides" aria-label="Diapositivas">
-    <div class="head"><h2>Diapositivas</h2></div>
+    <div class="head"><div class="modesw" id="modeSw" role="group" aria-label="Modo de trabajo"></div></div>
     <div class="scenebar" id="sceneBar"></div>
     <ol id="slideList"></ol>
     <div class="foot" id="slideFoot"></div>
@@ -446,7 +456,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
 
 <div class="modal story" id="story" hidden>
   <div class="stribbon" id="stRibbon"></div>
-  <div class="stmain"><div class="stbody" id="stBody"></div><aside class="stside" id="stSide" aria-label="Propiedades de la diapositiva"></aside></div>
+  <div class="stmain"><div class="stwrap"><div class="stbody" id="stBody"></div><div class="stfloat" id="stFloat"></div></div><aside class="stside" id="stSide" aria-label="Propiedades de la diapositiva"></aside></div>
 </div>
 
 <div class="modal" id="pv" hidden>
@@ -1725,7 +1735,11 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     }, null, { full: true });
   }
   function paintModeSw() {
-    const m = $('#modeSw'); if (!m) return; const st = !$('#story').hidden; m.textContent = '';
+    const st = !$('#story').hidden;
+    document.querySelectorAll('.modesw').forEach((m) => paintOneSw(m, st));
+  }
+  function paintOneSw(m, st) {
+    m.textContent = '';
     const b = (icon, label, on, fn) => h('button', { type: 'button', class: on ? 'on' : '', 'aria-pressed': on ? 'true' : 'false', onclick: fn, title: label }, ic(icon), label);
     m.append(b('tree', 'Modo historia', st, openStory), b('newslide', 'Modo diapositiva', !st, closeStory));
   }
@@ -1800,11 +1814,30 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     setStZoom(Math.min(1, (body.clientWidth - 40) / (mx + 30), (body.clientHeight - 40) / (my + 30)));
     body.scrollLeft = 0; body.scrollTop = 0;
   }
+  function roundedPoly(P, r) {
+    let d = 'M' + P[0].x + ' ' + P[0].y;
+    for (let i = 1; i < P.length - 1; i++) {
+      const a = P[i - 1], b = P[i], c = P[i + 1], l1 = Math.hypot(b.x - a.x, b.y - a.y), l2 = Math.hypot(c.x - b.x, c.y - b.y);
+      if (!l1 || !l2) continue;
+      const rr = Math.min(r, l1 / 2, l2 / 2);
+      d += ' L' + (b.x + (a.x - b.x) / l1 * rr) + ' ' + (b.y + (a.y - b.y) / l1 * rr) + ' Q' + b.x + ' ' + b.y + ' ' + (b.x + (c.x - b.x) / l2 * rr) + ' ' + (b.y + (c.y - b.y) / l2 * rr);
+    }
+    const L = P[P.length - 1]; return d + ' L' + L.x + ' ' + L.y;
+  }
+  function spline(P, startDir, travel) {
+    const Q = [{ x: P[0].x - startDir * 60, y: P[0].y }].concat(P, [{ x: P[P.length - 1].x + travel * 60, y: P[P.length - 1].y }]);
+    let d = 'M' + P[0].x + ' ' + P[0].y;
+    for (let i = 1; i < Q.length - 2; i++) {
+      const p0 = Q[i - 1], p1 = Q[i], p2 = Q[i + 1], p3 = Q[i + 2];
+      d += ' C' + (p1.x + (p2.x - p0.x) / 6) + ' ' + (p1.y + (p2.y - p0.y) / 6) + ' ' + (p2.x - (p3.x - p1.x) / 6) + ' ' + (p2.y - (p3.y - p1.y) / 6) + ' ' + p2.x + ' ' + p2.y;
+    }
+    return d;
+  }
+  const edgeNodes = (key) => { const v = (course.edgePts || {})[key]; return v ? (Array.isArray(v) ? v : [v]) : []; };
   function drawStoryEdges() {
     const w = $('#stWorld'); if (!w) return;
     const old = w.querySelector('.stlinks'); if (old) old.remove();
-    const edges = storyEdges(), cur = slide() && slide().id, z = stZ(), angle = course.edgeStyle === 'angle';
-    const pts = course.edgePts || {};
+    const edges = storyEdges(), cur = slide() && slide().id, z = stZ(), curve = course.edgeStyle === 'curve';
     const NS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'stlinks');
     const wr = w.getBoundingClientRect();
@@ -1813,53 +1846,57 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     Object.keys(COL).forEach((k) => { defs += '<marker id="stA-' + k + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="' + COL[k] + '"/></marker>'; });
     svg.innerHTML = '<defs>' + defs + '</defs>';
     const box = (id) => { const c = w.querySelector('[data-cid="' + id + '"] .th'); if (!c) return null; const r = c.getBoundingClientRect(); return { x: (r.left - wr.left) / z, y: (r.top - wr.top) / z, w: r.width / z, h: r.height / z }; };
+    const wpt = (ev) => { const r = w.getBoundingClientRect(); return { x: Math.round((ev.clientX - r.left) / stZ()), y: Math.round((ev.clientY - r.top) / stZ()) }; };
     let mx = 0, my = 0;
     const anyCur = edges.some((q) => q.a === cur || q.b === cur);
-    const hds = [];
+    const nodesToDraw = [];
     edges.forEach((e) => {
       const A = box(e.a), B = box(e.b); if (!A || !B) return;
-      const same = A.x === B.x, key = e.a + '>' + e.b, via = pts[key];
-      const dir = same ? 1 : (B.x > A.x ? 1 : -1);
+      const same = A.x === B.x, key = e.a + '>' + e.b, nodes = edgeNodes(key);
+      const dir = same ? 1 : (B.x > A.x ? 1 : -1), travel = same ? -1 : dir;
       const y1 = A.y + A.h / 2, y2 = B.y + B.h / 2;
       const x1 = dir > 0 || same ? A.x + A.w : A.x, x2 = same ? B.x + B.w : (dir > 0 ? B.x : B.x + B.w);
-      let d, hx, hy;
-      const defx = same ? x1 + 46 : (x1 + x2) / 2, defy = (y1 + y2) / 2;
-      hx = via ? via.x : defx; hy = via ? via.y : defy;
-      if (angle) {
-        const r = 12, vx = hx, sy = y2 >= y1 ? 1 : -1, sx1 = vx >= x1 ? 1 : -1, sx2 = x2 >= vx ? 1 : -1;
-        const rr = Math.max(0, Math.min(r, Math.abs(vx - x1), Math.abs(y2 - y1) / 2, Math.abs(x2 - vx)));
-        d = 'M' + x1 + ' ' + y1 + ' H' + (vx - sx1 * rr) + ' Q' + vx + ' ' + y1 + ' ' + vx + ' ' + (y1 + sy * rr) + ' V' + (y2 - sy * rr) + ' Q' + vx + ' ' + y2 + ' ' + (vx + sx2 * rr) + ' ' + y2 + ' H' + x2;
-        hy = (y1 + y2) / 2;
-      } else if (via) {
-        const o = Math.max(30, Math.min(120, Math.abs(hx - x1) / 2));
-        if (same) { const sy = y2 >= y1 ? 1 : -1, o2 = Math.max(20, Math.abs(hy - y1) / 2); d = 'M' + x1 + ' ' + y1 + ' C' + (x1 + 46) + ' ' + y1 + ' ' + hx + ' ' + (hy - sy * o2) + ' ' + hx + ' ' + hy + ' C' + hx + ' ' + (hy + sy * o2) + ' ' + (x2 + 46) + ' ' + y2 + ' ' + x2 + ' ' + y2; }
-        else d = 'M' + x1 + ' ' + y1 + ' C' + (x1 + dir * o) + ' ' + y1 + ' ' + (hx - dir * o) + ' ' + hy + ' ' + hx + ' ' + hy + ' C' + (hx + dir * o) + ' ' + hy + ' ' + (x2 - dir * o) + ' ' + y2 + ' ' + x2 + ' ' + y2;
-      } else if (same) d = 'M' + x1 + ' ' + y1 + ' C' + (x1 + 46) + ' ' + y1 + ' ' + (x2 + 46) + ' ' + y2 + ' ' + x2 + ' ' + y2;
-      else { const o = Math.max(40, Math.abs(x2 - x1) / 2); d = 'M' + x1 + ' ' + y1 + ' C' + (x1 + dir * o) + ' ' + y1 + ' ' + (x2 - dir * o) + ' ' + y2 + ' ' + x2 + ' ' + y2; }
+      const p1 = { x: x1, y: y1 }, p2 = { x: x2, y: y2 };
+      let P, d;
+      if (nodes.length) { P = [p1].concat(nodes, [p2]); d = curve ? spline(P, dir, travel) : roundedPoly(P, 14); }
+      else if (same) { P = [p1, { x: x1 + 46, y: y1 }, { x: x2 + 46, y: y2 }, p2]; d = curve ? 'M' + x1 + ' ' + y1 + ' C' + (x1 + 46) + ' ' + y1 + ' ' + (x2 + 46) + ' ' + y2 + ' ' + x2 + ' ' + y2 : roundedPoly(P, 14); }
+      else { const mxp = (x1 + x2) / 2; P = [p1, { x: mxp, y: y1 }, { x: mxp, y: y2 }, p2]; d = curve ? 'M' + x1 + ' ' + y1 + ' C' + mxp + ' ' + y1 + ' ' + mxp + ' ' + y2 + ' ' + x2 + ' ' + y2 : roundedPoly(P, 14); }
       const inv = e.a === cur || e.b === cur;
       const path = document.createElementNS(NS, 'path');
       path.setAttribute('d', d); path.setAttribute('fill', 'none'); path.setAttribute('stroke', COL[e.kind]); path.setAttribute('stroke-width', inv ? 3.5 : 2); path.setAttribute('opacity', inv ? 1 : (anyCur ? .4 : .85)); path.setAttribute('marker-end', 'url(#stA-' + e.kind + ')');
       path.setAttribute('data-edge', key);
       svg.append(path);
+      const hit = document.createElementNS(NS, 'path'); hit.setAttribute('d', d); hit.setAttribute('class', 'hit'); hit.setAttribute('stroke-width', 16); hit.setAttribute('data-hit', key);
+      const tt = document.createElementNS(NS, 'title'); tt.textContent = 'Doble clic para añadir un nodo y poder moldear la flecha'; hit.append(tt);
+      hit.addEventListener('dblclick', (ev) => {
+        ev.stopPropagation(); const pt = wpt(ev), Pc = [p1].concat(nodes, [p2]);
+        let bi = 0, bd = 1e9;
+        for (let i = 0; i < Pc.length - 1; i++) {
+          const a = Pc[i], b = Pc[i + 1], dx = b.x - a.x, dy = b.y - a.y, L2 = dx * dx + dy * dy || 1;
+          const t = clamp(((pt.x - a.x) * dx + (pt.y - a.y) * dy) / L2, 0, 1), qx = a.x + t * dx, qy = a.y + t * dy, dd = Math.hypot(pt.x - qx, pt.y - qy);
+          if (dd < bd) { bd = dd; bi = i; }
+        }
+        snap('en' + key + Date.now()); course.edgePts = course.edgePts || {};
+        const arr = nodes.slice(); arr.splice(bi, 0, pt); course.edgePts[key] = arr; dirty(); drawStoryEdges();
+      });
+      svg.append(hit);
+      const lp = P[Math.min(P.length - 2, Math.floor(P.length / 2))], lq = P[Math.min(P.length - 1, Math.floor(P.length / 2) + 1)];
       if (e.label) {
-        const t = document.createElementNS(NS, 'text'); t.setAttribute('x', hx); t.setAttribute('y', hy - 10); t.setAttribute('text-anchor', 'middle'); t.setAttribute('fill', COL[e.kind]); t.textContent = e.label; svg.append(t);
+        const t = document.createElementNS(NS, 'text'); t.setAttribute('x', (lp.x + lq.x) / 2); t.setAttribute('y', (lp.y + lq.y) / 2 - 8); t.setAttribute('text-anchor', 'middle'); t.setAttribute('fill', COL[e.kind]); t.textContent = e.label; svg.append(t);
       }
-      const c = document.createElementNS(NS, 'circle'); c.setAttribute('class', 'hd'); c.setAttribute('cx', hx); c.setAttribute('cy', hy); c.setAttribute('r', inv ? 8 : 6); c.setAttribute('stroke', COL[e.kind]); c.setAttribute('data-hd', key);
-      const tt = document.createElementNS(NS, 'title'); tt.textContent = 'Arrastra para mover la flecha · doble clic para restablecerla'; c.append(tt);
-      hds.push([c, key]);
-      mx = Math.max(mx, x1 + 120, x2 + 120, hx + 80); my = Math.max(my, y1, y2, hy + 40);
+      nodes.forEach((n, ni) => nodesToDraw.push([n, ni, key, e.kind, inv]));
+      P.forEach((q) => { mx = Math.max(mx, q.x + 120); my = Math.max(my, q.y + 40); });
     });
-    hds.forEach(([c, key]) => {
+    nodesToDraw.forEach(([n, ni, key, kind, inv]) => {
+      const c = document.createElementNS(NS, 'circle'); c.setAttribute('class', 'hd'); c.setAttribute('cx', n.x); c.setAttribute('cy', n.y); c.setAttribute('r', inv ? 8 : 6); c.setAttribute('stroke', COL[kind]); c.setAttribute('data-hd', key);
+      const tt = document.createElementNS(NS, 'title'); tt.textContent = 'Arrastra para mover el nodo · doble clic para quitarlo'; c.append(tt);
       svg.append(c);
-      c.addEventListener('dblclick', () => { if (course.edgePts && course.edgePts[key]) { snap('ep' + key); delete course.edgePts[key]; dirty(); drawStoryEdges(); } });
+      c.addEventListener('dblclick', (ev) => { ev.stopPropagation(); snap('dn' + key + Date.now()); const arr = edgeNodes(key).slice(); arr.splice(ni, 1); if (arr.length) course.edgePts[key] = arr; else delete course.edgePts[key]; dirty(); drawStoryEdges(); });
       c.addEventListener('pointerdown', (ev) => {
         ev.preventDefault(); ev.stopPropagation(); let first = true;
         const mv = (e2) => {
-          const r = w.getBoundingClientRect();
-          if (first) { snap('ep' + key); first = false; }
-          course.edgePts = course.edgePts || {};
-          course.edgePts[key] = { x: Math.round((e2.clientX - r.left) / stZ()), y: Math.round((e2.clientY - r.top) / stZ()) };
-          drawStoryEdges();
+          if (first) { snap('ep' + key + ni + Date.now()); first = false; }
+          const arr = edgeNodes(key).slice(); arr[ni] = wpt(e2); course.edgePts[key] = arr; drawStoryEdges();
         };
         const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); if (!first) dirty(); };
         window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
@@ -1875,22 +1912,23 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     const r = $('#stRibbon'); r.textContent = '';
     const si = S.sc, isS = startIdx() === si;
     r.append(
-      h('span', { class: 'ttl' }, 'Vista de historia'),
+      h('div', { class: 'modesw', role: 'group', 'aria-label': 'Modo de trabajo' }),
       h('div', { class: 'rpanes' },
         rgroup('Escenas', rbtn('plus', 'Nueva escena', newScene, { title: 'Añadir una escena al curso' }),
           rbtn('play', 'Escena inicial', () => setStartScene(si), { title: 'El curso empieza por la primera diapositiva de esta escena', cls: isS ? 'primary' : '' }),
           rbtn('edit', 'Nombre', () => { const n = document.querySelector('#stBody .sh .nm[data-sn="' + si + '"]'); if (n) renameScene(si, n); }, { title: 'Cambiar el nombre de la escena' }),
           rbtn('trash', 'Eliminar escena', () => deleteScene(si), { title: 'Eliminar la escena seleccionada' })),
         rgroup('Diapositiva', rbtn('newslide', 'Nueva diapositiva', () => insertSlideKind('content'), { title: 'Añadir una diapositiva después de la seleccionada' }),
-          rbtn('copy', 'Duplicar', dupSlide, { title: 'Duplicar la diapositiva' }), rbtn('trash', 'Eliminar', delSlide, { title: 'Eliminar la diapositiva' })),
-        rgroup('Vista', rbtn('plus', 'Acercar', () => setStZoom(stZ() + 0.1), { title: 'Acercar (Ctrl + rueda)' }), h('span', { class: 'zl', id: 'stZl' }, Math.round(stZ() * 100) + '%'),
-          rbtn('minus', 'Alejar', () => setStZoom(stZ() - 0.1), { title: 'Alejar' }), rbtn('fit', 'Ajustar', fitStory, { title: 'Ver todo el curso en pantalla' }),
-          rbtn('hand', 'Mano', () => { S.stHand = !S.stHand; paintStoryRibbon(); paintHand(); }, { title: 'Mover el lienzo arrastrando (o mantén Espacio)', cls: S.stHand ? 'primary' : '' }),
-          rbtn('arrange', course.edgeStyle === 'angle' ? 'Líneas: angulares' : 'Líneas: curvas', () => { edit(() => { course.edgeStyle = course.edgeStyle === 'angle' ? 'curve' : 'angle'; }, null, { full: true }); }, { title: 'Cambiar el aspecto de las flechas. Arrastra el punto de una flecha para moverla; doble clic en el punto la restablece.' }))),
+          rbtn('copy', 'Duplicar', dupSlide, { title: 'Duplicar la diapositiva' }), rbtn('trash', 'Eliminar', delSlide, { title: 'Eliminar la diapositiva' }))),
       h('span', { style: 'flex:1' }),
       h('div', { class: 'rpin' },
         h('button', { class: 'themetog', type: 'button', role: 'switch', 'aria-label': 'Modo noche', title: 'Cambiar entre modo día y modo noche', onclick: toggleTheme }, ic('sun', 'sun'), ic('moon', 'moon'), h('i', { class: 'knob' }))));
-    paintThemeBtn();
+    paintThemeBtn(); paintModeSw();
+    const f = $('#stFloat'); f.textContent = '';
+    const fb = (icon, label, fn, on) => h('button', { type: 'button', class: on ? 'on' : '', title: label, 'aria-label': label, onclick: fn }, ic(icon));
+    f.append(fb('minus', 'Alejar', () => setStZoom(stZ() - 0.1)), h('span', { class: 'zl', id: 'stZl' }, Math.round(stZ() * 100) + '%'), fb('plus', 'Acercar (Ctrl + rueda)', () => setStZoom(stZ() + 0.1)), fb('fit', 'Ajustar a la pantalla', fitStory),
+      h('span', { class: 'vs' }), fb('hand', 'Mano: mover el lienzo arrastrando (o mantén Espacio)', () => { S.stHand = !S.stHand; paintStoryRibbon(); paintHand(); }, S.stHand),
+      h('button', { type: 'button', title: 'Cambiar el aspecto de las flechas. Doble clic en una flecha para añadir un nodo.', onclick: () => { edit(() => { course.edgeStyle = course.edgeStyle === 'curve' ? 'angle' : 'curve'; }, null, { full: true }); } }, ic('arrange'), course.edgeStyle === 'curve' ? 'Curvas' : 'Angulares'));
   }
   function paintStorySide(edges) {
     const sd = $('#stSide'); sd.textContent = '';
@@ -1899,8 +1937,12 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     if (S.stTab === 'idx') {
       sd.append(h('h3', null, 'Índice del curso'), h('div', { class: 'hint', style: 'margin:0 0 8px' }, 'Así verá el alumno el menú del curso. Clic para seleccionar una diapositiva.'));
       course.scenes.forEach((sc, a) => {
-        sd.append(h('div', { class: 'ixs' }, h('span', null, (a + 1) + '. ' + sc.title), startIdx() === a ? h('span', { class: 'startbadge', style: 'margin-left:6px' }, ic('play'), 'Inicio') : null));
-        sc.slides.forEach((x, k) => sd.append(h('button', { class: 'ixl' + (x.id === sl.id ? ' on' : ''), type: 'button', onclick: () => gotoSlideId(x.id, true), ondblclick: () => { gotoSlideId(x.id); closeStory(); } }, h('b', null, (a + 1) + '.' + (k + 1)), h('span', null, x.title || x.id))));
+        sd.append(h('div', { class: 'ixs' }, h('span', { class: 'ixsn', title: 'Clic para cambiar el nombre', style: 'cursor:text', onclick: (ev) => renameScene(a, ev.currentTarget) }, (a + 1) + '. ' + sc.title), startIdx() === a ? h('span', { class: 'startbadge', style: 'margin-left:6px' }, ic('play'), 'Inicio') : null));
+        sc.slides.forEach((x, k) => sd.append(h('button', { class: 'ixl' + (x.id === sl.id ? ' on' : ''), 'data-ix': x.id, type: 'button', title: 'Clic: cambiar el nombre · doble clic: ir a la diapositiva', onclick: (ev) => {
+          if (ev.detail > 1) return;
+          const was = x.id === slide().id; clearTimeout(S.ixT);
+          S.ixT = setTimeout(() => { if (!was) gotoSlideId(x.id, true); renameSlide(x.id, () => document.querySelector('#stSide [data-ix="' + x.id + '"] .ixn')); }, 240);
+        }, ondblclick: () => { clearTimeout(S.ixT); gotoSlideId(x.id); closeStory(); } }, h('b', null, (a + 1) + '.' + (k + 1)), h('span', { class: 'ixn' }, x.title || x.id))));
       });
       return;
     }
@@ -2072,7 +2114,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
   function refreshTimeline() {
     paintTlHead();
     const inner = $('#tlinner'); inner.textContent = '';
-    const dur = ctxDur(), pps = S.pps, trackW = dur * pps + 40;
+    const dur = ctxDur(), pps = S.pps, EXTRA = 6, trackW = (dur + EXTRA) * pps + 40;
     inner.style.width = (NAMEW + trackW) + 'px';
     // regla
     const ruler = h('div', { class: 'tltrack', style: 'width:' + trackW + 'px' });
@@ -2115,6 +2157,16 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     vids.forEach((e) => inner.append(tlRow(e, dur, pps, trackW, true)));
     if (!aud.length && !vids.length) inner.append(h('div', { class: 'tlrow' }, h('div', { class: 'tlname' }, h('span', { style: 'color:var(--muted)' }, 'Sin audio')), h('div', { class: 'tltrack', style: 'width:' + trackW + 'px;color:var(--muted);padding:5px 10px' }, 'Añade un audio o un vídeo con el botón de arriba.')));
     inner.append(h('div', { class: 'playhead', id: 'playhead', style: 'left:' + (NAMEW + S.t * pps) + 'px' }));
+    inner.append(h('div', { class: 'tlbeyond', style: 'left:' + (NAMEW + dur * pps) + 'px' }));
+    const el = h('div', { class: 'endline', id: 'endline', title: 'Final de la diapositiva: arrástralo para alargarla o acortarla', style: 'left:' + (NAMEW + dur * pps) + 'px' }, h('i'));
+    el.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault(); ev.stopPropagation(); el.setPointerCapture(ev.pointerId);
+      const ir = inner.getBoundingClientRect(); let nv = dur;
+      const mv = (e2) => { nv = Math.max(1, Math.round(((e2.clientX - ir.left) - NAMEW) / pps * 10) / 10); el.style.left = (NAMEW + nv * pps) + 'px'; const bd = inner.querySelector('.tlbeyond'); if (bd) bd.style.left = el.style.left; };
+      const up = () => { el.removeEventListener('pointermove', mv); el.removeEventListener('pointerup', up); if (nv !== dur) { edit(() => { const dd = ctxDef(); dd.duration = nv; }, null, { full: true }); } };
+      el.addEventListener('pointermove', mv); el.addEventListener('pointerup', up);
+    });
+    inner.append(el);
     inner.classList.toggle('razor', S.tool === 'razor');
     const rl = h('div', { class: 'razorline', id: 'razorline' }); inner.append(rl);
     inner.onpointermove = (ev) => { if (S.tool !== 'razor') { rl.style.display = 'none'; return; } const x = ev.clientX - inner.getBoundingClientRect().left; if (x < NAMEW) { rl.style.display = 'none'; return; } rl.style.left = x + 'px'; rl.style.display = 'block'; };
@@ -2902,6 +2954,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
       if (mod && !typing && ev.key.toLowerCase() === 'z') { ev.preventDefault(); ev.shiftKey ? redo() : undo(); return; }
       if (mod && !typing && ev.key.toLowerCase() === 'y') { ev.preventDefault(); redo(); return; }
       if (typing) return;
+      if (ev.key === ' ') { ev.preventDefault(); togglePlayT(); return; }
       const e = selEl(), ms = selEls(), k = ev.key.toLowerCase();
       if (mod && k === 'b') { ev.preventDefault(); splitAtPlayhead(); }
       else if (!mod && !ev.altKey && k === 'v') setTool('sel');
