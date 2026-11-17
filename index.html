@@ -381,7 +381,7 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .segs { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); } .seg { border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); border-radius: 6px; padding: 3px 8px; font-size: 11.5px; font-weight: 600; } .seg.on { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
 .fxinsp { border-top: 1px solid var(--line); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; max-height: 45%; overflow-y: auto; } .insname { font-weight: 700; font-size: 12px; } .fxinsp .rfield { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; } .fxinsp .rfield input[type=number] { width: 70px; } .fxinsp .rfield input[type=range] { width: 110px; padding: 0; } .fxinsp .rfield select { max-width: 150px; }
 body.fxdragging .tlrow[data-id] .tltrack { outline: 1px dashed var(--brand); outline-offset: -1px; } .tlrow.fxover { background: var(--brand-soft); }
-.tlrow.hasfx { height: 42px; } .chip { position: absolute; top: 27px; height: 12px; border-radius: 4px; font-size: 9px; line-height: 12px; color: #fff; padding: 0 4px; overflow: hidden; white-space: nowrap; cursor: grab; z-index: 3; box-sizing: border-box; border: 1px solid rgba(0,0,0,.25); }
+.chip { position: absolute; top: 14px; height: 10px; border-radius: 3px; font-size: 8px; line-height: 10px; color: #fff; padding: 0 4px; overflow: hidden; white-space: nowrap; cursor: grab; z-index: 3; box-sizing: border-box; border: 1px solid rgba(0,0,0,.25); }
 .chip.k-in { background: #2f9e8f; } .chip.k-out { background: #e08a1e; } .chip.k-emph { background: #8b5cf6; } .chip.k-filt { background: #2d7cff; }
 .chip.on { outline: 2px solid var(--sel); outline-offset: 1px; z-index: 4; } .chip .edge { position: absolute; top: 0; bottom: 0; width: 5px; cursor: ew-resize; } .chip .edge.l { left: 0; } .chip .edge.r { right: 0; }
 .chip.delay { background: transparent; border: 1px dashed var(--muted); color: transparent; }
@@ -548,6 +548,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     anNone: 'M12 3a9 9 0 100 18 9 9 0 000-18zM6 6l12 12', anFade: 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 3v18M12 8h4M12 12h5M12 16h4', anUp: 'M12 19V6M7 11l5-5 5 5M5 21h14', anDown: 'M12 5v13M7 13l5 5 5-5M5 3h14',
     anLeft: 'M20 12H6M11 7l-5 5 5 5M21 5v14', anRight: 'M4 12h14M13 7l5 5-5 5M3 5v14', anZoom: 'M4 14h6v6M20 10h-6V4M10 14l-6 6M14 10l6-6', anShrink: 'M3 9V3h6M21 15v6h-6M3 3l6 6M21 21l-6-6',
     anWipe: 'M4 5h16v14H4zM12 5v14M4 12h8', anSpin: 'M20 12a8 8 0 11-3-6.2M20 4v5h-5', anBounce: 'M5 6c3 0 3 12 7 12s3-9 7-9M4 21h16',
+    tick: 'M5 12.5l4.5 4.5L19 7', tickNo: 'M0 0',
     fxPulse: 'M3 12h4l2-6 4 12 2-6h6', fxShake: 'M4 8l-2 4 2 4M20 8l2 4-2 4M8 6v12M12 4v16M16 6v12', fxTurn: 'M4 12a8 8 0 1014-5.3M18 3v4h-4', fxKen: 'M4 4h6M4 4v6M20 20h-6M20 20v-6M9 9h6v6H9z', fxBlink: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 100 6 3 3 0 000-6z', fxFloat: 'M3 14c3-7 5 7 9 0s6 7 9 0',
     fxBlur: 'M12 3s6 6 6 11a6 6 0 01-12 0c0-5 6-11 6-11z', fxBright: 'M12 8a4 4 0 100 8 4 4 0 000-8zM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2', fxDark: 'M20 14a8 8 0 01-10-10 8 8 0 1010 10z', fxGray: 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 3v18M12 3a9 9 0 010 18',
     fxSepia: 'M5 4h14v16H5zM5 9h14M5 14h14', fxHue: 'M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18', fxContrast: 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 3a9 9 0 010 18z', fxShadow: 'M5 5h11v11H5zM9 19h10V9', fxGlow: 'M12 8a4 4 0 100 8 4 4 0 000-8zM12 3v2M12 19v2M3 12h2M19 12h2M6 6l1 1M17 17l1 1M18 6l-1 1M7 17l-1 1',
@@ -644,6 +645,27 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     e.segs = a; e.start = a[0].start; const l = a[a.length - 1];
     if (l.end == null) delete e.end; else e.end = l.end;
     if (isMediaEl(e)) { if (a[0].trim) e.trim = a[0].trim; else delete e.trim; }
+  }
+  // Duración en pantalla: «hasta el final» (sin fin), «siempre» (desde 0 hasta el final) o ninguna (dura lo que dura el medio, o 5 s).
+  const showState = (e) => { const a = segsOf(e), f = a[0], l = a[a.length - 1]; return { end: l.end == null, always: l.end == null && f.start === 0 }; };
+  async function naturalEnd(e) {
+    const a = segsOf(e), l = a[a.length - 1], dur = ctxDur();
+    let len = 5;
+    if (isMediaEl(e)) { const secs = await mediaSecs(e.type, mediaUrl(e.src)); if (secs > 0) len = Math.max(0.1, secs - (l.trim || 0)); }
+    return r2(Math.min(dur, l.start + len));
+  }
+  async function setShow(e, mode) {
+    const st = showState(e), a = segsOf(e).map((x) => Object.assign({}, x));
+    const cur = mode === 'always' ? st.always : st.end;
+    if (cur) {
+      const ne = await naturalEnd(e); a[a.length - 1].end = ne > a[a.length - 1].start ? ne : null;
+    } else { a[a.length - 1].end = null; if (mode === 'always') a[0].start = 0; }
+    edit(() => setSegs(e, a), null, { full: true });
+  }
+  function durItems(e) {
+    if (e.x == null && !isMediaEl(e)) return [];
+    const st = showState(e);
+    return [['Duración'], [st.end ? 'tick' : 'tickNo', 'Mostrar hasta el final', () => setShow(e, 'end')], [st.always ? 'tick' : 'tickNo', 'Mostrar siempre', () => setShow(e, 'always')]];
   }
   function ctxDur() {
     const d = ctxDef();
@@ -1519,6 +1541,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const e = Object.assign({ id, name: (TYPE_NAME[props.type] || 'Objeto') + ' ' + id.slice(2), start: 0 }, props);
     edit(() => {
       elements().push(e); S.sel = id;
+      if (mediaSecs > 0 && (e.type === 'video' || e.type === 'audio') && e.end == null) { const d0 = ctxDef(); const cap = S.ctx === 'base' ? Math.max(d0.duration || 10, Math.ceil((e.start || 0) + mediaSecs)) : Infinity; if ((e.start || 0) + mediaSecs < cap + 0.001) e.end = r2((e.start || 0) + mediaSecs); }
       // Si el audio o vídeo dura más que la línea de tiempo, esta se alarga hasta que termine.
       if (mediaSecs > 0) {
         const need = Math.ceil((e.start || 0) + mediaSecs);
@@ -2394,8 +2417,6 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const bars = segs.map((sg, i) => {
       const end = sg.end == null ? dur : Math.min(sg.end, dur), start = clamp(sg.start, 0, dur), first = i === 0, last = i === segs.length - 1;
       const bar = h('div', { class: 'bar ' + kind + (sg.end == null ? ' open' : '') + (isSel(e.id) ? ' on' : '') + (multi && S.segSel && S.segSel.id === e.id && S.segSel.i === i ? ' segon' : ''), 'data-seg': i, style: 'left:' + start * pps + 'px;width:' + Math.max(6, (end - start) * pps) + 'px' },
-        first && e.in ? h('div', { class: 'an', style: 'left:0;width:' + Math.min(((e.in.dur || 0.5) + (e.in.delay || 0)) * pps, (end - start) * pps) + 'px' }) : null,
-        last && e.out && sg.end != null ? h('div', { class: 'an', style: 'right:0;width:' + Math.min((e.out.dur || 0.5) * pps, (end - start) * pps) + 'px' }) : null,
         h('i', { class: 'edge l' }), h('i', { class: 'edge r' }), first || (end - start) * pps > 90 ? h('span', { class: 'lb' }, (lane ? '♪ ' : '') + elLabel(e) + (first && !lane && (e.type === 'video' || e.type === 'audio') && e.src ? ' · ' + mediaName(e.src) : '')) : null);
       bar.addEventListener('contextmenu', (ev) => {
         ev.preventDefault(); ev.stopPropagation();
@@ -2405,7 +2426,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
           ['cut', 'Dividir aquí', () => { const q = r2(t); if (!splitOk(e, q)) { toast('Ahí no se puede dividir: está pegado al borde del tramo.'); return; } edit(() => splitCore(e, q), null, { full: true }); }],
           ['trash', n > 1 ? 'Eliminar este tramo' : 'Eliminar el objeto', () => deleteSeg(e, i, false)],
           ['trash', 'Eliminar tramo y cerrar el hueco', () => deleteSeg(e, i, true), n < 2],
-          ['group', 'Unir con el siguiente', () => joinSeg(e, i), !canJoin(e, i)]]);
+          ['group', 'Unir con el siguiente', () => joinSeg(e, i), !canJoin(e, i)]].concat(lane ? [] : durItems(e)));
       });
       bar.addEventListener('pointerdown', (ev) => {
         if (ev.button === 2) return;
@@ -2495,7 +2516,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       addFx(e, d.kind, d.type, Math.max(0, t));
     });
     const name = h('div', { class: 'tlname', 'data-eid': e.id, title: 'Doble clic para cambiar el nombre', onclick: (ev) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) { const cur = selIds(); setMulti(cur.indexOf(e.id) >= 0 ? cur.filter((x) => x !== e.id) : cur.concat(e.id)); afterSel(); } else select(e.id); } }, ic(lane ? 'audio' : e.type === 'shape' ? 'shape' : e.type), h('span', null, lane ? 'Audio de «' + elLabel(e) + '»' : elLabel(e)), h('span', { class: 'tag' }, lane ? 'audio' : TYPE_NAME[e.type] || e.type));
-    const row = h('div', { class: 'tlrow v-' + (lane ? 'audio lane' : e.type) + (isSel(e.id) ? ' sel' : '') + (inGroup ? ' ingroup' : '') + (chips.length ? ' hasfx' : ''), 'data-id': e.id }, name, track);
+    const row = h('div', { class: 'tlrow v-' + (lane ? 'audio lane' : e.type) + (isSel(e.id) ? ' sel' : '') + (inGroup ? ' ingroup' : ''), 'data-id': e.id }, name, track);
     if (!lane) makeSortable(row, 'obj', e.id, (from, to) => edit(() => moveIn(elements(), from, to), null, { full: true }), name);
     return row;
   }
