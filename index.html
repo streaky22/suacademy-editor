@@ -170,6 +170,7 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 .dlg.tpl h4 { margin: 14px 0 8px; font-size: 14px; }
 .tplbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-bottom: 12px; font-size: 13px; }
 .tplbar select, .tplbar input[type=color] { font: inherit; margin-left: 4px; } .tplnote { color: var(--muted); }
+.tplsec { grid-column: 1 / -1; margin: 10px 0 0; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
 .tplgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
 .tplcard { display: flex; flex-direction: column; gap: 6px; text-align: left; background: var(--panel-2); border: 2px solid transparent; border-radius: 12px; padding: 8px; cursor: pointer; font: inherit; color: var(--fg); }
 .tplcard:hover, .tplcard:focus-visible { border-color: var(--sel); outline: none; }
@@ -2366,10 +2367,17 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
   }
   /* ---------- Plantillas de diapositiva ---------- */
   const PALS = {
-    oscuro: { n: 'Oscuro y lila', bg: '#1B1A27', ink: '#B7A4D9', acc: '#B39DDB', card: '#5F5F78', cardInk: '#1B1A27', act: '#1B1A27', btnInk: '#1B1A27' },
     marca: { n: 'Marca SUAcademy', bg: '#FFFFFF', ink: '#222222', acc: '#E84039', card: '#F3F1F0', cardInk: '#222222', act: '#FDE8E7', btnInk: '#FFFFFF' },
-    azul: { n: 'Azul claro', bg: '#F4F7FB', ink: '#1F2D3D', acc: '#2D7CFF', card: '#DCE6F5', cardInk: '#1F2D3D', act: '#FFFFFF', btnInk: '#FFFFFF' }
+    oceano: { n: 'Océano', bg: '#EEF6FA', ink: '#123B4A', acc: '#0E6E80', card: '#CFE8EE', cardInk: '#123B4A', act: '#FFFFFF', btnInk: '#FFFFFF' },
+    bosque: { n: 'Bosque', bg: '#FAF5E8', ink: '#23352A', acc: '#2F6B3F', card: '#DCE8D3', cardInk: '#23352A', act: '#FFFFFF', btnInk: '#FFFFFF' },
+    medianoche: { n: 'Medianoche', bg: '#14213D', ink: '#E6ECF5', acc: '#FF8A65', card: '#2B3A5C', cardInk: '#F2F5FA', act: '#3A4B72', btnInk: '#14213D' },
+    atardecer: { n: 'Atardecer', bg: '#FFF6EA', ink: '#4A2B1A', acc: '#B84A17', card: '#FFDCC2', cardInk: '#4A2B1A', act: '#FFFFFF', btnInk: '#FFFFFF' },
+    lavanda: { n: 'Lavanda suave', bg: '#FAF8FF', ink: '#2D2545', acc: '#6B46C1', card: '#E6DDF7', cardInk: '#2D2545', act: '#FFFFFF', btnInk: '#FFFFFF' },
+    grafito: { n: 'Grafito y menta', bg: '#1E2224', ink: '#E8EEEC', acc: '#4FD1A5', card: '#343B3E', cardInk: '#EEF3F1', act: '#46504F', btnInk: '#10211B' },
+    mostaza: { n: 'Mostaza y vino', bg: '#F7F1E3', ink: '#3B1F26', acc: '#7A1F3D', card: '#EBD9A0', cardInk: '#3B1F26', act: '#FFFFFF', btnInk: '#FFFFFF' },
+    oscuro: { n: 'Oscuro y lila', bg: '#1B1A27', ink: '#CFC0EA', acc: '#B39DDB', card: '#3A3955', cardInk: '#F1EEFA', act: '#4A4970', btnInk: '#1B1A27' }
   };
+
   const TPLK = 'sua.plantillas', TPLP = 'sua.plantillas.paleta';
   const ICO = {
     cohete: 'M12 2c3 2 5 6 5 10l-2 3H9l-2-3c0-4 2-8 5-10zM9 15l-3 4M15 15l3 4M12 9.5a1.5 1.5 0 1 0 .01 0',
@@ -2396,11 +2404,13 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     estrella: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z', info: 'M12 3a9 9 0 1 0 .01 0M12 11v6M12 7.5v.01', play: 'M12 3a9 9 0 1 0 .01 0M10 8l6 4-6 4z', check: 'M5 12l5 5 9-10', cruz: 'M6 6l12 12M18 6L6 18'
   });
   const persoSvg = (c1, c2) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="100" fill="' + c1 + '"/><g fill="' + c2 + '"><circle cx="100" cy="82" r="36"/><path d="M30 190c4-42 36-62 70-62s66 20 70 62a100 100 0 0 1-140 0z"/></g></svg>';
+  const mapSvg = (c1, c2, c3) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520"><rect width="800" height="520" fill="' + c1 + '"/><path d="M0 330C120 280 200 380 330 340S520 250 640 300 760 380 800 360V520H0z" fill="' + c2 + '"/><path d="M0 120C90 80 180 140 280 110S470 40 590 90 740 70 800 40V0H0z" fill="' + c2 + '" opacity=".6"/><path d="M110 400C220 300 300 360 400 280S600 200 700 120" fill="none" stroke="' + c3 + '" stroke-width="6" stroke-dasharray="4 16" stroke-linecap="round"/><g fill="' + c3 + '"><circle cx="110" cy="400" r="16"/><circle cx="400" cy="280" r="16"/><circle cx="700" cy="120" r="16"/></g></svg>';
   const SAFE = { l: 140, t: 120, r: 1780, b: 960 };
   const T = (o) => Object.assign({ type: 'text', fontSize: 38 }, o);
+  const SECS = ['Apertura', 'Contenidos', 'Práctica y repaso', 'Evaluación', 'Cierre'];
   const TEMPLATES = [
     {
-      id: 'tabs', name: 'Pestañas con 6 botones', desc: 'Seis botones con icono: al pulsar uno cambian el título, el texto y la foto. Cada pestaña es una capa que editas por separado.',
+      id: 'tabs', sec: 'Contenidos', name: 'Pestañas con 6 botones', desc: 'Seis botones con icono: al pulsar uno cambian el título, el texto y la foto. Cada pestaña es una capa que editas por separado.',
       build(c) {
         const p = c.pal, icons = ['cohete', 'bombilla', 'reloj', 'pin', 'diana', 'lupa'], fot = [['#7B6FA8', '#3C355E'], ['#C98A5A', '#6B3F2A'], ['#5B9BA8', '#2C4E5E'], ['#8FA860', '#44582C'], ['#B8667A', '#5E2C3C'], ['#6A7FB8', '#2C3A5E']];
         c.add({ type: 'image', name: 'Decoración grande', x: 855, y: 130, w: 110, h: 110, src: c.asset('ast', astSvg(p.acc)), fit: 'contain', decor: true });
@@ -2430,7 +2440,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       }
     },
     {
-      id: 'tabsarriba', name: 'Pestañas arriba con panel', desc: 'Cinco pestañas en una fila; debajo, un panel con texto y foto que cambia al pulsar.',
+      id: 'tabsarriba', sec: 'Contenidos', name: 'Pestañas arriba con panel', desc: 'Cinco pestañas en una fila; debajo, un panel con texto y foto que cambia al pulsar.',
       build(c) {
         const p = c.pal, fot = [['#5B9BA8', '#2C4E5E'], ['#8FA860', '#44582C'], ['#C98A5A', '#6B3F2A'], ['#7B6FA8', '#3C355E'], ['#B8667A', '#5E2C3C']];
         c.add({ type: 'shape', name: 'Panel', x: 140, y: 230, w: 720, h: 710, fill: p.card, decor: true });
@@ -2454,7 +2464,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       }
     },
     {
-      id: 'leermas', name: 'Tarjetas «Leer más»', desc: 'Título e introducción y cuatro tarjetas con imagen. Cada una abre una ventana con su contenido.',
+      id: 'leermas', sec: 'Contenidos', name: 'Tarjetas «Leer más»', desc: 'Título e introducción y cuatro tarjetas con imagen. Cada una abre una ventana con su contenido.',
       build(c) {
         const p = c.pal, fot = [['#5B9BA8', '#2C4E5E'], ['#8FA860', '#44582C'], ['#C98A5A', '#6B3F2A'], ['#B8667A', '#5E2C3C']], tt = ['Primeras impresiones', 'Condiciones', 'Riego', 'Un extra'];
         c.add(T({ name: 'Título', x: 140, y: 130, w: 800, h: 220, text: 'Título del tema en dos líneas', fontSize: 72, fontWeight: 800, color: p.acc, valign: 'top' }));
@@ -2479,7 +2489,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       }
     },
     {
-      id: 'faq', name: 'Preguntas frecuentes', desc: 'Cinco preguntas; al pulsar una se muestra su respuesta y la anterior se cierra.',
+      id: 'faq', sec: 'Contenidos', name: 'Preguntas frecuentes', desc: 'Cinco preguntas; al pulsar una se muestra su respuesta y la anterior se cierra.',
       build(c) {
         const p = c.pal, qs = ['¿Primera pregunta frecuente?', '¿Segunda pregunta frecuente?', '¿Tercera pregunta frecuente?', '¿Cuarta pregunta frecuente?', '¿Quinta pregunta frecuente?'];
         c.add(T({ name: 'Título', x: 140, y: 130, w: 520, h: 120, text: 'FAQ', fontSize: 100, fontWeight: 800, color: p.acc }));
@@ -2498,7 +2508,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       }
     },
     {
-      id: 'portadadiag', name: 'Portada con imagen en diagonal', desc: 'Panel con título y texto a la izquierda, imagen a la derecha cortada en diagonal, y botones Empezar y Salir.',
+      id: 'portadadiag', sec: 'Apertura', name: 'Portada con imagen en diagonal', desc: 'Panel con título y texto a la izquierda, imagen a la derecha cortada en diagonal, y botones Empezar y Salir.',
       build(c) {
         const p = c.pal;
         c.add({ type: 'image', name: 'Imagen de portada', x: 0, y: 0, w: 1920, h: 1080, src: c.asset('foto', fotoSvg('#6A7FB8', '#2C3A5E', 'Tu imagen de portada')), fit: 'cover', alt: 'Imagen de portada' });
@@ -2512,7 +2522,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       }
     },
     {
-      id: 'menu3', name: 'Menú principal con 3 tarjetas', desc: 'Título, introducción y tres tarjetas altas con icono circular, encabezado y texto.',
+      id: 'menu3', sec: 'Apertura', name: 'Menú principal con 3 tarjetas', desc: 'Título, introducción y tres tarjetas altas con icono circular, encabezado y texto.',
       build(c) {
         const p = c.pal, ic3 = ['megafono', 'bombilla', 'nota'];
         c.add(T({ name: 'Título', x: 140, y: 130, w: 1500, h: 100, text: 'MENÚ PRINCIPAL', fontSize: 76, fontWeight: 800, color: p.acc }));
@@ -2530,7 +2540,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       }
     },
     {
-      id: 'introper', name: 'Introducción con personaje', desc: 'Personaje y saludo, tres bloques con imagen y texto, y botón Continuar.',
+      id: 'introper', sec: 'Apertura', name: 'Introducción con personaje', desc: 'Personaje y saludo, tres bloques con imagen y texto, y botón Continuar.',
       build(c) {
         const p = c.pal, fot = [['#5B9BA8', '#2C4E5E'], ['#8FA860', '#44582C'], ['#6A7FB8', '#2C3A5E']];
         c.add({ type: 'image', name: 'Personaje', x: 160, y: 130, w: 240, h: 240, src: c.asset('per', persoSvg(p.acc, p.card)), fit: 'contain', alt: 'Personaje' });
@@ -2546,7 +2556,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       }
     },
     {
-      id: 'portada', name: 'Portada sencilla', desc: 'Título grande, subtítulo, decoración y botón para empezar.',
+      id: 'portada', sec: 'Apertura', name: 'Portada sencilla', desc: 'Título grande, subtítulo, decoración y botón para empezar.',
       build(c) {
         const p = c.pal;
         c.add({ type: 'image', name: 'Decoración', x: 1300, y: 230, w: 440, h: 440, src: c.asset('ast', astSvg(p.acc)), fit: 'contain', decor: true });
@@ -2557,7 +2567,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       }
     },
     {
-      id: 'imgtexto', name: 'Imagen y texto', desc: 'Foto a un lado, título y texto al otro.',
+      id: 'imgtexto', sec: 'Contenidos', name: 'Imagen y texto', desc: 'Foto a un lado, título y texto al otro.',
       build(c) {
         const p = c.pal;
         c.add({ type: 'image', name: 'Foto', x: 140, y: 130, w: 820, h: 810, src: c.asset('foto', fotoSvg('#7B6FA8', '#3C355E', 'Tu foto')), fit: 'cover', alt: 'Describe la foto' });
@@ -2568,7 +2578,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       }
     },
     {
-      id: 'tarjetas', name: 'Tarjetas de vocabulario', desc: 'Seis tarjetas: se ve la palabra y, al pulsarla, su traducción. Un botón las vuelve a girar todas.',
+      id: 'tarjetas', sec: 'Práctica y repaso', name: 'Tarjetas de vocabulario', desc: 'Seis tarjetas: se ve la palabra y, al pulsarla, su traducción. Un botón las vuelve a girar todas.',
       build(c) {
         const p = c.pal, ids = [];
         c.add(T({ name: 'Título', x: 140, y: 130, w: 1500, h: 90, text: 'Vocabulario', fontSize: 72, fontWeight: 800, color: p.acc }));
@@ -2580,6 +2590,110 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
         });
         c.add({ type: 'button', name: 'Volver a girar', x: 740, y: 850, w: 440, h: 90, text: 'Volver a girar', fontSize: 34, fontWeight: 700, fill: p.acc, color: p.btnInk, radius: 14, triggers: ids.map((i) => ({ event: 'click', action: 'changeState', target: i, state: 'normal' })) });
         return { title: 'Tarjetas de vocabulario', background: p.bg };
+      }
+    },
+    {
+      id: 'portadamapa', sec: 'Apertura', name: 'Portada tipo mapa', desc: 'Barra superior con el nombre del curso, un mapa grande a la izquierda y título con botón Empezar a la derecha.',
+      build(c) {
+        const p = c.pal;
+        c.add({ type: 'shape', name: 'Barra superior', x: 0, y: 0, w: 1920, h: 100, fill: p.acc, decor: true });
+        c.add(T({ name: 'Nombre del curso', x: 150, y: 14, w: 1000, h: 72, text: 'Nombre del curso', fontSize: 40, fontWeight: 800, color: p.btnInk, valign: 'middle' }));
+        c.add({ type: 'image', name: 'Mapa', x: 140, y: 150, w: 1060, h: 790, src: c.asset('mapa', mapSvg(p.card, p.bg === '#FFFFFF' ? '#E4E0DE' : p.act, p.acc)), fit: 'cover', alt: 'Mapa del recorrido del curso', radius: 20 });
+        c.add(T({ name: 'Título', x: 1260, y: 170, w: 520, h: 300, text: 'Tu viaje de aprendizaje empieza aquí', fontSize: 64, fontWeight: 800, color: p.acc, valign: 'top' }));
+        c.add(T({ name: 'Texto', x: 1260, y: 500, w: 520, h: 250, text: 'Escribe aquí de qué trata el curso y qué va a conseguir el alumno.', fontSize: 32, color: p.ink }));
+        c.add({ type: 'button', name: 'Empezar', x: 1260, y: 790, w: 340, h: 100, text: 'Empezar', fontSize: 40, fontWeight: 800, fill: p.acc, color: p.btnInk, radius: 50, triggers: [{ event: 'click', action: 'nextSlide' }] });
+        return { title: 'Portada mapa', background: p.bg };
+      }
+    },
+    {
+      id: 'datos3', sec: 'Contenidos', name: 'Datos con tres imágenes y navegación', desc: 'Texto y lista a la izquierda, tres imágenes apiladas y una barra lateral con botones Anterior, Inicio y Siguiente.',
+      build(c) {
+        const p = c.pal, fot = [['#5B9BA8', '#2C4E5E'], ['#C98A5A', '#6B3F2A'], ['#8FA860', '#44582C']];
+        c.add(T({ name: 'Título', x: 140, y: 130, w: 700, h: 170, text: 'Datos clave del tema', fontSize: 64, fontWeight: 800, color: p.acc, valign: 'top' }));
+        c.add(T({ name: 'Introducción', x: 140, y: 320, w: 700, h: 200, text: 'Escribe aquí una introducción breve con el dato más importante.', fontSize: 34, color: p.ink }));
+        c.add(T({ name: 'Lista', x: 140, y: 560, w: 700, h: 380, text: '• Primer punto importante\n• Segundo punto importante\n• Tercer punto importante\n• Cuarto punto importante', fontSize: 34, color: p.ink }));
+        for (let k = 0; k < 3; k++) c.add({ type: 'image', name: 'Imagen ' + (k + 1), x: 900, y: 130 + k * 280, w: 600, h: 260, src: c.asset('foto' + k, fotoSvg(fot[k][0], fot[k][1], 'Imagen ' + (k + 1))), fit: 'cover', alt: 'Ilustración ' + (k + 1), radius: 16 });
+        c.add({ type: 'shape', name: 'Barra lateral', x: 1580, y: 130, w: 200, h: 810, fill: p.card, radius: 24, decor: true });
+        [['Anterior', 'prevSlide'], ['Inicio', 'restartCourse'], ['Siguiente', 'nextSlide']].forEach((b, k) => {
+          const y = 200 + k * 230;
+          c.add({ type: 'shape', name: 'Círculo ' + b[0], shape: 'ellipse', x: 1630, y, w: 100, h: 100, fill: p.acc, decor: true });
+          c.add(T({ name: 'Botón ' + b[0], x: 1630, y, w: 100, h: 100, text: ['←', '⌂', '→'][k], fontSize: 52, fontWeight: 800, color: p.btnInk, align: 'center', valign: 'middle' }));
+          c.add(T({ name: 'Etiqueta ' + b[0], x: 1590, y: y + 108, w: 180, h: 44, text: b[0], fontSize: 26, fontWeight: 700, color: p.cardInk, align: 'center' }));
+          const tr = [{ event: 'click', action: b[1] }];
+          c.add({ type: 'button', name: 'Ir: ' + b[0], x: 1590, y: y - 10, w: 180, h: 170, text: '', fill: '#000000', fillAlpha: 0, radius: 20, alt: b[0], triggers: tr });
+        });
+        return { title: 'Datos con imágenes', background: p.bg };
+      }
+    },
+    {
+      id: 'resumen4', sec: 'Cierre', name: 'Resumen en 4 columnas', desc: 'Foto, cuatro columnas con icono, encabezado y texto, y puntos de paginación decorativos.',
+      build(c) {
+        const p = c.pal, ic4 = ['bombilla', 'diana', 'libro', 'estrella'];
+        c.add(T({ name: 'Título', x: 140, y: 120, w: 1000, h: 90, text: 'Resumen del tema', fontSize: 64, fontWeight: 800, color: p.acc }));
+        c.add({ type: 'image', name: 'Foto', x: 1180, y: 120, w: 600, h: 260, src: c.asset('foto', fotoSvg('#6A7FB8', '#2C3A5E', 'Tu foto')), fit: 'cover', alt: 'Foto del resumen', radius: 16 });
+        c.add(T({ name: 'Introducción', x: 140, y: 220, w: 980, h: 160, text: 'Repasa lo esencial en cuatro ideas. Escribe aquí una frase que las enlace.', fontSize: 32, color: p.ink }));
+        for (let k = 0; k < 4; k++) {
+          const x = 140 + k * 415;
+          c.add({ type: 'shape', name: 'Columna ' + (k + 1), x, y: 430, w: 385, h: 450, fill: p.card, radius: 20, decor: true });
+          c.add({ type: 'shape', name: 'Círculo ' + (k + 1), shape: 'ellipse', x: x + 122, y: 460, w: 140, h: 140, fill: p.acc, decor: true });
+          c.add({ type: 'image', name: 'Icono ' + (k + 1), x: x + 152, y: 490, w: 80, h: 80, src: c.asset('ico' + k, icoSvg(ic4[k], p.btnInk)), fit: 'contain', decor: true });
+          c.add(T({ name: 'Encabezado ' + (k + 1), x: x + 25, y: 620, w: 335, h: 60, text: 'IDEA ' + (k + 1), fontSize: 32, fontWeight: 800, color: p.cardInk, align: 'center' }));
+          c.add(T({ name: 'Texto ' + (k + 1), x: x + 25, y: 690, w: 335, h: 170, text: 'Escribe aquí la idea ' + (k + 1) + ' con una frase corta.', fontSize: 28, color: p.cardInk, align: 'center' }));
+        }
+        for (let k = 0; k < 5; k++) c.add({ type: 'shape', name: 'Punto ' + (k + 1), shape: 'ellipse', x: 900 + k * 32, y: 915, w: 18, h: 18, fill: k === 2 ? p.acc : p.card, decor: true });
+        return { title: 'Resumen', background: p.bg };
+      }
+    },
+    {
+      id: 'test6', sec: 'Evaluación', name: 'Test de selección con resultado', desc: 'Seis frases: el alumno marca las que cree correctas, pulsa Enviar y ve qué frases lo eran (✓/✗) en un panel de resultado. Cambia los ✓/✗ según tu clave.',
+      build(c) {
+        const p = c.pal, ok = [true, false, true, false, true, false];
+        c.add(T({ name: 'Título', x: 140, y: 120, w: 1500, h: 90, text: 'Marca las frases correctas', fontSize: 60, fontWeight: 800, color: p.acc }));
+        const R = c.layer('res', 'Resultado');
+        R.add({ type: 'shape', name: 'Panel', x: 1420, y: 220, w: 360, h: 420, fill: p.card, radius: 20, decor: true, border: '3px solid ' + p.acc });
+        R.add(T({ name: 'Mensaje de resultado', x: 1450, y: 250, w: 300, h: 260, text: 'Los ✓ marcan las frases correctas. Compara con las que elegiste.', fontSize: 30, fontWeight: 700, color: p.cardInk }));
+        const marks = [], btns = [];
+        for (let k = 0; k < 6; k++) {
+          const y = 220 + k * 108;
+          btns.push(c.add({ type: 'button', name: 'Frase ' + (k + 1), x: 140, y, w: 1130, h: 96, text: 'Escribe aquí la frase número ' + (k + 1) + '.', align: 'left', fontSize: 32, fontWeight: 700, fill: p.card, color: p.cardInk, radius: 16, states: { sel: { fill: p.acc, color: p.btnInk }, hover: { fill: p.act } }, triggers: [{ event: 'click', action: 'toggleState', target: 'self', state: 'sel' }] }));
+          marks.push(c.add(T({ name: 'Clave ' + (k + 1), x: 1290, y, w: 100, h: 96, text: ok[k] ? '✓' : '✗', fontSize: 64, fontWeight: 800, color: p.acc, align: 'center', valign: 'middle', state: 'oculto', states: { oculto: { visible: false } } })));
+        }
+        const send = [{ event: 'click', action: 'showLayer', target: R.id }].concat(marks.map((m) => ({ event: 'click', action: 'changeState', target: m, state: 'normal' })));
+        c.add({ type: 'button', name: 'Enviar', x: 140, y: 880, w: 340, h: 80, text: 'Enviar', fontSize: 36, fontWeight: 800, fill: p.acc, color: p.btnInk, radius: 40, triggers: send });
+        const redo = [{ event: 'click', action: 'hideLayer', target: 'self' }].concat(marks.map((m) => ({ event: 'click', action: 'changeState', target: m, state: 'oculto' })), btns.map((b) => ({ event: 'click', action: 'changeState', target: b, state: 'normal' })));
+        R.add({ type: 'button', name: 'Reintentar', x: 1450, y: 540, w: 300, h: 70, text: 'Reintentar', fontSize: 30, fontWeight: 800, fill: p.acc, color: p.btnInk, radius: 35, triggers: redo });
+        return { title: 'Test de selección', background: p.bg };
+      }
+    },
+    {
+      id: 'vf', sec: 'Evaluación', name: 'Verdadero o falso con comentario', desc: 'Una afirmación y dos botones. Cada uno abre su comentario (acierto o error). Por defecto la correcta es «Verdadero»; cambia los textos si es «Falso».',
+      build(c) {
+        const p = c.pal;
+        c.add(T({ name: 'Título', x: 140, y: 120, w: 1500, h: 90, text: '¿Verdadero o falso?', fontSize: 60, fontWeight: 800, color: p.acc }));
+        c.add({ type: 'shape', name: 'Tarjeta', x: 140, y: 260, w: 1640, h: 330, fill: p.card, radius: 24, decor: true });
+        c.add(T({ name: 'Afirmación', x: 200, y: 290, w: 1520, h: 270, text: 'Escribe aquí la afirmación que el alumno debe valorar.', fontSize: 48, fontWeight: 700, color: p.cardInk, align: 'center', valign: 'middle' }));
+        const A = c.layer('bien', 'Acierto'), E = c.layer('mal', 'Error');
+        [[A, '¡Correcto!', 'Explica aquí por qué es verdadera.'], [E, 'No exactamente', 'Explica aquí por qué es verdadera y cómo se reconoce.']].forEach((q) => {
+          q[0].add({ type: 'shape', name: 'Panel', x: 340, y: 620, w: 1240, h: 330, fill: p.bg, radius: 24, decor: true, border: '4px solid ' + p.acc });
+          q[0].add(T({ name: 'Veredicto', x: 400, y: 650, w: 1120, h: 80, text: q[1], fontSize: 52, fontWeight: 800, color: p.acc }));
+          q[0].add(T({ name: 'Comentario', x: 400, y: 740, w: 1120, h: 120, text: q[2], fontSize: 32, color: p.ink }));
+          q[0].add({ type: 'button', name: 'Continuar', x: 1220, y: 860, w: 300, h: 70, text: 'Continuar', fontSize: 30, fontWeight: 800, fill: p.acc, color: p.btnInk, radius: 35, triggers: [{ event: 'click', action: 'nextSlide' }] });
+        });
+        c.add({ type: 'button', name: 'Verdadero', x: 340, y: 640, w: 560, h: 120, text: 'Verdadero', fontSize: 44, fontWeight: 800, fill: p.acc, color: p.btnInk, radius: 20, triggers: [{ event: 'click', action: 'showLayer', target: A.id }] });
+        c.add({ type: 'button', name: 'Falso', x: 1020, y: 640, w: 560, h: 120, text: 'Falso', fontSize: 44, fontWeight: 800, fill: p.cardInk, color: p.card, radius: 20, triggers: [{ event: 'click', action: 'showLayer', target: E.id }] });
+        return { title: 'Verdadero o falso', background: p.bg };
+      }
+    },
+    {
+      id: 'despedida', sec: 'Cierre', name: 'Despedida', desc: 'Mensaje final con dos botones: repetir el curso y salir.',
+      build(c) {
+        const p = c.pal;
+        c.add({ type: 'image', name: 'Decoración', x: 1330, y: 250, w: 400, h: 400, src: c.asset('ast', astSvg(p.acc)), fit: 'contain', decor: true });
+        c.add(T({ name: 'Título', x: 160, y: 270, w: 1100, h: 220, text: '¡Gracias por participar!', fontSize: 110, fontWeight: 800, color: p.acc, valign: 'bottom' }));
+        c.add(T({ name: 'Texto', x: 160, y: 520, w: 1100, h: 150, text: 'Has completado el curso. Escribe aquí un mensaje de cierre o los próximos pasos.', fontSize: 42, color: p.ink }));
+        c.add({ type: 'button', name: 'Repetir', x: 160, y: 740, w: 360, h: 100, text: 'Repetir el curso', fontSize: 36, fontWeight: 800, fill: p.acc, color: p.btnInk, radius: 50, triggers: [{ event: 'click', action: 'restartCourse' }] });
+        c.add({ type: 'button', name: 'Salir', x: 560, y: 740, w: 260, h: 100, text: 'Salir', fontSize: 36, fontWeight: 800, fill: p.card, color: p.cardInk, radius: 50, triggers: [{ event: 'click', action: 'exitCourse' }] });
+        return { title: 'Despedida', background: p.bg };
       }
     }
   ];
@@ -2628,7 +2742,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     return box;
   }
   function abrePlantillas() {
-    let palKey = 'oscuro', acc = null;
+    let palKey = 'marca', acc = null;
     try { const q = JSON.parse(localStorage.getItem(TPLP) || 'null'); if (q && PALS[q.k]) { palKey = q.k; acc = q.a || null; } } catch (e0) { /* sin memoria */ }
     const done = () => { back.remove(); document.removeEventListener('keydown', onKey, true); };
     const onKey = (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); done(); } };
@@ -2637,10 +2751,12 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const paint = () => {
       grid.textContent = ''; propias.textContent = '';
       const pal = curPal();
-      TEMPLATES.forEach((t) => {
+      let lastSec = null;
+      SECS.forEach((sn) => TEMPLATES.filter((t) => t.sec === sn).forEach((t) => {
+        if (sn !== lastSec) { lastSec = sn; grid.append(h('h4', { class: 'tplsec' }, sn)); }
         const c = tplCtx(pal), r = t.build(c), sl = Object.assign({ elements: c.base, layers: c.layers }, r);
         grid.append(h('button', { class: 'tplcard', type: 'button', 'data-tpl': t.id, title: t.desc, onclick: () => { done(); insertaPlantilla(t, pal); } }, tplThumb(sl), h('b', null, t.name), h('span', null, t.desc)));
-      });
+      }));
       const mine = misPlantillas();
       if (!mine.length) propias.append(h('p', { class: 'tplnone' }, 'Aún no tienes ninguna. Abre una diapositiva y usa «Guardar como plantilla» para crear la tuya.'));
       mine.forEach((m) => {
