@@ -38,13 +38,13 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--sel); outline-offset: 1px; }
-.app { display: grid; height: 100%; grid-template-columns: var(--lw, 250px) minmax(0, 1fr) var(--rw, 330px); grid-template-rows: 46px auto minmax(0, 1fr) var(--th, 320px); grid-template-areas: "top top top" "ribbon ribbon ribbon" "slides canvas panel" "fxp tl panel"; }
-.app.nofx { grid-template-areas: "top top top" "ribbon ribbon ribbon" "slides canvas panel" "slides tl panel"; } .app.nofx .fxpanel { display: none; }
+.app { display: grid; height: 100%; grid-template-columns: var(--lw, 250px) minmax(0, 1fr) var(--rw, 330px); grid-template-rows: 46px auto minmax(0, 1fr) var(--th, 320px); grid-template-areas: "top top top" "ribbon ribbon ribbon" "slides canvas panel" "slides tl panel"; }
 .app.nopanel { grid-template-columns: var(--lw, 250px) minmax(0, 1fr) 0; } .app.nopanel .panel { display: none; }
 .slides, .fxpanel, .panel, .tl { position: relative; }
 .rz { position: absolute; z-index: 6; background: transparent; } .rz:hover, .rz.on { background: var(--brand); opacity: .55; }
 .rz.v { top: 0; bottom: 0; width: 6px; cursor: col-resize; } .rz.v.r { right: -3px; } .rz.v.l { left: -3px; } .rz.hz { left: 0; right: 0; height: 6px; top: -3px; cursor: row-resize; }
-.fxpanel { grid-area: fxp; background: var(--panel); border-top: 1px solid var(--line); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.fxpanel { position: fixed; z-index: 35; left: 0; top: var(--fxtop, 120px); bottom: 0; width: var(--lw, 250px); background: var(--panel); border-right: 1px solid var(--line); box-shadow: 6px 0 24px rgba(0,0,0,.28); display: flex; flex-direction: column; min-height: 0; min-width: 0; transform: translateX(-104%); visibility: hidden; transition: transform .16s ease, visibility 0s .16s; }
+.fxpanel.open { transform: none; visibility: visible; transition: transform .16s ease; }
 .fxhead { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px 4px 12px; } .fxhead h2 { margin: 0; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
 .pstrip { display: flex; justify-content: flex-end; padding: 4px 6px 0; } .lgrip { height: 6px; flex: none; cursor: row-resize; background: transparent; margin-bottom: -3px; position: relative; z-index: 5; } .lgrip:hover { background: var(--brand); opacity: .55; }
 .edgetab { position: fixed; z-index: 30; right: 0; top: 50%; border: 1px solid var(--line); border-right: 0; background: var(--panel); color: var(--fg); border-radius: 8px 0 0 8px; padding: 10px 4px; font-size: 11px; font-weight: 700; writing-mode: vertical-rl; cursor: pointer; }
@@ -354,7 +354,7 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .tlhead input[type=number] { width: 64px; }
 .tlscroll { flex: 1; overflow: auto; position: relative; min-height: 0; }
 .tlinner { position: relative; min-width: 100%; }
-.tlrow { display: flex; height: 28px; border-bottom: 1px solid var(--line); }
+.tlrow { display: flex; height: var(--rh, 28px); border-bottom: 1px solid var(--line); } .tlrow[data-id] { position: relative; } .rowgrip { position: absolute; left: 0; right: 0; bottom: -3px; height: 6px; cursor: row-resize; z-index: 5; } .rowgrip:hover { background: var(--brand); opacity: .5; }
 .tlrow.sel { background: var(--brand-soft); }
 .tlname { position: sticky; left: 0; z-index: 3; width: 190px; flex: none; background: inherit; background-color: var(--panel); padding: 0 8px; display: flex; align-items: center; gap: 6px; border-right: 1px solid var(--line); overflow: hidden; cursor: pointer; }
 .tlrow.sel .tlname { background-color: var(--brand-soft); }
@@ -363,7 +363,7 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .tlrow.ruler { height: 24px; position: sticky; top: 0; z-index: 4; background: var(--panel); }
 .tlrow.ruler .tltrack { cursor: col-resize; }
 .tick { position: absolute; top: 0; bottom: 0; border-left: 1px solid var(--line); font-size: 10px; color: var(--muted); padding-left: 3px; pointer-events: none; }
-.bar { position: absolute; top: 4px; height: 20px; border-radius: 5px; background: var(--bar-shape); min-width: 6px; cursor: grab; display: flex; align-items: center; overflow: hidden; color: #fff; font-size: 11px; font-weight: 600; padding: 0 8px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.18); touch-action: none; }
+.bar { position: absolute; top: 4px; height: calc(var(--rh, 28px) - 8px); border-radius: 5px; background: var(--bar-shape); min-width: 6px; cursor: grab; display: flex; align-items: center; overflow: hidden; color: #fff; font-size: 11px; font-weight: 600; padding: 0 8px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.18); touch-action: none; }
 .bar.open { border-top-right-radius: 0; border-bottom-right-radius: 0; background-image: repeating-linear-gradient(135deg, transparent 0 6px, rgba(255,255,255,.12) 6px 12px); }
 .bar.t-text { background-color: var(--bar-text); } .bar.t-button { background-color: var(--bar-button); } .bar.t-image { background-color: var(--bar-image); }
 .bar.t-video { background-color: var(--bar-video); } .bar.t-audio { background-color: var(--bar-audio); } .bar.t-shape { background-color: var(--bar-shape); }
@@ -381,7 +381,7 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .segs { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); } .seg { border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); border-radius: 6px; padding: 3px 8px; font-size: 11.5px; font-weight: 600; } .seg.on { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
 .fxinsp { border-top: 1px solid var(--line); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; max-height: 45%; overflow-y: auto; } .insname { font-weight: 700; font-size: 12px; } .fxinsp .rfield { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; } .fxinsp .rfield input[type=number] { width: 70px; } .fxinsp .rfield input[type=range] { width: 110px; padding: 0; } .fxinsp .rfield select { max-width: 150px; }
 body.fxdragging .tlrow[data-id] .tltrack { outline: 1px dashed var(--brand); outline-offset: -1px; } .tlrow.fxover { background: var(--brand-soft); }
-.chip { position: absolute; top: 14px; height: 10px; border-radius: 3px; font-size: 8px; line-height: 10px; color: #fff; padding: 0 4px; overflow: hidden; white-space: nowrap; cursor: grab; z-index: 3; box-sizing: border-box; border: 1px solid rgba(0,0,0,.25); }
+.chip { position: absolute; bottom: 4px; height: clamp(10px, calc(var(--rh, 28px) * .32), 22px); border-radius: 3px; font-size: clamp(8px, calc(var(--rh, 28px) * .2), 12px); line-height: clamp(10px, calc(var(--rh, 28px) * .32), 22px); color: #fff; padding: 0 4px; overflow: hidden; white-space: nowrap; cursor: grab; z-index: 3; box-sizing: border-box; border: 1px solid rgba(0,0,0,.25); }
 .chip.k-in { background: #2f9e8f; } .chip.k-out { background: #e08a1e; } .chip.k-emph { background: #8b5cf6; } .chip.k-filt { background: #2d7cff; }
 .chip.on { outline: 2px solid var(--sel); outline-offset: 1px; z-index: 4; } .chip .edge { position: absolute; top: 0; bottom: 0; width: 5px; cursor: ew-resize; } .chip .edge.l { left: 0; } .chip .edge.r { right: 0; }
 .chip.delay { background: transparent; border: 1px dashed var(--muted); color: transparent; }
@@ -471,7 +471,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
   <div class="ribbon" id="ribbon"><div class="modeslot"><div class="slotcol"><div class="quickbar" id="quick"></div><div class="slotrow"><span class="tgslot"></span><div class="modesw" id="modeSw" role="group" aria-label="Modo de trabajo"></div></div></div></div><div class="rcolumn"><div class="rtabs" id="rtabs"></div><div class="rbody" id="rbody"></div></div></div>
 
   <aside class="slides" aria-label="Diapositivas">
-    <div class="head"><h2>Diapositivas</h2><button class="btn small" id="fxShow" type="button" title="Mostrar el panel de efectos">Efectos ▴</button></div>
+    <div class="head"><h2>Diapositivas</h2><button class="btn small" id="fxShow" type="button" title="Efectos: se despliega encima de este panel">Efectos ▸</button></div>
     <div class="scenebar" id="sceneBar"></div>
     <ol id="slideList"></ol>
     <div class="foot" id="slideFoot"></div>
@@ -485,7 +485,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
   </section>
 
   <aside class="fxpanel" id="fxPanel" aria-label="Efectos">
-    <div class="fxhead"><h2>Efectos</h2><button class="btn small" id="fxHide" type="button" title="Plegar el panel de efectos para ver las diapositivas">▾ Plegar</button></div>
+    <div class="fxhead"><h2>Efectos</h2><button class="btn small" id="fxHide" type="button" title="Cerrar el panel de efectos">✕ Cerrar</button></div>
     <div class="animbody" id="animBody"></div>
   </aside>
 
@@ -2325,6 +2325,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       tbtn('razor', 'Cuchilla', S.tool === 'razor', () => setTool('razor'), 'Cuchilla (C): haz clic en un objeto para cortarlo en ese punto'),
       tbtn('split', 'Cortar en el cabezal', false, splitAtPlayhead, 'Corta los objetos seleccionados (o todos los que están bajo el cabezal) · Ctrl+B'),
       tbtn('magnet', 'Imán', S.magnet !== false, toggleMagnet, 'Imán (N): los bordes se pegan al cabezal, al inicio/final y a otros objetos'),
+      h('button', { class: 'btn small', type: 'button', title: 'Abrir el panel de efectos', onclick: () => setFx(!$('#fxPanel').classList.contains('open')) }, ic('fxGlow'), 'Efectos'),
       h('label', { title: 'La línea de tiempo se desplaza para seguir el cabezal' }, h('input', { type: 'checkbox', checked: S.follow !== false ? true : null, onchange: (ev) => { S.follow = ev.target.checked; } }), 'Seguir'),
       h('span', { class: 'tsep' }),
       h('label', null, S.ctx === 'base' ? 'Duración (s)' : 'Duración (s, vacío = automática)',
@@ -2334,7 +2335,8 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
           if (S.ctx === 'base' && v == null) return;
           edit(() => { if (v == null) delete d.duration; else d.duration = v; }, 'dur');
         }, onchange: () => { fitPps(); refreshTimeline(); } })),
-      h('label', null, 'Zoom', h('input', { type: 'range', min: 12, max: 240, value: S.pps, oninput: (ev) => { S.pps = Number(ev.target.value); refreshTimeline(); } })),
+      h('label', null, 'Zoom', h('input', { type: 'range', min: 6, max: 600, value: S.pps, title: 'También con la rueda del ratón sobre la línea de tiempo', oninput: (ev) => { S.pps = Number(ev.target.value); refreshTimeline(); } })),
+      h('label', null, 'Alto', h('input', { type: 'range', min: 22, max: 90, value: S.rowH || 28, title: 'Grosor de las filas (Alt + rueda)', oninput: (ev) => { S.rowH = Number(ev.target.value); refreshTimeline(); } })),
       h('span', { class: 'hint', style: 'margin:0' }, 'Los objetos tenues no son visibles en el instante marcado.')
     );
   }
@@ -2489,7 +2491,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       el.addEventListener('pointerdown', (ev) => {
         ev.stopPropagation(); if (ev.button !== 0) return;
         const mode = ev.target.classList.contains('l') ? 'l' : ev.target.classList.contains('r') ? 'r' : 'm';
-        S.sel = e.id; S.multi = []; S.chip = { id: e.id, k: c.k };
+        S.sel = e.id; S.multi = []; S.chip = { id: e.id, k: c.k }; setFx(true);
         const it = c.it, x0 = ev.clientX, s0 = c.s, d0 = c.d, isAnim = c.k === 'in' || c.k === 'out'; let moved = false;
         el.setPointerCapture(ev.pointerId);
         const mv = (e2) => {
@@ -2516,9 +2518,22 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       addFx(e, d.kind, d.type, Math.max(0, t));
     });
     const name = h('div', { class: 'tlname', 'data-eid': e.id, title: 'Doble clic para cambiar el nombre', onclick: (ev) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) { const cur = selIds(); setMulti(cur.indexOf(e.id) >= 0 ? cur.filter((x) => x !== e.id) : cur.concat(e.id)); afterSel(); } else select(e.id); } }, ic(lane ? 'audio' : e.type === 'shape' ? 'shape' : e.type), h('span', null, lane ? 'Audio de «' + elLabel(e) + '»' : elLabel(e)), h('span', { class: 'tag' }, lane ? 'audio' : TYPE_NAME[e.type] || e.type));
-    const row = h('div', { class: 'tlrow v-' + (lane ? 'audio lane' : e.type) + (isSel(e.id) ? ' sel' : '') + (inGroup ? ' ingroup' : ''), 'data-id': e.id }, name, track);
+    const row = h('div', { class: 'tlrow v-' + (lane ? 'audio lane' : e.type) + (isSel(e.id) ? ' sel' : '') + (inGroup ? ' ingroup' : ''), 'data-id': e.id, style: (e.rowH || S.rowH) ? '--rh:' + (e.rowH || S.rowH) + 'px' : null }, name, track);
+    if (!lane) rowGrip(row, e);
     if (!lane) makeSortable(row, 'obj', e.id, (from, to) => edit(() => moveIn(elements(), from, to), null, { full: true }), name);
     return row;
+  }
+  // Grosor de la fila: se arrastra su borde inferior (solo esa fila). Alt + rueda cambia el de todas.
+  function rowGrip(row, e) {
+    const g = h('div', { class: 'rowgrip', title: 'Arrastra para cambiar el grosor de esta fila (Alt + rueda: todas)' });
+    g.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault(); ev.stopPropagation(); g.setPointerCapture(ev.pointerId);
+      const y0 = ev.clientY, h0 = row.offsetHeight;
+      const mv = (e2) => { const v = Math.round(clamp(h0 + e2.clientY - y0, 22, 140)); e.rowH = v; row.style.setProperty('--rh', v + 'px'); };
+      const up = () => { g.removeEventListener('pointermove', mv); g.removeEventListener('pointerup', up); if (e.rowH === 28) delete e.rowH; snap('rowh'); dirty(); refreshTimeline(); };
+      g.addEventListener('pointermove', mv); g.addEventListener('pointerup', up);
+    });
+    row.append(g);
   }
   function setT(t) {
     if (!S.playing) syncSound();
@@ -2686,6 +2701,12 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     edit(() => { if (c.k === 'in' || c.k === 'out') delete c.e[c.k]; else { c.e.fx = c.e.fx.filter((x) => x.id !== c.k); if (!c.e.fx.length) delete c.e.fx; } S.chip = null; }, null, { panel: true });
   }
   // Pestaña «Efectos»: galería (se arrastra a la línea de tiempo o se pulsa) y ajustes finos de la pieza seleccionada.
+  // Panel de efectos desplegable (como en Photoshop o Blender): se abre encima de la columna izquierda sin mover nada.
+  function setFx(open) {
+    const p = $('#fxPanel'); if (!p) return;
+    if (open) { const r = $('.slides').getBoundingClientRect(); p.style.setProperty('--fxtop', Math.round(r.top) + 'px'); paintAnimPane(); }
+    p.classList.toggle('open', !!open);
+  }
   function paintAnimPane() {
     const box = $('#animBody'); if (!box) return;
     const keepScroll = box.querySelector('.fxgal') ? box.querySelector('.fxgal').scrollTop : 0;
@@ -3446,9 +3467,8 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       const save = () => { try { localStorage.setItem(K, JSON.stringify(cfg)); } catch (e0) { /* sin almacenamiento */ } };
       const apply = () => {
         ['lw', 'rw', 'th'].forEach((k) => { if (cfg[k]) app.style.setProperty('--' + k, cfg[k] + 'px'); });
-        app.classList.toggle('nofx', !!cfg.nofx); app.classList.toggle('nopanel', !!cfg.nopanel);
+        app.classList.toggle('nopanel', !!cfg.nopanel);
         const tab = $('#edgeTab'); if (tab) tab.hidden = !cfg.nopanel;
-        const sh = $('#fxShow'); if (sh) sh.hidden = !cfg.nofx;
         window.dispatchEvent(new Event('resize'));
       };
       const grip = (host, cls, key, axis, min, max, sign) => {
@@ -3462,11 +3482,13 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
         });
         host.append(g);
       };
-      grip($('.slides'), 'v r', 'lw', 'x', 170, 520, 1); grip($('#fxPanel'), 'v r', 'lw', 'x', 170, 520, 1);
+      grip($('.slides'), 'v r', 'lw', 'x', 170, 520, 1);
       grip($('.panel'), 'v l', 'rw', 'x', 240, 640, -1);
-      grip($('.tl'), 'hz', 'th', 'y', 140, 700, -1); grip($('#fxPanel'), 'hz', 'th', 'y', 140, 700, -1);
-      $('#fxHide').addEventListener('click', () => { cfg.nofx = true; save(); apply(); });
-      $('#fxShow').addEventListener('click', () => { cfg.nofx = false; save(); apply(); });
+      grip($('.tl'), 'hz', 'th', 'y', 140, 700, -1);
+      $('#fxHide').addEventListener('click', () => setFx(false));
+      $('#fxShow').addEventListener('click', () => setFx(!$('#fxPanel').classList.contains('open')));
+      document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && $('#fxPanel').classList.contains('open') && !/^(input|textarea|select)$/i.test((ev.target.tagName || ''))) setFx(false); });
+      window.addEventListener('resize', () => { if ($('#fxPanel').classList.contains('open')) setFx(true); });
       const tab = h('button', { class: 'edgetab', id: 'edgeTab', type: 'button', hidden: true, title: 'Mostrar propiedades y capas', onclick: () => { cfg.nopanel = false; save(); apply(); } }, 'Propiedades ◂');
       document.body.append(tab);
       $('.panel').insertBefore(h('div', { class: 'pstrip' }, h('button', { class: 'btn small', type: 'button', title: 'Plegar propiedades y capas', onclick: () => { cfg.nopanel = true; save(); apply(); } }, 'Plegar ▸')), $('.panel').firstChild);
@@ -3480,6 +3502,19 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
         lg.addEventListener('pointermove', mv); lg.addEventListener('pointerup', up);
       });
       if (cfg.lh) lb.style.maxHeight = 'none';
+      // Rueda sobre la línea de tiempo: zoom (centrado en el puntero) · Mayús: desplazar filas · Alt: grosor de las filas
+      $('#tlscroll').addEventListener('wheel', (ev) => {
+        const sc = $('#tlscroll'), r = sc.getBoundingClientRect(), dy = ev.deltaY;
+        if (Math.abs(ev.deltaX) > Math.abs(dy)) return;
+        if (ev.shiftKey && !ev.altKey) { ev.preventDefault(); sc.scrollTop += dy; return; }
+        if (ev.altKey) { ev.preventDefault(); S.rowH = Math.round(clamp((S.rowH || 28) + (dy < 0 ? 4 : -4), 22, 90)); refreshTimeline(); return; }
+        if (ev.clientX - r.left < NAMEW) return;
+        ev.preventDefault();
+        const px = ev.clientX - r.left, tA = (px + sc.scrollLeft - NAMEW) / S.pps;
+        S.pps = clamp(S.pps * (ev.ctrlKey ? Math.exp(-dy * 0.01) : (dy < 0 ? 1.18 : 1 / 1.18)), 6, 600);
+        refreshTimeline();
+        const sc2 = $('#tlscroll'); sc2.scrollLeft = Math.max(0, NAMEW + tA * S.pps - px);
+      }, { passive: false });
       apply();
     })();
     if (window.ResizeObserver) new ResizeObserver(() => { fit(); }).observe(wrap);
