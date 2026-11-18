@@ -382,8 +382,15 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .segs { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); } .seg { border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); border-radius: 6px; padding: 3px 8px; font-size: 11.5px; font-weight: 600; } .seg.on { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
 .fxinsp { border-top: 1px solid var(--line); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; max-height: 45%; overflow-y: auto; } .insname { font-weight: 700; font-size: 12px; } .fxinsp .rfield { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; } .fxinsp .rfield input[type=number] { width: 70px; } .fxinsp .rfield input[type=range] { width: 110px; padding: 0; } .fxinsp .rfield select { max-width: 150px; }
 body.fxdragging .tlrow[data-id] .tltrack { outline: 1px dashed var(--brand); outline-offset: -1px; } .tlrow.fxover { background: var(--brand-soft); }
-.chip { position: absolute; bottom: 4px; height: clamp(10px, calc(var(--rh, 28px) * .32), 22px); border-radius: 3px; font-size: clamp(8px, calc(var(--rh, 28px) * .2), 12px); line-height: clamp(10px, calc(var(--rh, 28px) * .32), 22px); color: #fff; padding: 0 4px; overflow: hidden; white-space: nowrap; cursor: grab; z-index: 3; box-sizing: border-box; border: 1px solid rgba(0,0,0,.25); }
-.chip.k-in { background: #2f9e8f; } .chip.k-out { background: #e08a1e; } .chip.k-emph { background: #8b5cf6; } .chip.k-filt { background: #2d7cff; }
+.chip { position: absolute; height: calc((var(--rh, 28px) - 8px) / 2 - 1px); border-radius: 4px; font-size: 9.5px; font-weight: 700; display: flex; align-items: center; color: #fff; padding: 0 5px; overflow: hidden; white-space: nowrap; cursor: grab; z-index: 3; box-sizing: border-box; border: 1px solid rgba(0,0,0,.3); }
+.chip.k-in, .chip.k-out { top: 4px; color: #1d3550; border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.25); } .chip.k-in { background: linear-gradient(135deg, rgba(255,255,255,.85) 49.5%, rgba(255,255,255,.42) 50.5%); } .chip.k-out { background: linear-gradient(315deg, rgba(255,255,255,.85) 49.5%, rgba(255,255,255,.42) 50.5%); justify-content: flex-end; }
+.chip.k-emph, .chip.k-filt { bottom: 4px; } .chip.k-emph { background: #8b5cf6; } .chip.k-filt { background: #2d7cff; }
+.colpop { position: fixed; z-index: 60; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px 6px; box-shadow: 0 10px 30px rgba(0,0,0,.3); width: 232px; } .colpop h4 { margin: 6px 0 4px; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.cgrid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; } .cgrid.sh { margin-top: 3px; } .cgrid.r { grid-template-columns: repeat(12, 1fr); }
+.csw { aspect-ratio: 1; border: 1px solid rgba(128,128,128,.45); border-radius: 3px; padding: 0; min-width: 0; } .csw:hover { outline: 2px solid var(--brand); outline-offset: 1px; } .csw.on { outline: 2px solid var(--sel); outline-offset: 1px; } .csw.big { width: 34px; height: 30px; aspect-ratio: auto; border-radius: 6px; }
+.cact { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; border-top: 1px solid var(--line); padding-top: 4px; position: relative; }
+.szpop { position: fixed; z-index: 60; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.3); max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; min-width: 74px; padding: 4px 0; } .szpop button { border: 0; background: transparent; text-align: left; padding: 4px 18px; font-size: 13px; } .szpop button:hover { background: var(--brand-soft); } .szpop button.on { font-weight: 800; color: var(--brand); }
+.colbtn { display: inline-flex; flex-direction: column; align-items: center; gap: 0; padding: 1px 6px; line-height: 1; } .colbtn .swc { display: block; width: 16px; height: 4px; border-radius: 1px; margin-top: 1px; }
 .chip.on { outline: 2px solid var(--sel); outline-offset: 1px; z-index: 4; } .chip .edge { position: absolute; top: 0; bottom: 0; width: 5px; cursor: ew-resize; } .chip .edge.l { left: 0; } .chip .edge.r { right: 0; }
 .chip.delay { background: transparent; border: 1px dashed var(--muted); color: transparent; }
 .rfield { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 11.5px; color: var(--fg); white-space: nowrap; } .rfield input, .rfield select { width: 120px; padding: 2px 6px; font-size: 11.5px; } .rfield input[type=number] { width: 70px; }
@@ -545,7 +552,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     anNone: 'M12 3a9 9 0 100 18 9 9 0 000-18zM6 6l12 12', anFade: 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 3v18M12 8h4M12 12h5M12 16h4', anUp: 'M12 19V6M7 11l5-5 5 5M5 21h14', anDown: 'M12 5v13M7 13l5 5 5-5M5 3h14',
     anLeft: 'M20 12H6M11 7l-5 5 5 5M21 5v14', anRight: 'M4 12h14M13 7l5 5-5 5M3 5v14', anZoom: 'M4 14h6v6M20 10h-6V4M10 14l-6 6M14 10l6-6', anShrink: 'M3 9V3h6M21 15v6h-6M3 3l6 6M21 21l-6-6',
     anWipe: 'M4 5h16v14H4zM12 5v14M4 12h8', anSpin: 'M20 12a8 8 0 11-3-6.2M20 4v5h-5', anBounce: 'M5 6c3 0 3 12 7 12s3-9 7-9M4 21h16',
-    tick: 'M5 12.5l4.5 4.5L19 7', tickNo: 'M0 0',
+    tick: 'M5 12.5l4.5 4.5L19 7', tickNo: 'M0 0', palette: 'M12 3a9 9 0 100 18c1.4 0 2-1 1.5-2.2-.6-1.4.3-2.8 1.8-2.8H18a3 3 0 003-3c0-5-4-10-9-10zM7.5 12a1 1 0 100-2 1 1 0 000 2zM10 8a1 1 0 100-2 1 1 0 000 2zM15 8a1 1 0 100-2 1 1 0 000 2z', pipette: 'M14 5l5 5M16 3l5 5-3 3-5-5zM13 8l-8 8v3h3l8-8',
     fxPulse: 'M3 12h4l2-6 4 12 2-6h6', fxShake: 'M4 8l-2 4 2 4M20 8l2 4-2 4M8 6v12M12 4v16M16 6v12', fxTurn: 'M4 12a8 8 0 1014-5.3M18 3v4h-4', fxKen: 'M4 4h6M4 4v6M20 20h-6M20 20v-6M9 9h6v6H9z', fxBlink: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 100 6 3 3 0 000-6z', fxFloat: 'M3 14c3-7 5 7 9 0s6 7 9 0',
     fxBlur: 'M12 3s6 6 6 11a6 6 0 01-12 0c0-5 6-11 6-11z', fxBright: 'M12 8a4 4 0 100 8 4 4 0 000-8zM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2', fxDark: 'M20 14a8 8 0 01-10-10 8 8 0 1010 10z', fxGray: 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 3v18M12 3a9 9 0 010 18',
     fxSepia: 'M5 4h14v16H5zM5 9h14M5 14h14', fxHue: 'M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18', fxContrast: 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 3a9 9 0 010 18z', fxShadow: 'M5 5h11v11H5zM9 19h10V9', fxGlow: 'M12 8a4 4 0 100 8 4 4 0 000-8zM12 3v2M12 19v2M3 12h2M19 12h2M6 6l1 1M17 17l1 1M18 6l-1 1M7 17l-1 1',
@@ -1303,6 +1310,57 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
   const svgI = (d) => { const s = document.createElement('span'); s.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="' + d + '"/></svg>'; return s; };
   const rgb2hex = (c) => { const m = /(\d+)[, ]+(\d+)[, ]+(\d+)/.exec(c || ''); return m ? '#' + [1, 2, 3].map((i) => Number(m[i]).toString(16).padStart(2, '0')).join('') : '#000000'; };
   const firstFam = (f) => String(f || '').split(',')[0].replace(/["']/g, '').trim().toLowerCase();
+  // ---- Colores: paleta con recientes, colores del curso, más colores y cuentagotas ----
+  const SIZES = [8, 9, 10, 10.5, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 44, 48, 54, 60, 66, 72, 80, 88, 96, 110, 128, 144];
+  const BASEC = ['#FFFFFF', '#000000', '#E7E6E6', '#44546A', '#E84039', '#4472C4', '#ED7D31', '#A5A5A5', '#FFC000', '#70AD47'];
+  const STDC = ['#C00000', '#FF0000', '#FFC000', '#FFFF00', '#92D050', '#00B050', '#00B0F0', '#0070C0', '#002060', '#7030A0'];
+  const hexRgb = (x) => [1, 3, 5].map((i) => parseInt(x.slice(i, i + 2), 16));
+  const rgbHex = (a) => '#' + a.map((v) => Math.round(clamp(v, 0, 255)).toString(16).padStart(2, '0')).join('').toUpperCase();
+  const mixC = (x, y, k) => { const a = hexRgb(x), b = hexRgb(y); return rgbHex(a.map((v, i) => v + (b[i] - v) * k)); };
+  const recentColors = () => { try { return (JSON.parse(localStorage.getItem('sua.colores') || '[]') || []).filter(isHex); } catch (e0) { return []; } };
+  function rememberColor(hex) {
+    if (!isHex(hex)) return; hex = hex.toUpperCase();
+    try { localStorage.setItem('sua.colores', JSON.stringify([hex].concat(recentColors().filter((c) => c !== hex)).slice(0, 12))); } catch (e0) { /* sin almacenamiento */ }
+  }
+  function courseColors() {
+    const out = new Set(), add = (v) => { if (isHex(v)) out.add(v.toUpperCase()); };
+    (course.scenes || []).forEach((sc) => (sc.slides || []).forEach((sl) => { add(sl.bg); add(sl.background); [].concat(sl.elements || [], ...(sl.layers || []).map((l) => l.elements || [])).forEach((e) => { add(e.color); add(e.fill); }); }));
+    return [...out].slice(0, 12);
+  }
+  // anchor: botón que lo abre · cur: color actual · onPick(hex): se llama al elegir (también mientras se arrastra en «Más colores»)
+  function colorPop(anchor, cur, onPick) {
+    closeShapes();
+    const pop = h('div', { id: 'colPop', class: 'colpop', onclick: (ev) => ev.stopPropagation() });
+    pop.addEventListener('mousedown', (ev) => { if (!/^(input)$/i.test(ev.target.tagName)) ev.preventDefault(); });
+    const pick = (c, keep) => { onPick(c); if (keep !== false) rememberColor(c); };
+    const sw = (c, close) => h('button', { type: 'button', class: 'csw' + (cur && c.toLowerCase() === String(cur).toLowerCase() ? ' on' : ''), title: c, style: 'background:' + c, onclick: () => { pick(c); if (close !== false) pop.remove(); } });
+    pop.append(h('h4', null, 'Colores del tema'));
+    pop.append(h('div', { class: 'cgrid' }, BASEC.map((c) => sw(c))));
+    const shadeOf = (c, i, row) => (i === 0 ? mixC('#FFFFFF', '#000000', [0.05, 0.15, 0.25, 0.35, 0.5][row]) : i === 1 ? mixC('#000000', '#FFFFFF', [0.5, 0.35, 0.25, 0.15, 0.05][row]) : row < 3 ? mixC(c, '#FFFFFF', [0.8, 0.6, 0.4][row]) : mixC(c, '#000000', [0.25, 0.5][row - 3]));
+    const rows = []; for (let row = 0; row < 5; row++) BASEC.forEach((c, i) => rows.push(sw(shadeOf(c, i, row))));
+    pop.append(h('div', { class: 'cgrid sh' }, rows));
+    const rc = recentColors(); if (rc.length) { pop.append(h('h4', null, 'Recientes')); pop.append(h('div', { class: 'cgrid r' }, rc.map((c) => sw(c)))); }
+    const cc = courseColors().filter((c) => !rc.includes(c)); if (cc.length) { pop.append(h('h4', null, 'Usados en el curso')); pop.append(h('div', { class: 'cgrid r' }, cc.map((c) => sw(c)))); }
+    pop.append(h('h4', null, 'Colores estándar')); pop.append(h('div', { class: 'cgrid' }, STDC.map((c) => sw(c))));
+    const nat = h('input', { type: 'color', value: isHex(cur) ? cur : '#E84039', style: 'position:absolute;opacity:0;pointer-events:none;width:1px;height:1px' });
+    nat.addEventListener('input', () => pick(nat.value, false)); nat.addEventListener('change', () => { rememberColor(nat.value); pop.remove(); });
+    const eye = 'EyeDropper' in window;
+    pop.append(h('div', { class: 'cact' },
+      h('button', { type: 'button', class: 'pi', onclick: () => nat.click() }, ic('palette'), 'Más colores…'),
+      h('button', { type: 'button', class: 'pi', disabled: eye ? null : true, title: eye ? 'Toma un color de cualquier punto de la pantalla' : 'Tu navegador no incluye cuentagotas', onclick: async () => { try { const r = await new window.EyeDropper().open(); pick(r.sRGBHex.toUpperCase()); pop.remove(); } catch (e0) { /* cancelado */ } } }, ic('pipette'), 'Cuentagotas'), nat));
+    document.body.append(pop);
+    const r = anchor.getBoundingClientRect(), pr = pop.getBoundingClientRect();
+    pop.style.left = Math.max(4, Math.min(r.left, innerWidth - pr.width - 6)) + 'px'; pop.style.top = Math.max(4, Math.min(r.bottom + 4, innerHeight - pr.height - 6)) + 'px';
+  }
+  function sizePop(anchor, cur, onPick) {
+    closeShapes();
+    const pop = h('div', { id: 'sizePop', class: 'szpop', onclick: (ev) => ev.stopPropagation() });
+    pop.addEventListener('mousedown', (ev) => ev.preventDefault());
+    SIZES.forEach((v) => pop.append(h('button', { type: 'button', class: Number(cur) === v ? 'on' : '', onclick: () => { pop.remove(); onPick(v); } }, String(v).replace('.', ','))));
+    document.body.append(pop);
+    const r = anchor.getBoundingClientRect(), pr = pop.getBoundingClientRect();
+    pop.style.left = Math.max(4, Math.min(r.left, innerWidth - pr.width - 6)) + 'px'; pop.style.top = Math.max(4, Math.min(r.bottom + 2, innerHeight - pr.height - 6)) + 'px';
+  }
   function buildFmt() {
     const box = $('#fmt'); box.textContent = '';
     const keep = (n) => { n.addEventListener('mousedown', (ev) => { if (!/^(select|input)$/i.test(ev.target.tagName)) ev.preventDefault(); }); return n; };
@@ -1312,17 +1370,24 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     let [r1, r2] = grp('Fuente');
     F.font = h('select', { 'aria-label': 'Tipo de letra', title: 'Tipo de letra' }, FONTS.map((f) => h('option', { value: f[0] }, f[1])));
     F.font.addEventListener('change', () => fmtCmd('font', F.font.value));
-    F.size = h('input', { type: 'number', min: 8, max: 400, step: 2, 'aria-label': 'Tamaño de letra', title: 'Tamaño de letra (px)' });
-    F.size.addEventListener('change', () => { const v = Number(F.size.value); if (v >= 8) fmtCmd('size', v); });
-    r1.append(F.font, F.size);
+    F.size = h('input', { type: 'number', min: 6, max: 400, step: 1, 'aria-label': 'Tamaño de letra', title: 'Tamaño de letra (px)' });
+    F.size.addEventListener('change', () => { const v = Number(F.size.value); if (v >= 6) fmtCmd('size', v); });
+    const stepSize = (dir) => { const c = Number(F.size.value) || 40; const n = dir > 0 ? SIZES.find((v) => v > c) : [...SIZES].reverse().find((v) => v < c); fmtCmd('size', n || c); };
+    const szb = keep(h('button', { class: 'btn small icon', type: 'button', title: 'Lista de tamaños', 'aria-label': 'Lista de tamaños', onclick: (ev) => { ev.stopPropagation(); sizePop(szb, F.size.value, (v) => fmtCmd('size', v)); } }, '▾'));
+    r1.append(F.font, F.size, szb);
     cur = r2;
     tg('bold', h('b', null, 'B'), 'Negrita', () => fmtCmd('bold'));
     tg('italic', h('i', null, 'I'), 'Cursiva', () => fmtCmd('italic'));
     tg('underline', h('u', null, 'U'), 'Subrayado', () => fmtCmd('underline'));
     tg('strike', h('s', null, 'S'), 'Tachado', () => fmtCmd('strike'));
-    F.color = h('input', { type: 'color', value: '#222222', 'aria-label': 'Color del texto', title: 'Color del texto' });
-    F.color.addEventListener('input', () => fmtCmd('color', F.color.value));
-    r2.append(F.color);
+    cur = r2;
+    tg('grow', h('span', { style: 'font-weight:700' }, 'A', h('sup', null, '+')), 'Aumentar tamaño de letra', () => stepSize(1));
+    tg('shrink', h('span', { style: 'font-weight:700;font-size:11px' }, 'A', h('sup', null, '−')), 'Reducir tamaño de letra', () => stepSize(-1));
+    F.color = { value: '#222222' };
+    const swc = h('span', { class: 'swc' });
+    const colb = keep(h('button', { class: 'btn small colbtn', type: 'button', title: 'Color del texto', 'aria-label': 'Color del texto', onclick: (ev) => { ev.stopPropagation(); colorPop(colb, F.color.value, (c) => { F.color.value = c; paintSw(); fmtCmd('color', c); }); } }, h('b', null, 'A'), swc, h('span', { style: 'font-size:9px' }, '▾')));
+    const paintSw = () => { swc.style.background = F.color.value; };
+    F.paintSw = paintSw; paintSw(); r2.append(colb);
     [r1, r2] = grp('Párrafo');
     cur = r1;
     tg('ul', svgI('M7 5h10M7 10h10M7 15h10M3 5h.5M3 10h.5M3 15h.5'), 'Lista con viñetas', () => fmtCmd('ul'));
@@ -1361,12 +1426,12 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       const sel = getSelection(); let a = sel && sel.anchorNode; if (a && a.nodeType === 3) a = a.parentElement;
       if (a && ed.node.contains(a)) {
         const cs = getComputedStyle(a);
-        F.size.value = Math.round(parseFloat(cs.fontSize)) || ''; F.color.value = rgb2hex(cs.color);
+        F.size.value = Math.round(parseFloat(cs.fontSize)) || ''; F.color.value = rgb2hex(cs.color); F.paintSw();
         const fam = firstFam(cs.fontFamily); const opt = FONTS.find((f) => f[0] && firstFam(f[0]) === fam); F.font.value = opt ? opt[0] : '';
       }
     } else {
       on(F.bold, Number(e.fontWeight) >= 600); on(F.italic, e.italic); on(F.underline, e.underline); on(F.strike, e.strike); on(F.ul, false); on(F.ol, false);
-      F.size.value = e.fontSize || ''; F.color.value = isHex(e.color) ? e.color : (e.type === 'button' && !e.color ? '#000000' : '#222222'); F.font.value = e.fontFamily || '';
+      F.size.value = e.fontSize || ''; F.color.value = isHex(e.color) ? e.color : (e.type === 'button' && !e.color ? '#000000' : '#222222'); F.paintSw(); F.font.value = e.fontFamily || '';
     }
   }
   // Quita de un texto con formato los estilos locales indicados (para que un cambio al objeto entero prevalezca, como en Word al seleccionar todo).
@@ -1447,8 +1512,8 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     node.addEventListener('paste', (ev) => { ev.preventDefault(); document.execCommand('insertText', false, (ev.clipboardData || window.clipboardData).getData('text/plain')); });
     node.addEventListener('blur', (ev) => {
       const to = ev.relatedTarget;
-      if (to && to.closest && to.closest('#fmt')) return;
-      setTimeout(() => { if (S.editing && S.editing.node === node && document.activeElement !== node && !(document.activeElement && document.activeElement.closest && document.activeElement.closest('#fmt'))) commitEdit(); }, 0);
+      if (to && to.closest && to.closest('#fmt, #colPop, #sizePop')) return;
+      setTimeout(() => { if (S.editing && S.editing.node === node && document.activeElement !== node && !(document.activeElement && document.activeElement.closest && document.activeElement.closest('#fmt, #colPop, #sizePop'))) commitEdit(); }, 0);
     });
     syncFmt();
   }
@@ -1578,7 +1643,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const k = Math.min(1, (W * 0.6) / w, (H * 0.6) / hh); w = Math.round(w * k); hh = Math.round(hh * k);
     addElement(place({ type, src, x: Math.round((W - w) / 2), y: Math.round((H - hh) / 2), w, h: hh, volume: 1 }, w, hh), secs);
   }
-  function closeShapes(keepSticky) { document.querySelectorAll('#shapePop, #newPop, #ctxPop, #subPop, #bgPop' + (keepSticky ? '' : ', #arrPop')).forEach((o) => o.remove()); }
+  function closeShapes(keepSticky) { document.querySelectorAll('#sizePop, #colPop, #shapePop, #newPop, #ctxPop, #subPop, #bgPop' + (keepSticky ? '' : ', #arrPop')).forEach((o) => o.remove()); }
   function toggleShapes(btn) {
     if ($('#shapePop')) return closeShapes();
     const r = btn.getBoundingClientRect();
@@ -2478,13 +2543,14 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     // Piezas de efectos (entrada, salida, énfasis y filtros) en un carril bajo la barra
     const chips = [], env0 = { s: e.start || 0, e: e.end == null ? dur : e.end };
     if (!lane && e.x != null && e.type !== 'audio') {
-      if (e.in) chips.push({ k: 'in', it: e.in, kind: 'in', s: env0.s + (e.in.delay || 0), d: e.in.dur || 1, name: 'Entrada · ' + fxInfo('anim', e.in.type)[1] });
-      if (e.out) chips.push({ k: 'out', it: e.out, kind: 'out', s: env0.e - (e.out.dur || 1), d: e.out.dur || 1, name: 'Salida · ' + fxInfo('anim', e.out.type)[1] });
-      (e.fx || []).forEach((f) => chips.push({ k: f.id, it: f, kind: kindOf(f.type) === 'emph' ? 'emph' : 'filt', s: f.start, d: f.dur, name: fxInfo(kindOf(f.type), f.type)[1] }));
+      const span0 = Math.max(0.1, env0.e - env0.s);
+      if (e.in) { const ds = Math.min(e.in.delay || 0, span0 - 0.1); chips.push({ k: 'in', it: e.in, kind: 'in', s: env0.s + ds, d: Math.min(e.in.dur || 1, span0 - ds), name: 'Entrada · ' + fxInfo('anim', e.in.type)[1] }); }
+      if (e.out) { const dd = Math.min(e.out.dur || 1, span0); chips.push({ k: 'out', it: e.out, kind: 'out', s: env0.e - dd, d: dd, name: 'Salida · ' + fxInfo('anim', e.out.type)[1] }); }
+      (e.fx || []).forEach((f) => { const fs = clamp(f.start, env0.s, Math.max(env0.s, env0.e - 0.1)); chips.push({ k: f.id, it: f, kind: kindOf(f.type) === 'emph' ? 'emph' : 'filt', s: fs, d: Math.min(f.dur, env0.e - fs), name: fxInfo(kindOf(f.type), f.type)[1] }); });
     }
     chips.forEach((c) => {
       const on = S.chip && S.chip.id === e.id && S.chip.k === c.k;
-      const el = h('div', { class: 'chip k-' + c.kind + (on ? ' on' : ''), title: c.name + ' · arrastra los bordes para cambiar la duración', style: 'left:' + c.s * pps + 'px;width:' + Math.max(8, c.d * pps) + 'px' }, c.name, h('span', { class: 'edge l' }), h('span', { class: 'edge r' }));
+      const el = h('div', { class: 'chip k-' + c.kind + (on ? ' on' : ''), title: c.name + (c.k === 'in' || c.k === 'out' ? ' · fijada al ' + (c.k === 'in' ? 'principio' : 'final') + ' del objeto; arrastra el borde para cambiar la duración' : ' · arrastra los bordes para la duración y el cuerpo para moverla'), style: 'left:' + c.s * pps + 'px;width:' + Math.max(8, c.d * pps) + 'px' }, c.name, h('span', { class: 'edge l' }), h('span', { class: 'edge r' }));
       el.addEventListener('pointerdown', (ev) => {
         ev.stopPropagation(); if (ev.button !== 0) return;
         const mode = ev.target.classList.contains('l') ? 'l' : ev.target.classList.contains('r') ? 'r' : 'm';
@@ -2494,8 +2560,8 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
         const mv = (e2) => {
           const dt = (e2.clientX - x0) / pps; moved = moved || Math.abs(e2.clientX - x0) > 3; if (!moved) return;
           const rd = (v) => Math.round(v * 10) / 10;
-          if (c.k === 'in') { if (mode === 'r') it.dur = Math.max(0.1, rd(d0 + dt)); else if (mode === 'm') it.delay = Math.max(0, rd((s0 - env0.s) + dt)); }
-          else if (c.k === 'out') { if (mode !== 'm') it.dur = Math.max(0.1, rd(d0 - dt)); }
+          if (c.k === 'in') { if (mode === 'r') it.dur = clamp(rd(d0 + dt), 0.1, Math.max(0.1, env0.e - s0)); }
+          else if (c.k === 'out') { if (mode === 'l') it.dur = clamp(rd(d0 - dt), 0.1, Math.max(0.1, env0.e - env0.s)); }
           else if (mode === 'm') it.start = clamp(rd(s0 + dt), env0.s, Math.max(env0.s, env0.e - d0));
           else if (mode === 'r') it.dur = clamp(rd(d0 + dt), 0.1, Math.max(0.1, env0.e - s0));
           else { const ns = clamp(rd(s0 + dt), env0.s, s0 + d0 - 0.1); it.start = ns; it.dur = rd(s0 + d0 - ns); }
@@ -2515,7 +2581,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       addFx(e, d.kind, d.type, Math.max(0, t));
     });
     const name = h('div', { class: 'tlname', 'data-eid': e.id, title: 'Doble clic para cambiar el nombre', onclick: (ev) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) { const cur = selIds(); setMulti(cur.indexOf(e.id) >= 0 ? cur.filter((x) => x !== e.id) : cur.concat(e.id)); afterSel(); } else select(e.id); } }, ic(lane ? 'audio' : e.type === 'shape' ? 'shape' : e.type), h('span', null, lane ? 'Audio de «' + elLabel(e) + '»' : elLabel(e)), h('span', { class: 'tag' }, lane ? 'audio' : TYPE_NAME[e.type] || e.type));
-    const row = h('div', { class: 'tlrow v-' + (lane ? 'audio lane' : e.type) + (isSel(e.id) ? ' sel' : '') + (inGroup ? ' ingroup' : ''), 'data-id': e.id, style: (e.rowH || S.rowH) ? '--rh:' + (e.rowH || S.rowH) + 'px' : null }, name, track);
+    const row = h('div', { class: 'tlrow v-' + (lane ? 'audio lane' : e.type) + (isSel(e.id) ? ' sel' : '') + (inGroup ? ' ingroup' : ''), 'data-id': e.id, style: ((e.rowH || Math.max(S.rowH || 28, chips.length ? 44 : 0)) > 28) ? '--rh:' + (e.rowH || Math.max(S.rowH || 28, chips.length ? 44 : 0)) + 'px' : null }, name, track);
     if (!lane) rowGrip(row, e);
     if (!lane) makeSortable(row, 'obj', e.id, (from, to) => edit(() => moveIn(elements(), from, to), null, { full: true }), name);
     return row;
@@ -2616,9 +2682,9 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
   const isHex = (v) => /^#[0-9a-fA-F]{6}$/.test(v || '');
   function colorField(label, get, set, canClear) {
     const txt = h('input', { type: 'text', value: get() || '', placeholder: canClear ? 'sin color' : '#RRGGBB', 'aria-label': label });
-    const pick = h('input', { type: 'color', value: isHex(get()) ? get() : '#000000', 'aria-label': 'Elegir ' + label });
-    txt.addEventListener('input', () => { if (isHex(txt.value)) pick.value = txt.value; edit(() => set(txt.value.trim() || null), 'c' + label + S.sel); });
-    pick.addEventListener('input', () => { txt.value = pick.value; edit(() => set(pick.value), 'c' + label + S.sel); });
+    const pick = h('button', { type: 'button', class: 'csw big', 'aria-label': 'Elegir ' + label, title: 'Paleta, recientes y cuentagotas', style: 'background:' + (isHex(get()) ? get() : '#000000') });
+    pick.addEventListener('click', (ev) => { ev.stopPropagation(); colorPop(pick, get(), (c) => { txt.value = c; pick.style.background = c; edit(() => set(c), 'c' + label + S.sel); }); });
+    txt.addEventListener('input', () => { if (isHex(txt.value)) pick.style.background = txt.value; edit(() => set(txt.value.trim() || null), 'c' + label + S.sel); });
     return h('div', { class: 'f' }, h('span', null, label), h('div', { class: 'colorf' }, pick, txt));
   }
   const sec = (title, ...kids) => h('div', { class: 'sec' }, title ? h('h3', null, title) : null, kids);
@@ -2682,8 +2748,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       edit(() => { e[key] = Object.assign({ dur: DEF_FX_DUR, ease: 'out' }, key === 'in' ? { delay: 0 } : {}, { type }); S.chip = { id: e.id, k: key }; }, null, { panel: true });
       return;
     }
-    const dur = Math.min(DEF_FX_DUR, Math.max(0.2, env.e - env.s));
-    let st = t == null ? env.s : clamp(t, env.s, Math.max(env.s, env.e - dur)); st = r2(st);
+    const dur = Math.max(0.2, env.e - env.s), st = r2(env.s);
     const f = { id: newFxId(), type, start: st, dur: r2(dur), amt: 50 };
     edit(() => { e.fx = (e.fx || []).concat(f); S.chip = { id: e.id, k: f.id }; }, null, { panel: true });
   }
@@ -2719,7 +2784,9 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     if (!c) insp.push(h('div', { class: 'hint' }, 'Arrastra un efecto a un objeto de la línea de tiempo.'));
     else {
       const it = c.it, nm = c.k === 'in' ? 'Entrada · ' + fxInfo('anim', it.type)[1] : c.k === 'out' ? 'Salida · ' + fxInfo('anim', it.type)[1] : fxInfo(c.kind, it.type)[1];
-      const num = (label, prop, min, max, step, def) => h('label', { class: 'rfield' }, label, h('input', { type: 'number', min, max, step, value: it[prop] != null ? it[prop] : def, onchange: (ev) => { const v = clamp(Number(ev.target.value) || 0, min, max); edit(() => { it[prop] = v; }, null, { panel: true }); } }));
+      const en = envOf(c.e), span = Math.max(0.1, en.e - en.s);
+      const lim = (prop) => (prop === 'dur' ? (c.k === 'in' ? span - (it.delay || 0) : c.k === 'out' ? span : span - ((it.start || 0) - en.s)) : span - (it.dur || 0.1));
+      const num = (label, prop, min, max, step, def) => h('label', { class: 'rfield' }, label, h('input', { type: 'number', min, max: Math.max(min, Math.min(max, r2(lim(prop)))), step, value: it[prop] != null ? it[prop] : def, onchange: (ev) => { const v = clamp(Number(ev.target.value) || 0, min, Math.max(min, Math.min(max, lim(prop)))); edit(() => { it[prop] = r2(v); }, null, { panel: true }); } }));
       insp.push(h('div', { class: 'insname' }, nm), num('Duración (s)', 'dur', 0.1, 60, 0.1, DEF_FX_DUR));
       if (c.k === 'in') insp.push(num('Retardo (s)', 'delay', 0, 60, 0.1, 0));
       if (c.kind === 'anim') insp.push(h('label', { class: 'rfield' }, 'Suavizado', h('select', { onchange: (ev) => edit(() => { it.ease = ev.target.value; }, null, { panel: true }) }, EASES.map((x) => h('option', { value: x[0], selected: (it.ease || 'out') === x[0] ? true : null }, x[1])))));
@@ -3421,6 +3488,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       if (mod && !typing && ev.key.toLowerCase() === 'y') { ev.preventDefault(); redo(); return; }
       if (typing) return;
       if (ev.key === ' ') { ev.preventDefault(); togglePlayT(); return; }
+      if ((ev.key === 'Home' || ev.key === 'End') && !mod) { ev.preventDefault(); setT(ev.key === 'Home' ? 0 : ctxDur()); followPlayhead(); return; }
       const e = selEl(), ms = selEls(), k = ev.key.toLowerCase();
       if (mod && k === 's') { ev.preventDefault(); saveProject(ev.shiftKey); }
       else if (mod && k === 'b') { ev.preventDefault(); splitAtPlayhead(); }
