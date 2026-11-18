@@ -382,9 +382,9 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .segs { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); } .seg { border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); border-radius: 6px; padding: 3px 8px; font-size: 11.5px; font-weight: 600; } .seg.on { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
 .fxinsp { border-top: 1px solid var(--line); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; max-height: 45%; overflow-y: auto; } .insname { font-weight: 700; font-size: 12px; } .fxinsp .rfield { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; } .fxinsp .rfield input[type=number] { width: 70px; } .fxinsp .rfield input[type=range] { width: 110px; padding: 0; } .fxinsp .rfield select { max-width: 150px; }
 body.fxdragging .tlrow[data-id] .tltrack { outline: 1px dashed var(--brand); outline-offset: -1px; } .tlrow.fxover { background: var(--brand-soft); }
-.chip { position: absolute; height: calc((var(--rh, 28px) - 8px) / 2 - 1px); border-radius: 4px; font-size: 9.5px; font-weight: 700; display: flex; align-items: center; color: #fff; padding: 0 5px; overflow: hidden; white-space: nowrap; cursor: grab; z-index: 3; box-sizing: border-box; border: 1px solid rgba(0,0,0,.3); }
-.chip.k-in, .chip.k-out { top: 4px; color: #1d3550; border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.25); } .chip.k-in { background: linear-gradient(135deg, rgba(255,255,255,.85) 49.5%, rgba(255,255,255,.42) 50.5%); } .chip.k-out { background: linear-gradient(315deg, rgba(255,255,255,.85) 49.5%, rgba(255,255,255,.42) 50.5%); justify-content: flex-end; }
-.chip.k-emph, .chip.k-filt { bottom: 4px; } .chip.k-emph { background: #8b5cf6; } .chip.k-filt { background: #2d7cff; }
+.chip { position: absolute; border-radius: 4px; font-size: 9.5px; font-weight: 700; display: flex; align-items: center; color: #fff; padding: 0 5px; overflow: hidden; white-space: nowrap; cursor: grab; z-index: 3; box-sizing: border-box; border: 1px solid rgba(0,0,0,.3); }
+.chip.k-in, .chip.k-out { color: #1d3550; border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.25); } .chip.k-in { background: linear-gradient(135deg, rgba(255,255,255,.85) 49.5%, rgba(255,255,255,.42) 50.5%); } .chip.k-out { background: linear-gradient(315deg, rgba(255,255,255,.85) 49.5%, rgba(255,255,255,.42) 50.5%); justify-content: flex-end; }
+.chip.k-emph { background: #8b5cf6; } .chip.k-filt { background: #2d7cff; }
 .colpop { position: fixed; z-index: 60; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px 6px; box-shadow: 0 10px 30px rgba(0,0,0,.3); width: 232px; } .colpop h4 { margin: 6px 0 4px; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .cgrid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; } .cgrid.sh { margin-top: 3px; } .cgrid.r { grid-template-columns: repeat(12, 1fr); }
 .csw { aspect-ratio: 1; border: 1px solid rgba(128,128,128,.45); border-radius: 3px; padding: 0; min-width: 0; } .csw:hover { outline: 2px solid var(--brand); outline-offset: 1px; } .csw.on { outline: 2px solid var(--sel); outline-offset: 1px; } .csw.big { width: 34px; height: 30px; aspect-ratio: auto; border-radius: 6px; }
@@ -627,6 +627,14 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     const x2 = Math.max.apply(null, list.map((e) => e.x + e.w)), y2 = Math.max.apply(null, list.map((e) => e.y + e.h));
     return { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
   }
+  // Duración mínima de una diapositiva o capa: el final del último objeto (así no se pierde contenido al acortar la línea de tiempo).
+  function minDurOf(def) {
+    let d = 0;
+    (def.elements || []).forEach((e) => { segsOf(e).forEach((sg) => { d = Math.max(d, sg.end != null ? sg.end : (sg.start || 0) + 0.1); }); (e.triggers || []).forEach((t) => { if (t.event === 'timeReaches') d = Math.max(d, Number(t.time) || 0); }); });
+    (def.triggers || []).forEach((t) => { if (t.event === 'timeReaches') d = Math.max(d, Number(t.time) || 0); });
+    return Math.max(1, Math.ceil(d * 10) / 10);
+  }
+  function clampDur(def, v) { const m = minDurOf(def); if (v < m) { toast('La duración no puede ser menor que ' + m + ' s: ahí termina el último objeto. Acorta o quita ese objeto primero.'); return m; } return v; }
   function autoLayerDur(def) {
     let d = 0;
     (def.elements || []).forEach((e) => { d = Math.max(d, e.end != null ? e.end : (e.start || 0) + (e.in ? (e.in.dur || 0.5) + (e.in.delay || 0) : 0)); });
@@ -2227,7 +2235,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const lk = (e, other, dir) => h('button', { class: 'lk', type: 'button', onclick: () => gotoSlideId(other, true) }, h('i', { class: e.kind }), h('span', null, dir + ' ' + slideNum(other) + ' ' + ((slideById(other) || {}).title || '')), e.label ? h('span', { style: 'color:var(--muted);margin-left:auto' }, e.label) : null);
     const ins = edges.filter((e) => e.b === sl.id), outs = edges.filter((e) => e.a === sl.id);
     const ti = h('input', { type: 'text', value: sl.title || '' }); ti.addEventListener('change', () => edit(() => { sl.title = ti.value; }, null, { full: true }));
-    const du = h('input', { type: 'number', min: 1, step: 0.5, value: sl.duration }); du.addEventListener('change', () => { const v = Number(du.value); if (v > 0) edit(() => { sl.duration = v; }, null, { full: true }); });
+    const du = h('input', { type: 'number', min: 1, step: 0.5, value: sl.duration }); du.addEventListener('change', () => { let v = Number(du.value); if (v > 0) { v = clampDur(sl, v); du.value = v; } if (v > 0) edit(() => { sl.duration = v; }, null, { full: true }); });
     sd.append(h('h3', null, 'Diapositiva ' + slideNum(sl.id)),
       h('label', { class: 'f' }, h('span', null, 'Título'), ti), h('label', { class: 'f' }, h('span', null, 'Duración (s)'), du),
       h('button', { class: 'btn small', type: 'button', style: 'margin-top:6px', onclick: () => { gotoSlideId(sl.id); closeStory(); } }, ic('edit'), 'Abrir para editar'),
@@ -2395,8 +2403,10 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
           const v = ev.target.value === '' ? null : Number(ev.target.value);
           if (v != null && !(v > 0)) return;
           if (S.ctx === 'base' && v == null) return;
+          if (v != null && v < minDurOf(d)) return;
           edit(() => { if (v == null) delete d.duration; else d.duration = v; }, 'dur');
-        }, onchange: () => { fitPps(); refreshTimeline(); } })),
+        }, onchange: (ev) => { const v = Number(ev.target.value); if (ev.target.value !== '' && v > 0 && v < minDurOf(d)) { const m = clampDur(d, v); edit(() => { d.duration = m; }, 'dur'); ev.target.value = m; } fitPps(); refreshTimeline(); } })),
+      S.ctx === 'base' ? h('button', { class: 'btn small', type: 'button', title: 'Ajustar la duración al final del último objeto', onclick: () => { const m = minDurOf(d); if (m !== d.duration) edit(() => { d.duration = m; }, null, { full: true }); fitPps(); refreshTimeline(); } }, 'Ajustar') : null,
       h('label', null, 'Zoom', h('input', { type: 'range', min: 6, max: 600, value: S.pps, title: 'También con la rueda del ratón sobre la línea de tiempo', oninput: (ev) => { S.pps = Number(ev.target.value); refreshTimeline(); } })),
       h('label', null, 'Alto', h('input', { type: 'range', min: 22, max: 90, value: S.rowH || 28, title: 'Grosor de las filas (Alt + rueda)', oninput: (ev) => { S.rowH = Number(ev.target.value); refreshTimeline(); } })),
       h('span', { class: 'hint', style: 'margin:0' }, 'Los objetos tenues no son visibles en el instante marcado.')
@@ -2454,7 +2464,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     el.addEventListener('pointerdown', (ev) => {
       ev.preventDefault(); ev.stopPropagation(); el.setPointerCapture(ev.pointerId);
       const ir = inner.getBoundingClientRect(); let nv = dur;
-      const mv = (e2) => { nv = Math.max(1, Math.round(((e2.clientX - ir.left) - NAMEW) / pps * 10) / 10); el.style.left = (NAMEW + nv * pps) + 'px'; const bd = inner.querySelector('.tlbeyond'); if (bd) bd.style.left = el.style.left; };
+      const mv = (e2) => { nv = Math.max(1, minDurOf(ctxDef()), Math.round(((e2.clientX - ir.left) - NAMEW) / pps * 10) / 10); el.style.left = (NAMEW + nv * pps) + 'px'; const bd = inner.querySelector('.tlbeyond'); if (bd) bd.style.left = el.style.left; };
       const up = () => { el.removeEventListener('pointermove', mv); el.removeEventListener('pointerup', up); if (nv !== dur) { edit(() => { const dd = ctxDef(); dd.duration = nv; }, null, { full: true }); } };
       el.addEventListener('pointermove', mv); el.addEventListener('pointerup', up);
     });
@@ -2548,9 +2558,14 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       if (e.out) { const dd = Math.min(e.out.dur || 1, span0); chips.push({ k: 'out', it: e.out, kind: 'out', s: env0.e - dd, d: dd, name: 'Salida · ' + fxInfo('anim', e.out.type)[1] }); }
       (e.fx || []).forEach((f) => { const fs = clamp(f.start, env0.s, Math.max(env0.s, env0.e - 0.1)); chips.push({ k: f.id, it: f, kind: kindOf(f.type) === 'emph' ? 'emph' : 'filt', s: fs, d: Math.min(f.dur, env0.e - fs), name: fxInfo(kindOf(f.type), f.type)[1] }); });
     }
+    // Carriles: 1) entrada/salida · 2) énfasis · 3) efectos visuales; si dos piezas del mismo tipo coinciden en el tiempo, se apilan.
+    const pack = (list) => { const ends = []; list.slice().sort((a, b) => a.s - b.s).forEach((c) => { let i = ends.findIndex((x) => x <= c.s + 1e-6); if (i < 0) { i = ends.length; ends.push(0); } ends[i] = c.s + c.d; c.lane = i; }); return ends.length; };
+    const nIO = pack(chips.filter((c) => c.kind === 'in' || c.kind === 'out')), nEm = pack(chips.filter((c) => c.kind === 'emph')), nFi = pack(chips.filter((c) => c.kind === 'filt'));
+    chips.forEach((c) => { if (c.kind === 'emph') c.lane += nIO; else if (c.kind === 'filt') c.lane += nIO + nEm; });
+    const nLanes = nIO + nEm + nFi, rhPx = e.rowH || Math.max(S.rowH || 28, nLanes ? 8 + nLanes * 17 : 28), LH = nLanes ? Math.max(10, (rhPx - 8) / nLanes) : 17;
     chips.forEach((c) => {
       const on = S.chip && S.chip.id === e.id && S.chip.k === c.k;
-      const el = h('div', { class: 'chip k-' + c.kind + (on ? ' on' : ''), title: c.name + (c.k === 'in' || c.k === 'out' ? ' · fijada al ' + (c.k === 'in' ? 'principio' : 'final') + ' del objeto; arrastra el borde para cambiar la duración' : ' · arrastra los bordes para la duración y el cuerpo para moverla'), style: 'left:' + c.s * pps + 'px;width:' + Math.max(8, c.d * pps) + 'px' }, c.name, h('span', { class: 'edge l' }), h('span', { class: 'edge r' }));
+      const el = h('div', { class: 'chip k-' + c.kind + (on ? ' on' : ''), title: c.name + (c.k === 'in' || c.k === 'out' ? ' · fijada al ' + (c.k === 'in' ? 'principio' : 'final') + ' del objeto; arrastra el borde para cambiar la duración' : ' · arrastra los bordes para la duración y el cuerpo para moverla'), style: 'left:' + c.s * pps + 'px;width:' + Math.max(8, c.d * pps) + 'px;top:' + Math.round(4 + c.lane * LH) + 'px;height:' + Math.round(LH - 1) + 'px;font-size:' + Math.max(8, Math.min(12, Math.round(LH * 0.55))) + 'px' }, c.name, h('span', { class: 'edge l' }), h('span', { class: 'edge r' }));
       el.addEventListener('pointerdown', (ev) => {
         ev.stopPropagation(); if (ev.button !== 0) return;
         const mode = ev.target.classList.contains('l') ? 'l' : ev.target.classList.contains('r') ? 'r' : 'm';
@@ -2581,7 +2596,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       addFx(e, d.kind, d.type, Math.max(0, t));
     });
     const name = h('div', { class: 'tlname', 'data-eid': e.id, title: 'Doble clic para cambiar el nombre', onclick: (ev) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) { const cur = selIds(); setMulti(cur.indexOf(e.id) >= 0 ? cur.filter((x) => x !== e.id) : cur.concat(e.id)); afterSel(); } else select(e.id); } }, ic(lane ? 'audio' : e.type === 'shape' ? 'shape' : e.type), h('span', null, lane ? 'Audio de «' + elLabel(e) + '»' : elLabel(e)), h('span', { class: 'tag' }, lane ? 'audio' : TYPE_NAME[e.type] || e.type));
-    const row = h('div', { class: 'tlrow v-' + (lane ? 'audio lane' : e.type) + (isSel(e.id) ? ' sel' : '') + (inGroup ? ' ingroup' : ''), 'data-id': e.id, style: ((e.rowH || Math.max(S.rowH || 28, chips.length ? 44 : 0)) > 28) ? '--rh:' + (e.rowH || Math.max(S.rowH || 28, chips.length ? 44 : 0)) + 'px' : null }, name, track);
+    const row = h('div', { class: 'tlrow v-' + (lane ? 'audio lane' : e.type) + (isSel(e.id) ? ' sel' : '') + (inGroup ? ' ingroup' : ''), 'data-id': e.id, style: rhPx > 28 ? '--rh:' + rhPx + 'px' : null }, name, track);
     if (!lane) rowGrip(row, e);
     if (!lane) makeSortable(row, 'obj', e.id, (from, to) => edit(() => moveIn(elements(), from, to), null, { full: true }), name);
     return row;
@@ -3046,7 +3061,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     if (S.ctx === 'base') {
       out.push(sec('Diapositiva',
         h('div', { class: 'row one' }, field('Título', 'text', () => sl.title, (v) => { sl.title = v; }, { key: 'sl' + sl.id })),
-        h('div', { class: 'row one' }, field('Duración (s)', 'number', () => sl.duration, (v) => { if (v > 0) sl.duration = v; }, { step: 0.5, min: 1, key: 'sdur' })), ...bgControls(() => {})));
+        h('div', { class: 'row one' }, field('Duración (s)', 'number', () => sl.duration, (v) => { if (v > 0) sl.duration = Math.max(v, minDurOf(sl)); }, { step: 0.5, min: 1, key: 'sdur' })), ...bgControls(() => {})));
       if (sl.question) out.push(...questionSection(sl));
       if (sl.type === 'results') out.push(resultsSection(sl));
     } else {
