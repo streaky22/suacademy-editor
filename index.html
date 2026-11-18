@@ -551,6 +551,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     return e;
   }
   const PATHS = {
+    search: 'M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-5-5',
     undo: 'M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3', redo: 'M15 14l5-5-5-5M20 9H10a6 6 0 0 0 0 12h3',
     anNone: 'M12 3a9 9 0 100 18 9 9 0 000-18zM6 6l12 12', anFade: 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 3v18M12 8h4M12 12h5M12 16h4', anUp: 'M12 19V6M7 11l5-5 5 5M5 21h14', anDown: 'M12 5v13M7 13l5 5 5-5M5 3h14',
     anLeft: 'M20 12H6M11 7l-5 5 5 5M21 5v14', anRight: 'M4 12h14M13 7l5 5-5 5M3 5v14', anZoom: 'M4 14h6v6M20 10h-6V4M10 14l-6 6M14 10l6-6', anShrink: 'M3 9V3h6M21 15v6h-6M3 3l6 6M21 21l-6-6',
@@ -836,6 +837,63 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     const hasQ = (course.scenes || []).some((sc) => (sc.slides || []).some((sl) => sl.question));
     if ((course.publish || {}).complete === 'quiz' && !hasQ) out.unshift({ sev: 'error', msg: 'El criterio de finalización es «aprobar el test» pero el curso no tiene preguntas.', sl: null, name: 'Curso', id: null });
     return out;
+  }
+  /* ---------- Buscar y reemplazar en todo el curso ---------- */
+  function recorreTextos(cb) {
+    // cb(texto, nuevoTexto|null, donde, slide) para cada texto del curso; si devuelve un texto distinto, se guarda.
+    const dom = (html, f) => { const d = document.createElement('div'); d.innerHTML = html; const w = document.createTreeWalker(d, NodeFilter.SHOW_TEXT); const ns = []; while (w.nextNode()) ns.push(w.currentNode); ns.forEach((n) => { n.nodeValue = f(n.nodeValue); }); return d.innerHTML; };
+    const el = (e, sl) => {
+      const nm = (e.name || e.id);
+      if (e.html) { e.html = dom(e.html, (t) => cb(t, sl, nm)); if (e.text != null) e.text = cb(e.text, null, null); }
+      else if (e.text != null) e.text = cb(e.text, sl, nm);
+      if (e.alt) e.alt = cb(e.alt, sl, nm + ' (texto alternativo)');
+    };
+    course.scenes.forEach((sc) => sc.slides.forEach((sl) => {
+      if (sl.title) sl.title = cb(sl.title, sl, 'Título de la diapositiva');
+      (sl.elements || []).forEach((e) => el(e, sl));
+      (sl.layers || []).forEach((l) => (l.elements || []).forEach((e) => el(e, sl)));
+      const q = sl.question;
+      if (q) { if (q.prompt) q.prompt = cb(q.prompt, sl, 'Pregunta'); (q.options || []).forEach((o) => { if (o.text) o.text = cb(o.text, sl, 'Opción'); }); }
+    }));
+  }
+  function patronBusca(txt, mayus) { return new RegExp(txt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), mayus ? 'g' : 'gi'); }
+  function cuentaBusca(txt, mayus) {
+    const re = patronBusca(txt, mayus), res = []; let n = 0;
+    const cnt = (t, sl, donde) => { if (sl && t) { const m = t.match(re); if (m) { n += m.length; if (res.length < 12) res.push({ sl: sl.id, donde, titulo: sl.title || sl.name || '' }); } } return t; };
+    recorreTextosEn(JSON.parse(JSON.stringify(course)), cnt);
+    return { n, res };
+  }
+  function recorreTextosEn(c, cb) { const s = course; course = c; try { recorreTextos(cb); } finally { course = s; } }
+  function abreBuscar() {
+    const done = () => { back.remove(); document.removeEventListener('keydown', onKey, true); };
+    const onKey = (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); done(); } };
+    const f = h('input', { type: 'text', id: 'frFind', placeholder: 'Texto a buscar', 'aria-label': 'Texto a buscar' });
+    const r = h('input', { type: 'text', id: 'frRepl', placeholder: 'Reemplazar por', 'aria-label': 'Reemplazar por' });
+    const m = h('input', { type: 'checkbox', id: 'frCase' });
+    const info = h('div', { id: 'frInfo', class: 'revlist' });
+    const refresca = () => {
+      info.textContent = ''; const q = f.value; if (!q) { info.append(h('p', null, 'Escribe lo que quieres buscar.')); return; }
+      const { n, res } = cuentaBusca(q, m.checked);
+      if (!n) { info.append(h('p', null, 'Sin coincidencias.')); return; }
+      info.append(h('p', null, n + (n === 1 ? ' coincidencia.' : ' coincidencias.') + ' Pulsa una para ir a ella.'));
+      res.forEach((x) => info.append(h('button', { class: 'revit aviso', type: 'button', onclick: () => { done(); gotoSlideId(x.sl); } }, h('span', { class: 'revtx' }, h('b', null, x.titulo + ': '), x.donde))));
+    };
+    f.addEventListener('input', refresca); m.addEventListener('change', refresca);
+    const go = h('button', { class: 'btn primary', type: 'button', id: 'frGo', onclick: () => {
+      const q = f.value; if (!q) return;
+      const re = patronBusca(q, m.checked), rep = r.value; let n = 0;
+      edit(() => { recorreTextos((t) => { if (!t) return t; const k = t.match(re); if (k) { n += k.length; return t.replace(re, () => rep); } return t; }); }, null, { full: true });
+      done(); toast(n ? n + ' reemplazos hechos (Ctrl+Z para deshacer).' : 'No había nada que reemplazar.');
+    } }, 'Reemplazar todo');
+    const back = h('div', { class: 'dlgback', onclick: (ev) => { if (ev.target === back) done(); } },
+      h('div', { class: 'dlg pub', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Buscar y reemplazar' },
+        h('h3', null, 'Buscar y reemplazar'),
+        h('p', null, 'Busca en textos, títulos, preguntas, opciones y textos alternativos de todo el curso.'),
+        f, h('div', { style: 'height:6px' }), r,
+        h('label', { style: 'display:flex;gap:6px;align-items:center;margin:8px 0' }, m, 'Distinguir mayúsculas y minúsculas'),
+        info,
+        h('div', { class: 'dlgbtns', style: 'margin-top:14px' }, h('button', { class: 'btn', type: 'button', onclick: done }, 'Cerrar'), go)));
+    document.body.append(back); document.addEventListener('keydown', onKey, true); refresca(); f.focus();
   }
   function abreRevision() {
     const lista = revisaCurso();
@@ -1696,9 +1754,9 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     if (stretched) { fitPps(); refreshTimeline(); toast('Línea de tiempo ajustada a ' + stretched + ' s.'); }
     S.tab = 'props'; renderPanel();
   }
-  async function addMediaElement(type, pt) {
+  async function addMediaElement(type, pt, file) {
     const accept = { image: 'image/*', audio: 'audio/*', video: 'video/*' }[type];
-    const f = await pickFile(accept);
+    const f = file || await pickFile(accept);
     if (!f) return;
     const name = addMedia(f.name, f);
     const src = 'media/' + name;
@@ -1823,21 +1881,64 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const j = S.si + d; if (j < 0 || j >= slides().length) return;
     edit(() => { const a = slides(); [a[j], a[S.si]] = [a[S.si], a[j]]; S.si = j; }, null, { full: true });
   }
+  /* Portapapeles entre proyectos: se guarda en el navegador (objetos o diapositiva, con sus imágenes). */
+  const XC = 'sua.portapapeles';
+  let clipT = 0;
+  const blobToData = (b) => new Promise((r) => { const f = new FileReader(); f.onload = () => r(f.result); f.onerror = () => r(null); f.readAsDataURL(b); });
+  function dataToBlob(d) {
+    const m = /^data:([^;,]*)(;base64)?,(.*)$/s.exec(d || ''); if (!m) return null;
+    const bin = m[2] ? atob(m[3]) : decodeURIComponent(m[3]); const u = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    return new Blob([u], { type: m[1] || 'application/octet-stream' });
+  }
+  async function guardaXC(kind, data) {
+    clipT = Date.now();
+    try {
+      const m = {}; let tot = 0;
+      for (const sr of usedSrcs(data)) {
+        const n = mediaName(sr), it = media[n]; if (!it || it.blob.size > 3e6 || tot > 4e6) continue;
+        const d = await blobToData(it.blob); if (d) { m[n] = d; tot += d.length; }
+      }
+      localStorage.setItem(XC, JSON.stringify({ kind, data, media: m, t: clipT }));
+    } catch (e) { /* sin espacio: queda el portapapeles interno */ }
+  }
+  const hayXC = () => { try { return !!localStorage.getItem(XC); } catch (e) { return false; } };
+  function leeXC() {
+    try {
+      const x = JSON.parse(localStorage.getItem(XC) || 'null'); if (!x) return null;
+      Object.keys(x.media || {}).forEach((n) => { if (!media[n]) { const b = dataToBlob(x.media[n]); if (b) { const nn = addMedia(n, b); if (nn !== n) { const t = JSON.stringify(x.data).split('media/' + n).join('media/' + nn); x.data = JSON.parse(t); } } } });
+      return x;
+    } catch (e) { return null; }
+  }
   function copySel(quiet) {
     const l = selEls(); if (!l.length) { if (!quiet) toast('Selecciona un objeto primero.'); return; }
-    clip = JSON.stringify(l); if (!quiet) toast(l.length > 1 ? l.length + ' objetos copiados.' : 'Objeto copiado.');
+    clip = JSON.stringify(l); guardaXC('els', l); if (!quiet) toast(l.length > 1 ? l.length + ' objetos copiados.' : 'Objeto copiado.');
   }
   function cutSel() { if (!selEls().length) { toast('Selecciona un objeto primero.'); return; } copySel(true); deleteSel(); }
   function pasteClip(at) {
-    if (!clip) { toast('No hay nada copiado.'); return; }
-    const arr = [].concat(JSON.parse(clip)).filter(Boolean);
+    if (at && typeof at.x !== 'number') at = null;
+    let arr = null;
+    let x = null; try { x = JSON.parse(localStorage.getItem(XC) || 'null'); } catch (e) { /* nada */ }
+    if (x && x.kind === 'els' && (x.t || 0) >= clipT) { const y = leeXC(); if (y) arr = [].concat(y.data); }
+    if (!arr && clip) arr = [].concat(JSON.parse(clip));
+    if (!arr) { if (x && x.kind === 'slide') { pasteSlideXC(); return; } toast('No hay nada copiado.'); return; }
+    arr = arr.filter(Boolean);
     edit(() => {
-      const ids = cloneInto(arr, 0, false), made = ids.map((id) => elements().find((x) => x.id === id)).filter((e) => e && e.x != null);
+      const ids = cloneInto(arr, 0, false), made = ids.map((id) => elements().find((q) => q.id === id)).filter((q) => q && q.x != null);
       if (made.length) {
         const bb = bboxOf(made), dx = at ? Math.round((at.x - bb.x) / 10) * 10 : 40, dy = at ? Math.round((at.y - bb.y) / 10) * 10 : 40;
-        made.forEach((e) => { e.x += dx; e.y += dy; });
+        made.forEach((q) => { q.x += dx; q.y += dy; });
       }
       setMulti(ids);
+    }, null, { full: true });
+  }
+  function copySlideXC() { guardaXC('slide', slide()); toast('Diapositiva copiada. Puedes pegarla en este u otro proyecto.'); }
+  function pasteSlideXC() {
+    const y = leeXC(); if (!y || y.kind !== 'slide') { toast('No hay ninguna diapositiva copiada.'); return; }
+    edit(() => {
+      const c = JSON.parse(JSON.stringify(y.data));
+      c.id = newId('d', new Set(allSlides().map((q) => q.id))); c.title = (c.title || 'Diapositiva') + ' (pegada)';
+      slides().splice(S.si + 1, 0, c); S.si++; S.ctx = 'base'; S.sel = null;
     }, null, { full: true });
   }
   function orderSel(mode) {
@@ -1886,7 +1987,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const put = (props) => { const w = props.w || 0, hh = props.h || 0; return Object.assign(props, { x: Math.round(clamp(at.x, 0, Math.max(0, course.width - w))), y: Math.round(clamp(at.y, 0, Math.max(0, course.height - hh))) }); };
     items.push(['Portapapeles']);
     if (n) items.push(['cut', 'Cortar', cutSel], ['copy', 'Copiar', () => copySel()]);
-    items.push(['paste', 'Pegar', () => pasteClip(), !clip], ['paste', 'Pegar aquí', () => pasteClip(at), !clip]);
+    items.push(['paste', 'Pegar', () => pasteClip(), !clip && !hayXC()], ['paste', 'Pegar aquí', () => pasteClip(at), !clip && !hayXC()]);
     items.push({ sub: ['plus', 'Insertar', [['text', 'Texto', () => addElement(put(defaults('text')))], ['image', 'Imagen…', () => addMediaElement('image', at)], ['audio', 'Audio…', () => addMediaElement('audio', at)], ['video', 'Vídeo…', () => addMediaElement('video', at)], ['button', 'Botón', () => addElement(put(defaults('button')))]]] });
     items.push(['Interactividad'], ['play', 'Accionadores…', () => { S.tab = 'trig'; renderPanel(); }]);
     if (!n) items.push(['Selección'], ['group', 'Seleccionar todo', selectAll]);
@@ -1906,7 +2007,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const sid = li.dataset.sid, i = slides().findIndex((x) => x.id === sid);
     if (i >= 0 && i !== S.si) gotoSlide(i);
     ctxPop(ev.clientX, ev.clientY, [['Diapositiva'],
-      ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['copy', 'Duplicar', dupSlide],
+      ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['copy', 'Duplicar', dupSlide], ['copy', 'Copiar diapositiva (para otro proyecto)', copySlideXC], ['paste', 'Pegar diapositiva', pasteSlideXC, !hayXC()],
       ['edit', 'Cambiar nombre', () => renameSlide(sid, () => document.querySelector('#slideList li[data-sid="' + sid + '"] .nm'))], ['Interactividad'], ['play', 'Accionadores de la diapositiva…', () => { S.sel = null; S.multi = []; S.tab = 'trig'; refreshAll(); }],
       ['Orden'], ['up', 'Subir', () => moveSlideBy(-1), S.si === 0], ['down', 'Bajar', () => moveSlideBy(1), S.si >= slides().length - 1],
       ['Eliminar'], ['trash', 'Eliminar diapositiva', delSlide, slides().length < 2]]);
@@ -1935,7 +2036,8 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       h('span', { class: 'sp' }));
     paintQuick($('#quick'), true);
     const edicion = h('div', { class: 'rpane', 'data-pane': 'edit' },
-      rgroup('Portapapeles', rbtn('paste', 'Pegar', pasteClip, { title: 'Pegar (Ctrl+V)' }), rcol(rsm('cut', 'Cortar', cutSel, { title: 'Cortar el objeto' }), rsm('copy', 'Copiar', copySel, { title: 'Copiar el objeto (Ctrl+C)' }))),
+      rgroup('Portapapeles', rbtn('paste', 'Pegar', () => pasteClip(), { title: 'Pegar (Ctrl+V)' }), rcol(rsm('cut', 'Cortar', cutSel, { title: 'Cortar el objeto' }), rsm('copy', 'Copiar', () => copySel(), { title: 'Copiar el objeto (Ctrl+C)' }))),
+      rgroup('Buscar', rbtn('search', 'Buscar y reemplazar', () => abreBuscar(), { title: 'Buscar y reemplazar texto en todo el curso (Ctrl+H)' })),
       rgroup('Diapositiva',
         h('div', { class: 'rsplit' }, h('button', { class: 'rb', type: 'button', title: 'Añadir una diapositiva en blanco', onclick: () => insertSlideKind('content') }, ic('newslide', 'big')),
           h('button', { class: 'rcaret', type: 'button', title: 'Elegir el tipo de diapositiva: pregunta, encuesta, resultados…', onclick: (ev) => { ev.stopPropagation(); newSlideMenu(ev.currentTarget); } }, 'Nueva diapositiva ▾')),
@@ -3582,7 +3684,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       if (c) {
         const id = c.dataset.cid; gotoSlideId(id, true);
         ctxPop(ev.clientX, ev.clientY, [['Diapositiva'], ['edit', 'Abrir para editar', () => { gotoSlideId(id); closeStory(); }], ['Interactividad'], ['play', 'Accionadores…', () => { S.sel = null; S.multi = []; S.tab = 'trig'; gotoSlideId(id); closeStory(); }],
-          ['Estructura'], ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['copy', 'Duplicar', dupSlide], ['trash', 'Eliminar', delSlide, slides().length < 2]]);
+          ['Estructura'], ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['copy', 'Duplicar', dupSlide], ['copy', 'Copiar diapositiva (para otro proyecto)', copySlideXC], ['paste', 'Pegar diapositiva', pasteSlideXC, !hayXC()], ['trash', 'Eliminar', delSlide, slides().length < 2]]);
       } else {
         const si = Number(sh.parentNode.dataset.scene); S.sc = si; S.si = 0; refreshAll();
         ctxPop(ev.clientX, ev.clientY, [['Escena'], ['play', 'Escena inicial', () => setStartScene(si)], ['edit', 'Cambiar nombre', () => renameScene(si, sh.querySelector('.nm'))], ['Eliminar'], ['trash', 'Eliminar escena', () => deleteScene(si)]]);
@@ -3615,6 +3717,26 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       else if (p === 'example') loadExample();
       else if (p === 'theme') toggleTheme();
     });
+    const kindOf = (f) => /^image\//.test(f.type) ? 'image' : /^audio\//.test(f.type) ? 'audio' : /^video\//.test(f.type) ? 'video' : null;
+    const stagePt = (ev) => { const r = stage.getBoundingClientRect(); return { x: (ev.clientX - r.left) / S.scale, y: (ev.clientY - r.top) / S.scale }; };
+    async function metePaquete(files, pt) {
+      const l = [].slice.call(files).filter((f) => kindOf(f)); if (!l.length) return false;
+      let i = 0; for (const f of l) { const k = kindOf(f); await addMediaElement(k, pt ? { x: pt.x + i * 30, y: pt.y + i * 30 } : null, f.name ? f : new File([f], 'pegada.' + (f.type.split('/')[1] || 'png'), { type: f.type })); i++; }
+      return true;
+    }
+    document.addEventListener('paste', (ev) => {
+      const tg = ev.target, tag = (tg.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || tg.isContentEditable) return;
+      if (!$('#story').hidden || !$('#pv').hidden) return;
+      const cd = ev.clipboardData; if (!cd) return;
+      if (cd.files && cd.files.length && [].some.call(cd.files, (f) => kindOf(f))) { ev.preventDefault(); metePaquete(cd.files, null); return; }
+      ev.preventDefault(); pasteClip();
+    });
+    holder.addEventListener('dragover', (ev) => { if (ev.dataTransfer && [].indexOf.call(ev.dataTransfer.types || [], 'Files') >= 0) { ev.preventDefault(); ev.dataTransfer.dropEffect = 'copy'; } });
+    holder.addEventListener('drop', (ev) => {
+      if (!ev.dataTransfer || !ev.dataTransfer.files || !ev.dataTransfer.files.length) return;
+      ev.preventDefault(); metePaquete(ev.dataTransfer.files, stagePt(ev));
+    });
     document.addEventListener('keydown', (ev) => {
       if (ev.key === ' ' && !$('#story').hidden && !/^(input|textarea|select|button)$/i.test(ev.target.tagName || '') && !ev.target.isContentEditable) { ev.preventDefault(); if (!S.space) { S.space = true; paintHand(); } return; }
       if (ev.key === 'Escape') closeShapes();
@@ -3634,11 +3756,11 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       else if (!mod && !ev.altKey && k === 'v') setTool('sel');
       else if (!mod && !ev.altKey && k === 'c') setTool('razor');
       else if (!mod && !ev.altKey && k === 'n') toggleMagnet();
+      else if (mod && k === 'h') { ev.preventDefault(); abreBuscar(); }
       else if (mod && k === 'a') { ev.preventDefault(); selectAll(); }
       else if (mod && k === 'g') { ev.preventDefault(); if (ev.shiftKey) ungroupSel(); else groupSel(); }
       else if (mod && k === 'd' && ms.length) { ev.preventDefault(); duplicateSel(); }
       else if (mod && k === 'c' && ms.length) { copySel(true); }
-      else if (mod && k === 'v' && clip) { pasteClip(); }
       else if (mod && k === 'x' && ms.length) { ev.preventDefault(); cutSel(); }
       else if (mod && ev.key === ']' && ms.length) { ev.preventDefault(); orderSel(ev.shiftKey ? 'front' : 'forward'); }
       else if (mod && ev.key === '[' && ms.length) { ev.preventDefault(); orderSel(ev.shiftKey ? 'back' : 'backward'); }
