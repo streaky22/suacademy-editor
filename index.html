@@ -38,16 +38,17 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--sel); outline-offset: 1px; }
-.app { display: grid; height: 100%; grid-template-columns: var(--lw, 250px) minmax(0, 1fr) var(--rw, 330px); grid-template-rows: 46px auto minmax(0, 1fr) var(--th, 320px); grid-template-areas: "top top top" "ribbon ribbon ribbon" "slides canvas panel" "slides tl panel"; }
-.app.nopanel { grid-template-columns: var(--lw, 250px) minmax(0, 1fr) 0; } .app.nopanel .panel { display: none; }
-.slides, .fxpanel, .panel, .tl { position: relative; }
+.app { --lcol: 0px; --rcol: 0px; display: grid; height: 100%; grid-template-columns: 30px var(--lcol) minmax(0, 1fr) var(--rcol) 30px; grid-template-rows: 46px auto minmax(0, 1fr) var(--th, 320px); grid-template-areas: "top top top top top" "ribbon ribbon ribbon ribbon ribbon" "ls slides canvas panel rs" "ls slides tl panel rs"; }
+.app.dockl { --lcol: var(--lw, 250px); } .app.dockr { --rcol: var(--rw, 330px); }
+.slides, .panel, .tl { position: relative; }
+.slides.shut, .panel.shut { display: none; }
+.slides.fly, .panel.fly { position: fixed; z-index: 35; top: var(--ptop, 120px); bottom: 0; box-shadow: 0 0 28px rgba(0,0,0,.35); } .slides.fly { left: 30px; width: var(--lw, 250px); } .panel.fly { right: 30px; width: var(--rw, 330px); }
+.sidestrip { background: var(--panel); display: flex; flex-direction: column; gap: 6px; padding: 8px 3px; z-index: 36; } .sidestrip.ls { grid-area: ls; border-right: 1px solid var(--line); } .sidestrip.rs { grid-area: rs; border-left: 1px solid var(--line); }
+.sbtn { writing-mode: vertical-rl; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid transparent; background: transparent; color: var(--muted); padding: 12px 4px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; } .sbtn:hover { color: var(--fg); background: var(--panel-2); } .sbtn.on { background: var(--brand-soft); color: var(--fg); border-color: var(--brand); }
+.phead { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 4px 12px; } .phead h2 { margin: 0; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; } .phbtns { display: flex; gap: 4px; }
+.rsec { display: none; flex: 1; min-height: 0; flex-direction: column; } .panel.s-props .rs-props, .panel.s-layers .rs-layers, .panel.s-fx .rs-fx { display: flex; } .rs-props .pbody { flex: 1; min-height: 0; overflow: auto; } .rs-layers .layers { flex: 1; max-height: none; border-top: 0; }
 .rz { position: absolute; z-index: 6; background: transparent; } .rz:hover, .rz.on { background: var(--brand); opacity: .55; }
 .rz.v { top: 0; bottom: 0; width: 6px; cursor: col-resize; } .rz.v.r { right: -3px; } .rz.v.l { left: -3px; } .rz.hz { left: 0; right: 0; height: 6px; top: -3px; cursor: row-resize; }
-.fxpanel { position: fixed; z-index: 35; left: 0; top: var(--fxtop, 120px); bottom: 0; width: var(--lw, 250px); background: var(--panel); border-right: 1px solid var(--line); box-shadow: 6px 0 24px rgba(0,0,0,.28); display: flex; flex-direction: column; min-height: 0; min-width: 0; transform: translateX(-104%); visibility: hidden; transition: transform .16s ease, visibility 0s .16s; }
-.fxpanel.open { transform: none; visibility: visible; transition: transform .16s ease; }
-.fxhead { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px 4px 12px; } .fxhead h2 { margin: 0; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
-.pstrip { display: flex; justify-content: flex-end; padding: 4px 6px 0; } .lgrip { height: 6px; flex: none; cursor: row-resize; background: transparent; margin-bottom: -3px; position: relative; z-index: 5; } .lgrip:hover { background: var(--brand); opacity: .55; }
-.edgetab { position: fixed; z-index: 30; right: 0; top: 50%; border: 1px solid var(--line); border-right: 0; background: var(--panel); color: var(--fg); border-radius: 8px 0 0 8px; padding: 10px 4px; font-size: 11px; font-weight: 700; writing-mode: vertical-rl; cursor: pointer; }
 .top { grid-area: top; display: flex; align-items: center; gap: 8px; padding: 0 10px; background: var(--panel); border-bottom: 1px solid var(--line); min-width: 0; }
 .top .logo { font-weight: 800; letter-spacing: .02em; color: var(--brand); white-space: nowrap; }
 .top .title { width: 200px; min-width: 80px; font-weight: 600; background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 5px 8px; }
@@ -449,7 +450,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
 @media (max-width: 900px) {
   body { overflow: auto; height: auto; padding-inline: 16px; }
   .app { display: flex; flex-direction: column; height: auto; }
-  .slides, .panel { max-height: 320px; border: 0; }
+  .slides, .panel { max-height: 320px; border: 0; } .sidestrip { display: none; } .slides.fly, .panel.fly { position: static; width: auto; } .slides.shut, .panel.shut { display: flex; }
   .center { height: 70vh; }
   .tl { height: 240px; }
   .top { flex-wrap: wrap; padding: 6px 0; height: auto; }
@@ -471,7 +472,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
   <div class="ribbon" id="ribbon"><div class="modeslot"><div class="slotcol"><div class="quickbar" id="quick"></div><div class="slotrow"><span class="tgslot"></span><div class="modesw" id="modeSw" role="group" aria-label="Modo de trabajo"></div></div></div></div><div class="rcolumn"><div class="rtabs" id="rtabs"></div><div class="rbody" id="rbody"></div></div></div>
 
   <aside class="slides" aria-label="Diapositivas">
-    <div class="head"><h2>Diapositivas</h2><button class="btn small" id="fxShow" type="button" title="Efectos: se despliega encima de este panel">Efectos ▸</button></div>
+    <div class="head"><h2>Diapositivas</h2><span class="phbtns" id="lBtns"></span></div>
     <div class="scenebar" id="sceneBar"></div>
     <ol id="slideList"></ol>
     <div class="foot" id="slideFoot"></div>
@@ -484,21 +485,17 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     </div>
   </section>
 
-  <aside class="fxpanel" id="fxPanel" aria-label="Efectos">
-    <div class="fxhead"><h2>Efectos</h2><button class="btn small" id="fxHide" type="button" title="Cerrar el panel de efectos">✕ Cerrar</button></div>
-    <div class="animbody" id="animBody"></div>
-  </aside>
-
   <section class="tl" aria-label="Línea de tiempo">
     <div class="ctxrow" id="ctxrow"></div>
     <div class="tlhead" id="tlhead"></div>
     <div class="tlscroll" id="tlscroll"><div class="tlinner" id="tlinner"></div></div>
   </section>
 
-  <aside class="panel">
-    <div class="tabs" id="tabs"></div>
-    <div class="pbody" id="pbody"></div>
-    <div class="layers" id="layersBox" aria-label="Capas"></div>
+  <aside class="panel s-props" id="rpanel">
+    <div class="phead"><h2 id="rTitle">Propiedades</h2><span class="phbtns" id="rBtns"></span></div>
+    <div class="rsec rs-props"><div class="tabs" id="tabs"></div><div class="pbody" id="pbody"></div></div>
+    <div class="rsec rs-layers"><div class="layers" id="layersBox" aria-label="Capas"></div></div>
+    <div class="rsec rs-fx"><div class="animbody" id="animBody"></div></div>
   </aside>
 </div>
 
@@ -2325,7 +2322,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       tbtn('razor', 'Cuchilla', S.tool === 'razor', () => setTool('razor'), 'Cuchilla (C): haz clic en un objeto para cortarlo en ese punto'),
       tbtn('split', 'Cortar en el cabezal', false, splitAtPlayhead, 'Corta los objetos seleccionados (o todos los que están bajo el cabezal) · Ctrl+B'),
       tbtn('magnet', 'Imán', S.magnet !== false, toggleMagnet, 'Imán (N): los bordes se pegan al cabezal, al inicio/final y a otros objetos'),
-      h('button', { class: 'btn small', type: 'button', title: 'Abrir el panel de efectos', onclick: () => setFx(!$('#fxPanel').classList.contains('open')) }, ic('fxGlow'), 'Efectos'),
+      h('button', { class: 'btn small', type: 'button', title: 'Abrir el panel de efectos', onclick: () => { if (panelApi) panelApi.r('fx'); } }, ic('fxGlow'), 'Efectos'),
       h('label', { title: 'La línea de tiempo se desplaza para seguir el cabezal' }, h('input', { type: 'checkbox', checked: S.follow !== false ? true : null, onchange: (ev) => { S.follow = ev.target.checked; } }), 'Seguir'),
       h('span', { class: 'tsep' }),
       h('label', null, S.ctx === 'base' ? 'Duración (s)' : 'Duración (s, vacío = automática)',
@@ -2701,12 +2698,9 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     edit(() => { if (c.k === 'in' || c.k === 'out') delete c.e[c.k]; else { c.e.fx = c.e.fx.filter((x) => x.id !== c.k); if (!c.e.fx.length) delete c.e.fx; } S.chip = null; }, null, { panel: true });
   }
   // Pestaña «Efectos»: galería (se arrastra a la línea de tiempo o se pulsa) y ajustes finos de la pieza seleccionada.
-  // Panel de efectos desplegable (como en Photoshop o Blender): se abre encima de la columna izquierda sin mover nada.
-  function setFx(open) {
-    const p = $('#fxPanel'); if (!p) return;
-    if (open) { const r = $('.slides').getBoundingClientRect(); p.style.setProperty('--fxtop', Math.round(r.top) + 'px'); paintAnimPane(); }
-    p.classList.toggle('open', !!open);
-  }
+  // Los paneles laterales (diapositivas a la izquierda; propiedades, capas y efectos a la derecha) se pliegan en una tira y se despliegan al pulsar.
+  let panelApi = null;
+  function setFx(open) { if (panelApi) panelApi.r('fx', open); }
   function paintAnimPane() {
     const box = $('#animBody'); if (!box) return;
     const keepScroll = box.querySelector('.fxgal') ? box.querySelector('.fxgal').scrollTop : 0;
@@ -3460,48 +3454,52 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       }
     });
     document.addEventListener('keyup', (ev) => { if (ev.key === ' ' && S.space) { S.space = false; paintHand(); } });
-    // Paneles: ancho/alto ajustables arrastrando el borde, y plegables (se recuerda entre sesiones)
+    // Paneles: plegables en tiras laterales (Photoshop/Blender), con ancho/alto ajustables; se recuerda entre sesiones
     (function paneles() {
-      const app = $('#app'), K = 'sua.paneles'; let cfg = {};
-      try { cfg = JSON.parse(localStorage.getItem(K) || '{}') || {}; } catch (e0) { cfg = {}; }
+      const app = $('#app'), K = 'sua.paneles2'; let cfg = { l: { open: true, pin: true }, r: { open: true, pin: true, sec: 'props' } };
+      try { const o = JSON.parse(localStorage.getItem(K) || 'null'); if (o && o.l && o.r) cfg = o; else { const old = JSON.parse(localStorage.getItem('sua.paneles') || '{}'); ['lw', 'rw', 'th'].forEach((k) => { if (old[k]) cfg[k] = old[k]; }); } } catch (e0) { /* sin almacenamiento */ }
       const save = () => { try { localStorage.setItem(K, JSON.stringify(cfg)); } catch (e0) { /* sin almacenamiento */ } };
+      const lp = $('.slides'), rp = $('#rpanel'), RT = { props: 'Propiedades', layers: 'Capas', fx: 'Efectos' };
+      const lbtn = h('button', { class: 'sbtn', type: 'button', title: 'Mostrar u ocultar las diapositivas', onclick: () => { cfg.l.open = !cfg.l.open; save(); apply(); } }, 'Diapositivas');
+      const rbtns = Object.keys(RT).map((k) => h('button', { class: 'sbtn', type: 'button', 'data-sec': k, title: 'Mostrar u ocultar: ' + RT[k], onclick: () => api.r(k) }, RT[k]));
+      app.append(h('div', { class: 'sidestrip ls' }, lbtn), h('div', { class: 'sidestrip rs' }, rbtns));
+      const heads = (box, side) => {
+        const pin = h('button', { class: 'btn small', type: 'button', onclick: () => { cfg[side].pin = !cfg[side].pin; save(); apply(); } }), x = h('button', { class: 'btn small', type: 'button', title: 'Plegar', onclick: () => { cfg[side].open = false; save(); apply(); } }, '✕');
+        box.append(pin, x); return pin;
+      };
+      const lpin = heads($('#lBtns'), 'l'), rpin = heads($('#rBtns'), 'r');
       const apply = () => {
         ['lw', 'rw', 'th'].forEach((k) => { if (cfg[k]) app.style.setProperty('--' + k, cfg[k] + 'px'); });
-        app.classList.toggle('nopanel', !!cfg.nopanel);
-        const tab = $('#edgeTab'); if (tab) tab.hidden = !cfg.nopanel;
+        app.style.setProperty('--ptop', Math.round($('.center').getBoundingClientRect().top) + 'px');
+        const lo = cfg.l.open, ro = cfg.r.open;
+        app.classList.toggle('dockl', lo && cfg.l.pin); app.classList.toggle('dockr', ro && cfg.r.pin);
+        lp.classList.toggle('shut', !lo); lp.classList.toggle('fly', lo && !cfg.l.pin);
+        rp.classList.toggle('shut', !ro); rp.classList.toggle('fly', ro && !cfg.r.pin);
+        rp.classList.remove('s-props', 's-layers', 's-fx'); rp.classList.add('s-' + cfg.r.sec); $('#rTitle').textContent = RT[cfg.r.sec];
+        lbtn.classList.toggle('on', lo); rbtns.forEach((b) => b.classList.toggle('on', ro && b.dataset.sec === cfg.r.sec));
+        [[lpin, cfg.l.pin], [rpin, cfg.r.pin]].forEach(([b, v]) => { b.textContent = v ? 'Soltar' : 'Fijar'; b.title = v ? 'Ahora ocupa sitio fijo; pulsa para que se superponga' : 'Ahora se superpone; pulsa para fijarlo y que ocupe sitio'; });
+        if (ro && cfg.r.sec === 'fx') paintAnimPane();
         window.dispatchEvent(new Event('resize'));
       };
+      const api = { r: (sec, open) => { const same = cfg.r.open && cfg.r.sec === sec; cfg.r.open = open == null ? !same : open; if (cfg.r.open) cfg.r.sec = sec; save(); apply(); } };
+      panelApi = api;
       const grip = (host, cls, key, axis, min, max, sign) => {
         const g = h('div', { class: 'rz ' + cls });
         g.addEventListener('pointerdown', (ev) => {
           ev.preventDefault(); g.setPointerCapture(ev.pointerId); g.classList.add('on');
-          const p0 = axis === 'x' ? ev.clientX : ev.clientY, v0 = axis === 'x' ? (key === 'lw' ? $('.slides').offsetWidth : $('.panel').offsetWidth) : $('.tl').offsetHeight; let raf = 0;
+          const p0 = axis === 'x' ? ev.clientX : ev.clientY, v0 = axis === 'x' ? (key === 'lw' ? lp.offsetWidth : rp.offsetWidth) : $('.tl').offsetHeight; let raf = 0;
           const mv = (e2) => { const d = ((axis === 'x' ? e2.clientX : e2.clientY) - p0) * sign; cfg[key] = Math.round(clamp(v0 + d, min, Math.min(max, (axis === 'x' ? window.innerWidth : window.innerHeight) * 0.6))); app.style.setProperty('--' + key, cfg[key] + 'px'); if (!raf) raf = requestAnimationFrame(() => { raf = 0; fit(); }); };
           const up = () => { g.removeEventListener('pointermove', mv); g.removeEventListener('pointerup', up); g.classList.remove('on'); save(); fit(); };
           g.addEventListener('pointermove', mv); g.addEventListener('pointerup', up);
         });
         host.append(g);
       };
-      grip($('.slides'), 'v r', 'lw', 'x', 170, 520, 1);
-      grip($('.panel'), 'v l', 'rw', 'x', 240, 640, -1);
-      grip($('.tl'), 'hz', 'th', 'y', 140, 700, -1);
-      $('#fxHide').addEventListener('click', () => setFx(false));
-      $('#fxShow').addEventListener('click', () => setFx(!$('#fxPanel').classList.contains('open')));
-      document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && $('#fxPanel').classList.contains('open') && !/^(input|textarea|select)$/i.test((ev.target.tagName || ''))) setFx(false); });
-      window.addEventListener('resize', () => { if ($('#fxPanel').classList.contains('open')) setFx(true); });
-      const tab = h('button', { class: 'edgetab', id: 'edgeTab', type: 'button', hidden: true, title: 'Mostrar propiedades y capas', onclick: () => { cfg.nopanel = false; save(); apply(); } }, 'Propiedades ◂');
-      document.body.append(tab);
-      $('.panel').insertBefore(h('div', { class: 'pstrip' }, h('button', { class: 'btn small', type: 'button', title: 'Plegar propiedades y capas', onclick: () => { cfg.nopanel = true; save(); apply(); } }, 'Plegar ▸')), $('.panel').firstChild);
-      // Altura de la ventana de capas
-      const lb = $('#layersBox'); if (cfg.lh) lb.style.height = cfg.lh + 'px';
-      const lg = h('div', { class: 'lgrip', title: 'Arrastra para cambiar la altura de las capas' }); lb.parentNode.insertBefore(lg, lb);
-      lg.addEventListener('pointerdown', (ev) => {
-        ev.preventDefault(); lg.setPointerCapture(ev.pointerId); const y0 = ev.clientY, h0 = lb.offsetHeight;
-        const mv = (e2) => { cfg.lh = Math.round(clamp(h0 - (e2.clientY - y0), 90, window.innerHeight * 0.6)); lb.style.height = cfg.lh + 'px'; lb.style.maxHeight = 'none'; };
-        const up = () => { lg.removeEventListener('pointermove', mv); lg.removeEventListener('pointerup', up); save(); };
-        lg.addEventListener('pointermove', mv); lg.addEventListener('pointerup', up);
+      grip(lp, 'v r', 'lw', 'x', 170, 520, 1); grip(rp, 'v l', 'rw', 'x', 240, 640, -1); grip($('.tl'), 'hz', 'th', 'y', 140, 700, -1);
+      document.addEventListener('keydown', (ev) => {
+        if (ev.key !== 'Escape' || /^(input|textarea|select)$/i.test(ev.target.tagName || '')) return;
+        let ch = false; if (cfg.r.open && !cfg.r.pin) { cfg.r.open = false; ch = true; } if (cfg.l.open && !cfg.l.pin) { cfg.l.open = false; ch = true; } if (ch) { save(); apply(); }
       });
-      if (cfg.lh) lb.style.maxHeight = 'none';
+      window.addEventListener('resize', () => { app.style.setProperty('--ptop', Math.round($('.center').getBoundingClientRect().top) + 'px'); });
       // Rueda sobre la línea de tiempo: zoom (centrado en el puntero) · Mayús: desplazar filas · Alt: grosor de las filas
       $('#tlscroll').addEventListener('wheel', (ev) => {
         const sc = $('#tlscroll'), r = sc.getBoundingClientRect(), dy = ev.deltaY;
