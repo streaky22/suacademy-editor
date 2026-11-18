@@ -114,6 +114,9 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 .rpin { flex: none; display: flex; align-items: stretch; border-left: 2px solid var(--line); margin-left: 4px; padding-left: 4px; background: var(--panel); }
 .rpin .rg:last-child { border-right: 0; }
 .rtabs .sp { flex: 1; }
+.verbox { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 0 12px; font-size: 12.5px; color: var(--muted); }
+.verbox b { color: var(--fg); }
+.atajos { border-collapse: collapse; width: 100%; font-size: 13.5px; } .atajos td { padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; } .atajos kbd { background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; font: inherit; font-weight: 700; white-space: nowrap; }
 .themetog { position: relative; width: 30px; height: 100%; min-height: 66px; margin: 0; border-radius: 15px; border: 1px solid var(--line); background: var(--panel); padding: 0; flex: none; }
 .themetog:hover { border-color: var(--muted); }
 .themetog svg.ic { position: absolute; left: 6px; width: 16px; height: 16px; z-index: 2; stroke: var(--muted); transition: stroke .15s; }
@@ -654,6 +657,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     group: 'M3 3h18v18H3zM7 8h6v5H7zM11 12h6v5h-6z', ungroup: 'M3 3h8v8H3zM13 13h8v8h-8z', edit: 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4', tree: 'M4 4h6v5H4zM14 4h6v5h-6zM9 15h6v5H9zM7 9v3h10V9M12 12v3',
     sun: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4'
   };
+  Object.assign(PATHS, { refresh: 'M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5', help: 'M12 3a9 9 0 1 0 .01 0M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17v.01', keyboard: 'M3 7h18v10H3zM7 11h.01M11 11h.01M15 11h.01M8 14h8', sparkle: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 17l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z', book: 'M4 4h7a3 3 0 0 1 2 1 3 3 0 0 1 2-1h5v15h-5a2 2 0 0 0-2 1.5A2 2 0 0 0 11 19H4z' });
   function ic(name, cls) {
     const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'ic' + (cls ? ' ' + cls : '')); s.setAttribute('aria-hidden', 'true');
@@ -3175,6 +3179,32 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     document.querySelectorAll('#rtabs .rtab[data-rt]').forEach((b) => b.classList.toggle('on', b.dataset.rt === t));
     document.querySelectorAll('#rbody .rpane').forEach((p) => { p.hidden = p.dataset.pane !== t; });
   }
+  function pintaVersion() {
+    const el = document.getElementById('verNum'); if (!el) return;
+    if (window.escritorio && escritorio.info) escritorio.info().then((i) => { el.textContent = i.version + (i.actualizado ? ' (actualizada)' : ''); }).catch(() => { el.textContent = 'desconocida'; });
+    else el.textContent = 'en el navegador (sin instalar)';
+  }
+  function buscaActualizaciones() {
+    if (!(window.escritorio && escritorio.info)) { toast('Las actualizaciones automáticas funcionan en el programa de escritorio. Aquí, en el navegador, ya usas la versión más reciente al recargar la página.'); return; }
+    if (!escritorio.buscarActualizacion) { toast('Tu programa instalado es anterior a este botón. Instala el instalador nuevo una vez (te lo paso) y desde entonces podrás actualizar con este botón.'); return; }
+    toast('Buscando actualizaciones…');
+    escritorio.buscarActualizacion().catch(() => toast('No se pudo comprobar. Revisa tu conexión a internet.'));
+  }
+  function ventanaInfo(titulo, cuerpo) {
+    const done = () => { back.remove(); document.removeEventListener('keydown', onKey, true); };
+    const onKey = (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); done(); } };
+    const back = h('div', { class: 'dlgback', onclick: (ev) => { if (ev.target === back) done(); } },
+      h('div', { class: 'dlg pub', role: 'dialog', 'aria-modal': 'true', 'aria-label': titulo, style: 'max-height:80vh;overflow:auto' }, h('h3', null, titulo), cuerpo, h('div', { class: 'dlgbtns' }, h('button', { class: 'btn', type: 'button', onclick: done }, 'Cerrar'))));
+    document.body.append(back); document.addEventListener('keydown', onKey, true);
+  }
+  function abreAtajos() {
+    const L = [['Ctrl+Z / Ctrl+Y', 'Deshacer / rehacer'], ['Ctrl+C / Ctrl+X / Ctrl+V', 'Copiar, cortar y pegar objetos'], ['Ctrl+D', 'Duplicar el objeto'], ['Ctrl+G / Ctrl+Mayús+G', 'Agrupar / desagrupar'], ['Supr', 'Eliminar el objeto seleccionado'], ['Flechas', 'Mover el objeto (con Mayús, más deprisa)'], ['Clic + Mayús o Ctrl', 'Seleccionar varios objetos'], ['Alt + arrastrar', 'Copiar el objeto arrastrándolo'], ['Doble clic en un texto', 'Editar el texto'], ['Clic derecho', 'Menú con más opciones (también en tablas)'], ['Ctrl+H', 'Buscar y reemplazar en todo el curso'], ['Ctrl+S / Ctrl+Mayús+S', 'Guardar / guardar como'], ['Ctrl+A', 'Seleccionar todos los objetos'], ['Ctrl+B', 'Dividir en el cabezal de la línea de tiempo'], ['V / C / N', 'Herramienta Seleccionar / Cuchilla / Imán'], ['F5', 'Vista previa'], ['Ctrl+Alt+V', 'Pegar formato'], ['Barra espaciadora', 'Reproducir / pausar la línea de tiempo']];
+    ventanaInfo('Atajos de teclado', h('table', { class: 'atajos' }, L.map((x) => h('tr', null, h('td', null, h('kbd', null, x[0])), h('td', null, x[1])))));
+  }
+  function abreGuia() {
+    const P = [['1. Crea diapositivas', 'Pulsa «Nueva diapositiva» o elige una de «Plantillas» (pestañas, preguntas frecuentes, test…). Los colores salen de «Aplicar diseño».'], ['2. Añade contenido', 'En «Insertar» tienes texto, imágenes, vídeo, audio, botones, tablas y más. Arrastra para mover y usa las asas para cambiar el tamaño.'], ['3. Dale vida', 'En la pestaña «Efectos» arrastra un efecto sobre uno o varios objetos seleccionados. En «Accionadores» haz que un botón muestre una capa, cambie de diapositiva o cambie un estado.'], ['4. Preguntas', 'Usa «Nueva diapositiva ▾» para crear una pregunta. Ahí marcas la respuesta correcta, los puntos, los intentos y los mensajes.'], ['5. Revisa y exporta', '«Vista previa» para probar como alumno, «Revisar» para detectar errores y «Exportar SCORM» para subirlo a Moodle.']];
+    ventanaInfo('Primeros pasos', h('div', null, P.map((x) => h('div', { style: 'margin:0 0 12px' }, h('b', null, x[0]), h('p', { style: 'margin:2px 0 0' }, x[1])))));
+  }
   function buildRibbon() {
     const tabs = $('#rtabs'), body = $('#rbody'); tabs.textContent = ''; body.textContent = '';
     const drop = h('div', { class: 'drop', id: 'projDrop', hidden: true },
@@ -3184,7 +3214,8 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       h('button', { class: 'rtab', type: 'button', 'data-rt': 'edit', onclick: () => showRibTab('edit') }, 'Edición'),
       h('button', { class: 'rtab', type: 'button', 'data-rt': 'ins', onclick: () => showRibTab('ins') }, 'Insertar'),
       h('button', { class: 'rtab ctx', type: 'button', 'data-rt': 'obj', hidden: true, onclick: () => showRibTab('obj') }, 'Objeto'),
-      h('span', { class: 'sp' }));
+      h('span', { class: 'sp' }),
+      h('button', { class: 'rtab', type: 'button', 'data-rt': 'help', onclick: () => showRibTab('help') }, 'Ayuda'));
     paintQuick($('#quick'), true);
     const edicion = h('div', { class: 'rpane', 'data-pane': 'edit' },
       rgroup('Diapositiva',
@@ -3201,8 +3232,12 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const pin = h('div', { class: 'rpin' },
       rgroup('Dibujo', rbtn('arrange', 'Organizar ▾', (ev) => { ev.stopPropagation(); arrangeMenu(ev.currentTarget); }, { title: 'Organizar objetos: ordenar, agrupar, alinear y distribuir' })),
       rgroup('Publicar', rbtn('play', 'Vista previa', null, { id: 'previewBtn', title: 'Vista previa desde esta diapositiva' }), rbtn('check', 'Revisar', null, { id: 'reviewBtn', title: 'Revisar accesibilidad y errores del curso' }), rbtn('publish', 'Exportar SCORM', null, { id: 'exportBtn', cls: 'primary' })));
-    body.append(h('div', { class: 'rpanes' }, edicion, insertar, h('div', { class: 'rpane', 'data-pane': 'obj' })), pin);
-    showRibTab(ribTab === 'obj' ? 'edit' : ribTab); paintCtx();
+    const ayuda = h('div', { class: 'rpane', 'data-pane': 'help' },
+      rgroup('Actualizaciones', rbtn('refresh', 'Buscar actualizaciones', buscaActualizaciones, { title: 'Comprueba si hay una versión nueva del editor y la instala' }), h('div', { class: 'verbox', id: 'verBox' }, h('b', null, 'Versión'), h('span', { id: 'verNum' }, 'cargando…'))),
+      rgroup('Guías', rbtn('keyboard', 'Atajos de teclado', abreAtajos, { title: 'Lista de atajos de teclado y gestos del ratón' }), rbtn('book', 'Primeros pasos', abreGuia, { title: 'Guía corta para empezar a crear un curso' })),
+      rgroup('Inteligencia artificial', rbtn('sparkle', 'Asistente IA', () => toast('Próximamente. Se activará cuando decidas conectar una clave de API; hasta entonces el editor funciona sin IA.'), { title: 'Próximamente: lecciones, preguntas y traducciones con IA (necesita una clave de API)' })));
+    body.append(h('div', { class: 'rpanes' }, edicion, insertar, h('div', { class: 'rpane', 'data-pane': 'obj' }), ayuda), pin);
+    showRibTab(ribTab === 'obj' ? 'edit' : ribTab); paintCtx(); pintaVersion();
   }
   function paintTools() {
     const t = $('#tools'); t.textContent = '';
