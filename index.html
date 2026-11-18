@@ -934,7 +934,12 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     { n: 'Noche', bg: '#1B1F2A', tx: '#F2F2F2', ac: '#F2A900', at: '#1B1F2A', ff: 'Segoe UI, Arial, sans-serif' },
     { n: 'Atardecer', bg: '#FFF6EE', tx: '#4A2A1A', ac: '#D9622B', at: '#FFFFFF', ff: 'Georgia, serif' },
     { n: 'Papel', bg: '#FAF6EC', tx: '#2B2B2B', ac: '#7A4E2D', at: '#FFFFFF', ff: 'Georgia, "Times New Roman", serif' },
-    { n: 'Pizarra', bg: '#2F3B3A', tx: '#F5F5F0', ac: '#7FD1AE', at: '#1B2625', ff: '"Trebuchet MS", Arial, sans-serif' }
+    { n: 'Pizarra', bg: '#2F3B3A', tx: '#F5F5F0', ac: '#7FD1AE', at: '#1B2625', ff: '"Trebuchet MS", Arial, sans-serif' },
+    { n: 'Medianoche', bg: '#14213D', tx: '#E6ECF5', ac: '#FF8A65', at: '#14213D', ff: 'Segoe UI, Arial, sans-serif' },
+    { n: 'Lavanda suave', bg: '#FAF8FF', tx: '#2D2545', ac: '#6B46C1', at: '#FFFFFF', ff: '' },
+    { n: 'Grafito y menta', bg: '#1E2224', tx: '#E8EEEC', ac: '#4FD1A5', at: '#10211B', ff: '"Trebuchet MS", Arial, sans-serif' },
+    { n: 'Mostaza y vino', bg: '#F7F1E3', tx: '#3B1F26', ac: '#7A1F3D', at: '#FFFFFF', ff: 'Georgia, serif' },
+    { n: 'Oscuro y lila', bg: '#1B1A27', tx: '#CFC0EA', ac: '#B39DDB', at: '#1B1A27', ff: '' }
   ];
   function oscurece(hex, k) { const m = /^#([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return hex; const c = [0, 2, 4].map((i) => Math.max(0, Math.round(parseInt(m[1].substr(i, 2), 16) * (1 - k)))); return '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase(); }
   function aplicaTema(t, todo) {
@@ -2366,17 +2371,12 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     }, null, { full: true });
   }
   /* ---------- Plantillas de diapositiva ---------- */
-  const PALS = {
-    marca: { n: 'Marca SUAcademy', bg: '#FFFFFF', ink: '#222222', acc: '#E84039', card: '#F3F1F0', cardInk: '#222222', act: '#FDE8E7', btnInk: '#FFFFFF' },
-    oceano: { n: 'Océano', bg: '#EEF6FA', ink: '#123B4A', acc: '#0E6E80', card: '#CFE8EE', cardInk: '#123B4A', act: '#FFFFFF', btnInk: '#FFFFFF' },
-    bosque: { n: 'Bosque', bg: '#FAF5E8', ink: '#23352A', acc: '#2F6B3F', card: '#DCE8D3', cardInk: '#23352A', act: '#FFFFFF', btnInk: '#FFFFFF' },
-    medianoche: { n: 'Medianoche', bg: '#14213D', ink: '#E6ECF5', acc: '#FF8A65', card: '#2B3A5C', cardInk: '#F2F5FA', act: '#3A4B72', btnInk: '#14213D' },
-    atardecer: { n: 'Atardecer', bg: '#FFF6EA', ink: '#4A2B1A', acc: '#B84A17', card: '#FFDCC2', cardInk: '#4A2B1A', act: '#FFFFFF', btnInk: '#FFFFFF' },
-    lavanda: { n: 'Lavanda suave', bg: '#FAF8FF', ink: '#2D2545', acc: '#6B46C1', card: '#E6DDF7', cardInk: '#2D2545', act: '#FFFFFF', btnInk: '#FFFFFF' },
-    grafito: { n: 'Grafito y menta', bg: '#1E2224', ink: '#E8EEEC', acc: '#4FD1A5', card: '#343B3E', cardInk: '#EEF3F1', act: '#46504F', btnInk: '#10211B' },
-    mostaza: { n: 'Mostaza y vino', bg: '#F7F1E3', ink: '#3B1F26', acc: '#7A1F3D', card: '#EBD9A0', cardInk: '#3B1F26', act: '#FFFFFF', btnInk: '#FFFFFF' },
-    oscuro: { n: 'Oscuro y lila', bg: '#1B1A27', ink: '#CFC0EA', acc: '#B39DDB', card: '#3A3955', cardInk: '#F1EEFA', act: '#4A4970', btnInk: '#1B1A27' }
-  };
+  // Los colores de las plantillas salen de la misma lista que «Aplicar diseño» (TEMAS).
+  const mezcla = (a, b, k) => { const pa = /^#([0-9a-f]{6})$/i.exec(a), pb = /^#([0-9a-f]{6})$/i.exec(b); if (!pa || !pb) return a; return '#' + [0, 2, 4].map((q) => Math.round(parseInt(pa[1].substr(q, 2), 16) * (1 - k) + parseInt(pb[1].substr(q, 2), 16) * k).toString(16).padStart(2, '0')).join('').toUpperCase(); };
+  const lumHex = (hx) => { const m = /^#([0-9a-f]{6})$/i.exec(hx); if (!m) return 1; return [0, 2, 4].reduce((t, q, k) => t + [0.2126, 0.7152, 0.0722][k] * Math.pow(parseInt(m[1].substr(q, 2), 16) / 255, 2.2), 0); };
+  const PALS = {}; TEMAS.forEach((t) => { const oscuro = lumHex(t.bg) < 0.3; PALS[t.n] = { n: t.n, ff: t.ff, bg: t.bg, ink: t.tx, acc: t.ac, btnInk: t.at, card: mezcla(t.bg, t.tx, oscuro ? 0.16 : 0.07), cardInk: t.tx, act: oscuro ? mezcla(t.bg, t.tx, 0.28) : mezcla(t.bg, t.ac, 0.14) }; });
+  const PAL_OLD = { marca: 'SUAcademy', oceano: 'Océano', bosque: 'Bosque', medianoche: 'Medianoche', atardecer: 'Atardecer', lavanda: 'Lavanda suave', grafito: 'Grafito y menta', mostaza: 'Mostaza y vino', oscuro: 'Oscuro y lila', azul: 'Océano' };
+
 
   const TPLK = 'sua.plantillas', TPLP = 'sua.plantillas.paleta';
   const ICO = {
@@ -2392,7 +2392,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
   const fotoSvg = (c1, c2, txt) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/></linearGradient></defs><rect width="800" height="520" fill="url(#g)"/><g fill="none" stroke="#ffffff" stroke-opacity=".85" stroke-width="10" stroke-linejoin="round"><rect x="300" y="190" width="200" height="140" rx="14"/><circle cx="400" cy="260" r="38"/></g><text x="400" y="400" text-anchor="middle" font-family="sans-serif" font-size="34" font-weight="700" fill="#ffffff" fill-opacity=".9">' + txt + '</text></svg>';
   function tplCtx(pal) {
     const c = { pal, assets: [], layers: [], base: [], u: 'p' + Math.floor(100 + Math.random() * 900) }; let n = 0;
-    const mk = (arr) => (o) => { o.id = o.id || ('el' + (++n)); if (!('start' in o)) o.start = 0; arr.push(o); return o.id; };
+    const mk = (arr) => (o) => { o.id = o.id || ('el' + (++n)); if (pal.ff && (o.type === 'text' || o.type === 'button') && !o.fontFamily) o.fontFamily = pal.ff; if (!('start' in o)) o.start = 0; arr.push(o); return o.id; };
     c.add = mk(c.base);
     c.asset = (key, svg) => { c.assets.push({ key, svg }); return '@' + key; };
     c.layer = (id, title) => { const L = { id: c.u + '_' + id, title, pauseBase: false, dimBase: false, blockBase: false, elements: [], triggers: [] }; c.layers.push(L); return { id: L.id, add: mk(L.elements) }; };
@@ -2742,8 +2742,8 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     return box;
   }
   function abrePlantillas() {
-    let palKey = 'marca', acc = null;
-    try { const q = JSON.parse(localStorage.getItem(TPLP) || 'null'); if (q && PALS[q.k]) { palKey = q.k; acc = q.a || null; } } catch (e0) { /* sin memoria */ }
+    let palKey = 'SUAcademy', acc = null;
+    try { const q = JSON.parse(localStorage.getItem(TPLP) || 'null'); const kk = PALS[q && q.k] ? q.k : (q && PAL_OLD[q.k]); if (q && kk) { palKey = kk; acc = q.a || null; } } catch (e0) { /* sin memoria */ }
     const done = () => { back.remove(); document.removeEventListener('keydown', onKey, true); };
     const onKey = (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); done(); } };
     const curPal = () => Object.assign({}, PALS[palKey], acc ? { acc } : {});
@@ -3951,7 +3951,8 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     track.addEventListener('drop', (ev) => {
       if (!S.fxDrag) return; ev.preventDefault();
       const d = S.fxDrag, t = (ev.clientX - track.getBoundingClientRect().left) / pps; S.fxDrag = null; document.body.classList.remove('fxdragging');
-      addFx(e, d.kind, d.type, Math.max(0, t));
+      const sel = selEls(), grp = sel.length > 1 && sel.some((x) => x.id === e.id) ? sel : [e];
+      addFx(grp, d.kind, d.type, Math.max(0, t));
     });
     const name = h('div', { class: 'tlname', 'data-eid': e.id, title: 'Doble clic para cambiar el nombre', onclick: (ev) => { if (ev.shiftKey || ev.ctrlKey || ev.metaKey) { const cur = selIds(); setMulti(cur.indexOf(e.id) >= 0 ? cur.filter((x) => x !== e.id) : cur.concat(e.id)); afterSel(); } else select(e.id); } }, ic(lane ? 'audio' : e.type === 'shape' ? 'shape' : e.type), h('span', null, lane ? 'Audio de «' + elLabel(e) + '»' : elLabel(e)), h('span', { class: 'tag' }, lane ? 'audio' : TYPE_NAME[e.type] || e.type));
     const row = h('div', { class: 'tlrow v-' + (lane ? 'audio lane' : e.type) + (isSel(e.id) ? ' sel' : '') + (inGroup ? ' ingroup' : ''), 'data-id': e.id, style: rhPx > 28 ? '--rh:' + rhPx + 'px' : null }, name, track);
@@ -4121,22 +4122,29 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
   const envOf = (e) => ({ s: e.start || 0, e: e.end == null ? ctxDur() : e.end });
   const newFxId = () => 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
   // Añade un efecto al objeto e (a partir de arrastrar desde la galería o de hacer clic): t = segundo donde se suelta.
-  function addFx(e, kind, type, t, as) {
-    if (e.type === 'audio' || e.x == null) { toast('Los efectos visuales no se aplican al audio.'); return; }
+  function addFxRaw(e, kind, type, t, as) {
     const env = envOf(e);
     if (kind === 'anim') {
       const key = as || (t != null && t > (env.s + env.e) / 2 ? 'out' : 'in');
-      edit(() => { e[key] = Object.assign({ dur: DEF_FX_DUR, ease: 'out' }, key === 'in' ? { delay: 0 } : {}, { type }); S.chip = { id: e.id, k: key }; }, null, { panel: true });
+      e[key] = Object.assign({ dur: DEF_FX_DUR, ease: 'out' }, key === 'in' ? { delay: 0 } : {}, { type }); S.chip = { id: e.id, k: key };
       return;
     }
     const dur = Math.max(0.2, env.e - env.s), st = r2(env.s);
     const f = { id: newFxId(), type, start: st, dur: r2(dur), amt: 50 };
-    edit(() => { e.fx = (e.fx || []).concat(f); S.chip = { id: e.id, k: f.id }; }, null, { panel: true });
+    e.fx = (e.fx || []).concat(f); S.chip = { id: e.id, k: f.id };
+  }
+  // list: uno o varios objetos; todos reciben el efecto en un solo paso (un solo Ctrl+Z).
+  function addFx(list, kind, type, t, as) {
+    const l = [].concat(list).filter((e) => e.type !== 'audio' && e.x != null);
+    if (!l.length) { toast('Los efectos visuales no se aplican al audio.'); return; }
+    edit(() => l.forEach((e) => addFxRaw(e, kind, type, t, as)), null, { panel: true });
+    if (l.length > 1) toast('Efecto aplicado a ' + l.length + ' objetos.');
   }
   function applyFxClick(kind, type) {
     const l = selEls().filter((x) => x.type !== 'audio' && x.x != null);
-    if (!l.length) { toast('Selecciona un objeto y haz clic, o arrastra el efecto a su fila de la línea de tiempo.'); return; }
-    l.forEach((e) => { const env = envOf(e); addFx(e, kind, type, S.t >= env.s && S.t <= env.e ? S.t : env.s, kind === 'anim' ? (S.fxAs || 'in') : undefined); });
+    if (!l.length) { toast('Selecciona uno o varios objetos y haz clic, o arrastra el efecto a la fila de uno de ellos en la línea de tiempo.'); return; }
+    edit(() => l.forEach((e) => { const env = envOf(e); addFxRaw(e, kind, type, S.t >= env.s && S.t <= env.e ? S.t : env.s, kind === 'anim' ? (S.fxAs || 'in') : undefined); }), null, { panel: true });
+    if (l.length > 1) toast('Efecto aplicado a ' + l.length + ' objetos.');
   }
   const chipOf = () => { const c = S.chip; if (!c) return null; const e = elements().find((x) => x.id === c.id); if (!e) return null; if (c.k === 'in' || c.k === 'out') return e[c.k] ? { e, it: e[c.k], k: c.k, kind: 'anim' } : null; const f = (e.fx || []).find((x) => x.id === c.k); return f ? { e, it: f, k: c.k, kind: kindOf(f.type) } : null; };
   function delChip() {
@@ -4152,7 +4160,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const keepScroll = box.querySelector('.fxgal') ? box.querySelector('.fxgal').scrollTop : 0;
     box.textContent = '';
     const q = (S.fxQ || '').toLowerCase();
-    const tile = (kind, x) => h('button', { class: 'fxtile', type: 'button', draggable: 'true', title: x[1] + ' · arrástralo a la línea de tiempo o pulsa para aplicarlo al objeto seleccionado', 'data-name': x[1].toLowerCase(),
+    const tile = (kind, x) => h('button', { class: 'fxtile', type: 'button', draggable: 'true', title: x[1] + ' · arrástralo a la línea de tiempo o pulsa para aplicarlo a los objetos seleccionados (si sueltas sobre uno de varios seleccionados, se aplica a todos)', 'data-name': x[1].toLowerCase(),
       onclick: () => applyFxClick(kind, x[0]),
       ondragstart: (ev) => { S.fxDrag = { kind, type: x[0] }; ev.dataTransfer.effectAllowed = 'copy'; try { ev.dataTransfer.setData('text/plain', 'fx:' + x[0]); } catch (e0) { /* sin datos */ } document.body.classList.add('fxdragging'); },
       ondragend: () => { S.fxDrag = null; document.body.classList.remove('fxdragging'); document.querySelectorAll('.tlrow.fxover').forEach((r) => r.classList.remove('fxover')); } }, ic(x[2]), h('span', null, x[1]));
