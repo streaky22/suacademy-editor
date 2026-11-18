@@ -166,6 +166,17 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 .rpop { position: fixed; z-index: 60; background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); padding: 12px; display: flex; flex-direction: column; gap: 10px; min-width: 220px; }
 .cel.blk { outline: calc(var(--u) * 2) dashed #888; }
 .cel td[contenteditable], .cel th[contenteditable] { cursor: text; }
+.dlg.tpl { width: min(980px, calc(100vw - 32px)); max-height: calc(100vh - 40px); overflow: auto; }
+.dlg.tpl h4 { margin: 14px 0 8px; font-size: 14px; }
+.tplbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-bottom: 12px; font-size: 13px; }
+.tplbar select, .tplbar input[type=color] { font: inherit; margin-left: 4px; } .tplnote { color: var(--muted); }
+.tplgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.tplcard { display: flex; flex-direction: column; gap: 6px; text-align: left; background: var(--panel-2); border: 2px solid transparent; border-radius: 12px; padding: 8px; cursor: pointer; font: inherit; color: var(--fg); }
+.tplcard:hover, .tplcard:focus-visible { border-color: var(--sel); outline: none; }
+.tplcard b { font-size: 13.5px; } .tplcard span { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.tplcard.mine { cursor: default; } .tplopen { display: flex; flex-direction: column; gap: 6px; background: none; border: 0; padding: 0; text-align: left; font: inherit; color: var(--fg); cursor: pointer; } .tplnone { color: var(--muted); font-size: 13px; margin: 0; }
+.tpth { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+.tpth i { position: absolute; display: block; }
 .stage.cropping .selbox { display: none; }
 .cdim { position: absolute; background: rgba(0,0,0,.5); }
 .cframe { position: absolute; outline: calc(var(--u) * 2) solid #fff; box-shadow: 0 0 0 calc(var(--u) * 3) rgba(0,0,0,.55); }
@@ -609,7 +620,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     return e;
   }
   const PATHS = {
-    crop: 'M6 2v14h14M2 6h14v14', shadow: 'M5 5h12v12H5zM19 9v10H9',
+    template: 'M3 4h18v7H3zM3 14h8v6H3zM14 14h7v6h-7z', crop: 'M6 2v14h14M2 6h14v14', shadow: 'M5 5h12v12H5zM19 9v10H9',
     lock: 'M6 11h12v9H6zM8 11V8a4 4 0 118 0v3',
     design: 'M12 3a9 9 0 100 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a3 3 0 003-3c0-5-4-9-8-9zM7.5 11h.01M10 7.5h.01M14.5 7.5h.01', brush: 'M4 20c0-3 2-4 4-4l9-9a2.5 2.5 0 013.5 3.5L11 19c-1 1-4 1-7 1z',
     line: 'M4 20 20 4', table: 'M3 5h18v14H3zM3 10h18M3 15h18M9 5v14M15 5v14', progress: 'M3 9h18v6H3zM3 9h8v6H3z', web: 'M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18', carousel: 'M7 6h10v12H7zM3 8v8M21 8v8',
@@ -2339,7 +2350,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     edit(() => { slides().splice(S.si + 1, 0, slideFromKind(kind)); S.si++; S.ctx = 'base'; S.sel = null; S.t = 0; }, null, { full: true });
   }
   function newSlideMenu(anchor) {
-    const items = [];
+    const items = [['template', 'Desde una plantilla…', abrePlantillas]];
     SLIDE_KINDS.forEach((k) => { if (!k[1]) items.push([k[0]]); else items.push([KIND_IC[k[1]] || 'blank', k[0], () => insertSlideKind(k[1])]); });
     ribPop('newPop', anchor, items);
   }
@@ -2349,6 +2360,190 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       c.id = newId('d', new Set(allSlides().map((s) => s.id))); c.title += ' (copia)';
       slides().splice(S.si + 1, 0, c); S.si++; S.ctx = 'base'; S.sel = null;
     }, null, { full: true });
+  }
+  /* ---------- Plantillas de diapositiva ---------- */
+  const PALS = {
+    oscuro: { n: 'Oscuro y lila', bg: '#1B1A27', ink: '#B7A4D9', acc: '#B39DDB', card: '#5F5F78', cardInk: '#1B1A27', act: '#1B1A27', btnInk: '#1B1A27' },
+    marca: { n: 'Marca SUAcademy', bg: '#FFFFFF', ink: '#222222', acc: '#E84039', card: '#F3F1F0', cardInk: '#222222', act: '#FDE8E7', btnInk: '#FFFFFF' },
+    azul: { n: 'Azul claro', bg: '#F4F7FB', ink: '#1F2D3D', acc: '#2D7CFF', card: '#DCE6F5', cardInk: '#1F2D3D', act: '#FFFFFF', btnInk: '#FFFFFF' }
+  };
+  const TPLK = 'sua.plantillas', TPLP = 'sua.plantillas.paleta';
+  const ICO = {
+    cohete: 'M12 2c3 2 5 6 5 10l-2 3H9l-2-3c0-4 2-8 5-10zM9 15l-3 4M15 15l3 4M12 9.5a1.5 1.5 0 1 0 .01 0',
+    bombilla: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z',
+    reloj: 'M6 3h12M6 21h12M7 3c0 5 3 6 5 9-2 3-5 4-5 9M17 3c0 5-3 6-5 9 2 3 5 4 5 9',
+    pin: 'M12 21s-6-6-6-11a6 6 0 0 1 12 0c0 5-6 11-6 11zM12 7.5a2.5 2.5 0 1 0 .01 0',
+    diana: 'M12 3a9 9 0 1 0 .01 0M12 7.5a4.5 4.5 0 1 0 .01 0M12 11.5a.5.5 0 1 0 .01 0M12 1v4M12 19v4M1 12h4M19 12h4',
+    lupa: 'M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15zM16 16l6 6'
+  };
+  const icoSvg = (k, col) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="' + col + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="' + ICO[k] + '"/></svg>';
+  const astSvg = (col) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><g fill="' + col + '"><rect x="-8" y="-48" width="16" height="96" rx="2"/><rect x="-8" y="-48" width="16" height="96" rx="2" transform="rotate(60)"/><rect x="-8" y="-48" width="16" height="96" rx="2" transform="rotate(120)"/></g></svg>';
+  const fotoSvg = (c1, c2, txt) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/></linearGradient></defs><rect width="800" height="520" fill="url(#g)"/><g fill="none" stroke="#ffffff" stroke-opacity=".85" stroke-width="10" stroke-linejoin="round"><rect x="300" y="190" width="200" height="140" rx="14"/><circle cx="400" cy="260" r="38"/></g><text x="400" y="400" text-anchor="middle" font-family="sans-serif" font-size="34" font-weight="700" fill="#ffffff" fill-opacity=".9">' + txt + '</text></svg>';
+  function tplCtx(pal) {
+    const c = { pal, assets: [], layers: [], base: [], u: 'p' + Math.floor(100 + Math.random() * 900) }; let n = 0;
+    const mk = (arr) => (o) => { o.id = o.id || ('el' + (++n)); if (!('start' in o)) o.start = 0; arr.push(o); return o.id; };
+    c.add = mk(c.base);
+    c.asset = (key, svg) => { c.assets.push({ key, svg }); return '@' + key; };
+    c.layer = (id, title) => { const L = { id: c.u + '_' + id, title, pauseBase: false, dimBase: false, blockBase: false, elements: [], triggers: [] }; c.layers.push(L); return { id: L.id, add: mk(L.elements) }; };
+    return c;
+  }
+  const TEMPLATES = [
+    {
+      id: 'tabs', name: 'Pestañas con 6 botones', desc: 'Seis botones con icono: al pulsar uno cambian el título, el texto y la foto. Cada pestaña es una capa que editas por separado.',
+      build(c) {
+        const p = c.pal, icons = ['cohete', 'bombilla', 'reloj', 'pin', 'diana', 'lupa'], fot = [['#7B6FA8', '#3C355E'], ['#C98A5A', '#6B3F2A'], ['#5B9BA8', '#2C4E5E'], ['#8FA860', '#44582C'], ['#B8667A', '#5E2C3C'], ['#6A7FB8', '#2C3A5E']];
+        c.add({ type: 'image', name: 'Decoración grande', x: 905, y: 10, w: 210, h: 210, src: c.asset('ast', astSvg(p.acc)), fit: 'contain', decor: true });
+        c.add({ type: 'image', name: 'Decoración pequeña', x: 830, y: 560, w: 80, h: 80, src: c.asset('ast', astSvg(p.acc)), fit: 'contain', decor: true });
+        const L = [1, 2, 3, 4, 5, 6].map((k) => c.layer('tab' + k, 'Pestaña ' + k));
+        L.forEach((l, i) => {
+          const k = i + 1;
+          l.add({ type: 'text', name: 'Título ' + k, x: 100, y: 90, w: 740, h: 80, text: 'Título de la pestaña ' + k + ' (si hace falta)', fontSize: 40, fontWeight: 800, color: p.acc });
+          l.add({ type: 'text', name: 'Texto ' + k, x: 100, y: 200, w: 740, h: 400, text: 'Escribe aquí el contenido de la pestaña ' + k + '. Puedes cambiar el texto, la foto y los colores como en cualquier otra diapositiva.', fontSize: 36, color: p.ink });
+          l.add({ type: 'image', name: 'Foto ' + k, x: 1000, y: 70, w: 830, h: 540, src: c.asset('foto' + k, fotoSvg(fot[i][0], fot[i][1], 'Tu foto ' + k)), fit: 'cover', alt: 'Foto de la pestaña ' + k });
+        });
+        const cards = [], labels = [];
+        for (let k = 0; k < 6; k++) {
+          const col = k % 3, row = Math.floor(k / 3), x = 96 + col * 584, y = 670 + row * 194;
+          cards.push(c.add({ type: 'shape', name: 'Tarjeta ' + (k + 1), x, y, w: 560, h: 170, fill: p.card, radius: 16, decor: true, state: k === 0 ? 'activa' : undefined, states: { activa: { fill: p.acc } } }));
+          c.add({ type: 'image', name: 'Icono ' + (k + 1), x: x + 36, y: y + 55, w: 60, h: 60, src: c.asset('ico' + k, icoSvg(icons[k], p.cardInk)), fit: 'contain', decor: true });
+          labels.push(c.add({ type: 'text', name: 'Etiqueta ' + (k + 1), x: x + 130, y: y + 25, w: 400, h: 120, text: 'Pestaña ' + (k + 1) + ' con un título más largo', fontSize: 34, fontWeight: 800, color: p.cardInk, valign: 'middle', state: k === 0 ? 'activa' : undefined, states: { activa: { color: p.btnInk } } }));
+        }
+        for (let k = 0; k < 6; k++) {
+          const col = k % 3, row = Math.floor(k / 3), x = 96 + col * 584, y = 670 + row * 194, tr = [];
+          for (let j = 0; j < 6; j++) { if (j !== k) tr.push({ event: 'click', action: 'hideLayer', target: L[j].id }); }
+          tr.push({ event: 'click', action: 'showLayer', target: L[k].id });
+          for (let j = 0; j < 6; j++) { tr.push({ event: 'click', action: 'changeState', target: cards[j], state: j === k ? 'activa' : 'normal' }); tr.push({ event: 'click', action: 'changeState', target: labels[j], state: j === k ? 'activa' : 'normal' }); }
+          c.add({ type: 'button', name: 'Pulsar pestaña ' + (k + 1), x, y, w: 560, h: 170, text: '', fill: '#000000', fillAlpha: 0, radius: 16, triggers: tr, alt: 'Pestaña ' + (k + 1) });
+        }
+        return { title: 'Pestañas', background: p.bg, triggers: [{ event: 'timeReaches', time: 0, action: 'showLayer', target: L[0].id }] };
+      }
+    },
+    {
+      id: 'portada', name: 'Portada', desc: 'Título grande, subtítulo, decoración y botón para empezar.',
+      build(c) {
+        const p = c.pal;
+        c.add({ type: 'image', name: 'Decoración', x: 1300, y: 230, w: 440, h: 440, src: c.asset('ast', astSvg(p.acc)), fit: 'contain', decor: true });
+        c.add({ type: 'text', name: 'Título', x: 160, y: 300, w: 1100, h: 260, text: 'Título del curso', fontSize: 120, fontWeight: 800, color: p.acc, valign: 'bottom' });
+        c.add({ type: 'text', name: 'Subtítulo', x: 160, y: 590, w: 1100, h: 120, text: 'Subtítulo o descripción breve', fontSize: 50, color: p.ink });
+        c.add({ type: 'button', name: 'Empezar', x: 160, y: 780, w: 380, h: 110, text: 'Empezar', fontSize: 44, fontWeight: 800, fill: p.acc, color: p.btnInk, radius: 16, states: { hover: { opacity: 85 } }, triggers: [{ event: 'click', action: 'nextSlide' }] });
+        return { title: 'Portada', background: p.bg };
+      }
+    },
+    {
+      id: 'imgtexto', name: 'Imagen y texto', desc: 'Foto a un lado, título y texto al otro.',
+      build(c) {
+        const p = c.pal;
+        c.add({ type: 'image', name: 'Foto', x: 100, y: 130, w: 860, h: 820, src: c.asset('foto', fotoSvg('#7B6FA8', '#3C355E', 'Tu foto')), fit: 'cover', alt: 'Describe la foto' });
+        c.add({ type: 'image', name: 'Decoración', x: 880, y: 70, w: 150, h: 150, src: c.asset('ast', astSvg(p.acc)), fit: 'contain', decor: true });
+        c.add({ type: 'text', name: 'Título', x: 1040, y: 160, w: 780, h: 150, text: 'Título de la diapositiva', fontSize: 70, fontWeight: 800, color: p.acc, valign: 'bottom' });
+        c.add({ type: 'text', name: 'Texto', x: 1040, y: 340, w: 780, h: 560, text: 'Escribe aquí el contenido. Cambia la foto con un clic y ajusta los colores desde la cinta.', fontSize: 40, color: p.ink });
+        return { title: 'Imagen y texto', background: p.bg };
+      }
+    },
+    {
+      id: 'tarjetas', name: 'Tarjetas de vocabulario', desc: 'Seis tarjetas: se ve la palabra y, al pulsarla, su traducción. Un botón las vuelve a girar todas.',
+      build(c) {
+        const p = c.pal, ids = [];
+        c.add({ type: 'text', name: 'Título', x: 110, y: 60, w: 1700, h: 100, text: 'Vocabulario', fontSize: 72, fontWeight: 800, color: p.acc });
+        c.add({ type: 'text', name: 'Instrucción', x: 110, y: 160, w: 1700, h: 70, text: 'Pulsa una tarjeta para ver la traducción', fontSize: 38, color: p.ink });
+        const W = [['la casa', 'the house'], ['el perro', 'the dog'], ['la ventana', 'the window'], ['el libro', 'the book'], ['la mesa', 'the table'], ['el coche', 'the car']];
+        W.forEach((w, k) => {
+          const x = 110 + (k % 3) * 580, y = 260 + Math.floor(k / 3) * 340;
+          ids.push(c.add({ type: 'button', name: 'Tarjeta ' + (k + 1), x, y, w: 540, h: 300, text: w[0], fontSize: 60, fontWeight: 800, fill: p.card, color: p.cardInk, radius: 20, states: { hover: { fill: p.act }, volteada: { text: w[1], fill: p.acc, color: p.btnInk } }, triggers: [{ event: 'click', action: 'changeState', target: 'self', state: 'volteada' }] }));
+        });
+        c.add({ type: 'button', name: 'Volver a girar', x: 740, y: 950, w: 440, h: 90, text: 'Volver a girar', fontSize: 34, fontWeight: 700, fill: p.acc, color: p.btnInk, radius: 14, triggers: ids.map((i) => ({ event: 'click', action: 'changeState', target: i, state: 'normal' })) });
+        return { title: 'Tarjetas de vocabulario', background: p.bg };
+      }
+    }
+  ];
+  const misPlantillas = () => { try { return JSON.parse(localStorage.getItem(TPLK) || '[]') || []; } catch (e0) { return []; } };
+  function guardaMisPlantillas(a) { try { localStorage.setItem(TPLK, JSON.stringify(a)); return true; } catch (e0) { toast('No hay espacio para guardar más plantillas propias.', true); return false; } }
+  // Da a una diapositiva ya montada un id nuevo, la adapta al tamaño del curso y la inserta.
+  function insertaPlantillaSlide(sl) {
+    const W = course.width || 1920, H = course.height || 1080, sx = W / 1920, sy = H / 1080;
+    const fix = (e) => { if (e.x != null && !e.keepSize) { e.x = Math.round(e.x * sx); e.y = Math.round(e.y * sy); e.w = Math.round(e.w * sx); e.h = Math.round(e.h * sy); if (e.fontSize) e.fontSize = Math.round(e.fontSize * Math.min(sx, sy)); } };
+    if (sx !== 1 || sy !== 1) { (sl.elements || []).forEach(fix); (sl.layers || []).forEach((l) => (l.elements || []).forEach(fix)); }
+    sl.id = newId('d', new Set(allSlides().map((s) => s.id))); sl.duration = sl.duration || 10; sl.layers = sl.layers || []; sl.triggers = sl.triggers || [];
+    edit(() => { slides().splice(S.si + 1, 0, sl); S.si++; S.ctx = 'base'; S.sel = null; S.t = 0; }, null, { full: true });
+  }
+  function insertaPlantilla(t, pal) {
+    const c = tplCtx(pal), r = t.build(c);
+    const sl = Object.assign({ elements: c.base, layers: c.layers }, r);
+    let json = JSON.stringify(sl);
+    const done = {};
+    c.assets.forEach((a) => { if (!done[a.key]) done[a.key] = addMedia('plantilla-' + a.key + '.svg', new Blob([a.svg], { type: 'image/svg+xml' })); json = json.split('"@' + a.key + '"').join('"media/' + done[a.key] + '"'); });
+    insertaPlantillaSlide(JSON.parse(json));
+    toast('Plantilla «' + t.name + '» añadida. Cambia los textos y la foto.');
+  }
+  function insertaMiPlantilla(m) {
+    let json = JSON.stringify(m.slide);
+    Object.keys(m.media || {}).forEach((n) => { const b = dataToBlob(m.media[n]); if (!b) return; const nn = media[n] ? n : addMedia(n, b); if (nn !== n) json = json.split('media/' + n).join('media/' + nn); });
+    const sl = JSON.parse(json);
+    insertaPlantillaSlide(sl);
+    toast('Plantilla «' + m.name + '» añadida.');
+  }
+  async function guardaComoPlantilla(nombre) {
+    const sl = JSON.parse(JSON.stringify(slide())), m = {}; let tot = 0;
+    for (const sr of usedSrcs(sl)) { const n = mediaName(sr), it = media[n]; if (!it) continue; if (it.blob.size > 1.5e6 || tot > 3e6) { toast('Un archivo pesado (' + n + ') no se guarda dentro de la plantilla; tendrás que volver a ponerlo.'); continue; } const d = await blobToData(it.blob); if (d) { m[n] = d; tot += d.length; } }
+    const a = misPlantillas(); a.push({ id: 'm' + Date.now(), name: nombre || sl.title || 'Mi plantilla', slide: sl, media: m });
+    if (guardaMisPlantillas(a)) toast('Guardada como plantilla: «' + (nombre || sl.title) + '».');
+  }
+  function tplThumb(sl) {
+    const W = course.width || 1920, H = course.height || 1080, box = h('div', { class: 'tpth', style: 'background:' + (sl.background || '#fff') });
+    const els = (sl.elements || []).concat(((sl.layers || [])[0] || {}).elements || []);
+    els.forEach((e) => {
+      if (e.w == null || e.hidden) return;
+      const x = e.x / W * 100, y = e.y / H * 100, w = e.w / W * 100, hh = (e.type === 'text' ? Math.min(e.h, (e.fontSize || 40) * 1.3) : e.h) / H * 100;
+      const hex = (v) => (/^#[0-9a-f]{6}$/i.test(v || '') ? v : null);
+      let bg = e.type === 'image' ? 'rgba(128,128,128,.4)' : e.type === 'text' ? (hex(e.color) ? hex(e.color) + '88' : 'rgba(128,128,128,.5)') : (e.fillAlpha === 0 ? 'transparent' : (hex(e.fill) || 'rgba(128,128,128,.4)'));
+      box.append(h('i', { style: 'left:' + x + '%;top:' + y + '%;width:' + w + '%;height:' + hh + '%;background:' + bg + (e.radius ? ';border-radius:' + Math.min(10, e.radius / 4) + 'px' : '') }));
+    });
+    return box;
+  }
+  function abrePlantillas() {
+    let palKey = 'oscuro', acc = null;
+    try { const q = JSON.parse(localStorage.getItem(TPLP) || 'null'); if (q && PALS[q.k]) { palKey = q.k; acc = q.a || null; } } catch (e0) { /* sin memoria */ }
+    const done = () => { back.remove(); document.removeEventListener('keydown', onKey, true); };
+    const onKey = (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); done(); } };
+    const curPal = () => Object.assign({}, PALS[palKey], acc ? { acc } : {});
+    const grid = h('div', { class: 'tplgrid' }), propias = h('div', { class: 'tplgrid' });
+    const paint = () => {
+      grid.textContent = ''; propias.textContent = '';
+      const pal = curPal();
+      TEMPLATES.forEach((t) => {
+        const c = tplCtx(pal), r = t.build(c), sl = Object.assign({ elements: c.base, layers: c.layers }, r);
+        grid.append(h('button', { class: 'tplcard', type: 'button', 'data-tpl': t.id, title: t.desc, onclick: () => { done(); insertaPlantilla(t, pal); } }, tplThumb(sl), h('b', null, t.name), h('span', null, t.desc)));
+      });
+      const mine = misPlantillas();
+      if (!mine.length) propias.append(h('p', { class: 'tplnone' }, 'Aún no tienes ninguna. Abre una diapositiva y usa «Guardar como plantilla» para crear la tuya.'));
+      mine.forEach((m) => {
+        propias.append(h('div', { class: 'tplcard mine', 'data-mine': m.id }, h('button', { class: 'tplopen', type: 'button', onclick: () => { done(); insertaMiPlantilla(m); } }, tplThumb(m.slide), h('b', null, m.name)),
+          h('button', { class: 'btn small', type: 'button', title: 'Quitar esta plantilla de la lista', onclick: () => { guardaMisPlantillas(misPlantillas().filter((x) => x.id !== m.id)); paint(); } }, ic('trash'), 'Quitar')));
+      });
+    };
+    const sel = h('select', { 'aria-label': 'Colores', onchange: (ev) => { palKey = ev.target.value; acc = null; accIn.value = PALS[palKey].acc; save(); paint(); } }, Object.keys(PALS).map((k) => h('option', { value: k }, PALS[k].n)));
+    sel.value = palKey;
+    const accIn = h('input', { type: 'color', value: (acc || PALS[palKey].acc), 'aria-label': 'Color de acento', oninput: (ev) => { acc = ev.target.value; save(); paint(); } });
+    const save = () => { try { localStorage.setItem(TPLP, JSON.stringify({ k: palKey, a: acc })); } catch (e0) { /* sin memoria */ } };
+    paint();
+    const back = h('div', { class: 'dlgback', onclick: (ev) => { if (ev.target === back) done(); } },
+      h('div', { class: 'dlg tpl', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Plantillas' },
+        h('h3', null, 'Nueva diapositiva desde una plantilla'),
+        h('div', { class: 'tplbar' }, h('label', null, 'Colores ', sel), h('label', null, 'Acento ', accIn), h('span', { class: 'tplnote' }, 'Se aplican al insertarla. Después puedes cambiar lo que quieras.')),
+        grid, h('h4', null, 'Mis plantillas'), propias,
+        h('div', { class: 'dlgbtns', style: 'margin-top:14px' }, h('button', { class: 'btn', type: 'button', onclick: () => { done(); pideNombrePlantilla(); } }, 'Guardar esta diapositiva como plantilla'), h('button', { class: 'btn primary', type: 'button', onclick: done }, 'Cerrar'))));
+    document.body.append(back); document.addEventListener('keydown', onKey, true);
+  }
+  function pideNombrePlantilla() {
+    const done = () => { back.remove(); document.removeEventListener('keydown', onKey, true); };
+    const onKey = (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); done(); } };
+    const inp = h('input', { type: 'text', value: slide().title || 'Mi plantilla', 'aria-label': 'Nombre de la plantilla', style: 'width:100%;padding:8px;font:inherit' });
+    const ok = () => { const n = inp.value.trim() || 'Mi plantilla'; done(); guardaComoPlantilla(n); };
+    inp.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') ok(); });
+    const back = h('div', { class: 'dlgback', onclick: (ev) => { if (ev.target === back) done(); } },
+      h('div', { class: 'dlg', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Guardar plantilla' }, h('h3', null, 'Guardar como plantilla'), h('p', null, 'Se guarda esta diapositiva (con sus capas e imágenes) para insertarla en cualquier curso.'), inp,
+        h('div', { class: 'dlgbtns', style: 'margin-top:14px' }, h('button', { class: 'btn', type: 'button', onclick: done }, 'Cancelar'), h('button', { class: 'btn primary', type: 'button', id: 'tplOk', onclick: ok }, 'Guardar'))));
+    document.body.append(back); document.addEventListener('keydown', onKey, true); inp.focus(); inp.select();
   }
   function delSlide() {
     if (slides().length < 2) { toast('El curso necesita al menos una diapositiva.', true); return; }
@@ -2492,7 +2687,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const sid = li.dataset.sid, i = slides().findIndex((x) => x.id === sid);
     if (i >= 0 && i !== S.si) gotoSlide(i);
     ctxPop(ev.clientX, ev.clientY, [['Diapositiva'],
-      ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['copy', 'Duplicar', dupSlide], ['copy', 'Copiar diapositiva (para otro proyecto)', copySlideXC], ['paste', 'Pegar diapositiva', pasteSlideXC, !hayXC()],
+      ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['template', 'Nueva desde plantilla…', abrePlantillas], ['copy', 'Duplicar', dupSlide], ['copy', 'Copiar diapositiva (para otro proyecto)', copySlideXC], ['paste', 'Pegar diapositiva', pasteSlideXC, !hayXC()],
       ['edit', 'Cambiar nombre', () => renameSlide(sid, () => document.querySelector('#slideList li[data-sid="' + sid + '"] .nm'))], ['Interactividad'], ['play', 'Accionadores de la diapositiva…', () => { S.sel = null; S.multi = []; S.tab = 'trig'; refreshAll(); }],
       ['Orden'], ['up', 'Subir', () => moveSlideBy(-1), S.si === 0], ['down', 'Bajar', () => moveSlideBy(1), S.si >= slides().length - 1],
       ['Eliminar'], ['trash', 'Eliminar diapositiva', delSlide, slides().length < 2]]);
@@ -2752,6 +2947,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       rgroup('Diapositiva',
         h('div', { class: 'rsplit' }, h('button', { class: 'rb', type: 'button', title: 'Añadir una diapositiva en blanco', onclick: () => insertSlideKind('content') }, ic('newslide', 'big')),
           h('button', { class: 'rcaret', type: 'button', title: 'Elegir el tipo de diapositiva: pregunta, encuesta, resultados…', onclick: (ev) => { ev.stopPropagation(); newSlideMenu(ev.currentTarget); } }, 'Nueva diapositiva ▾')),
+        rbtn('template', 'Plantillas', abrePlantillas, { title: 'Nueva diapositiva desde una plantilla (y guardar las tuyas)' }),
         rcol(rsm('copy', 'Duplicar', dupSlide, { title: 'Duplicar la diapositiva' }), rsm('trash', 'Eliminar', delSlide, { title: 'Eliminar la diapositiva' }), rsm('image', 'Fondo', (ev) => { ev.stopPropagation(); bgMenu(ev.currentTarget); }, { id: 'bgBtn', title: 'Color e imagen de fondo de la diapositiva' }))),
       rgroup('Portapapeles', rcol(rbtn('paste', 'Pegar', () => pasteClip(), { title: 'Pegar (Ctrl+V)' }), rsm('brush', 'Pegar formato', pegaFormato, { title: 'Aplicar el formato copiado (Ctrl+Alt+V)' })), rcol(rsm('cut', 'Cortar', cutSel, { title: 'Cortar el objeto' }), rsm('copy', 'Copiar', () => copySel(), { title: 'Copiar el objeto (Ctrl+C)' }), rsm('brush', 'Copiar formato', copiaFormato, { title: 'Copiar el formato del objeto (Ctrl+Alt+C)' }))),
       rgroup('Insertar', rbtn('text', 'Texto', () => addElement(defaults('text')), { title: 'Insertar: Texto' }), rbtn('image', 'Imagen', () => addMediaElement('image'), { title: 'Insertar: Imagen' })),
@@ -4414,7 +4610,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       if (c) {
         const id = c.dataset.cid; gotoSlideId(id, true);
         ctxPop(ev.clientX, ev.clientY, [['Diapositiva'], ['edit', 'Abrir para editar', () => { gotoSlideId(id); closeStory(); }], ['Interactividad'], ['play', 'Accionadores…', () => { S.sel = null; S.multi = []; S.tab = 'trig'; gotoSlideId(id); closeStory(); }],
-          ['Estructura'], ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['copy', 'Duplicar', dupSlide], ['copy', 'Copiar diapositiva (para otro proyecto)', copySlideXC], ['paste', 'Pegar diapositiva', pasteSlideXC, !hayXC()], ['trash', 'Eliminar', delSlide, slides().length < 2]]);
+          ['Estructura'], ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['template', 'Nueva desde plantilla…', abrePlantillas], ['copy', 'Duplicar', dupSlide], ['copy', 'Copiar diapositiva (para otro proyecto)', copySlideXC], ['paste', 'Pegar diapositiva', pasteSlideXC, !hayXC()], ['trash', 'Eliminar', delSlide, slides().length < 2]]);
       } else {
         const si = Number(sh.parentNode.dataset.scene); S.sc = si; S.si = 0; refreshAll();
         ctxPop(ev.clientX, ev.clientY, [['Escena'], ['play', 'Escena inicial', () => setStartScene(si)], ['edit', 'Cambiar nombre', () => renameScene(si, sh.querySelector('.nm'))], ['Eliminar'], ['trash', 'Eliminar escena', () => deleteScene(si)]]);
