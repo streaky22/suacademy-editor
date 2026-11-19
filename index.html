@@ -237,6 +237,7 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 .bkcard.over { border-color: var(--brand); }
 .bkcard.drag { opacity: .4; }
 .bkcard.bad { border-color: var(--brand); background: rgba(232,64,57,.1); }
+.bkgrip svg.ic { width: 18px; height: 18px; stroke-width: 3; }
 .bkgrip { cursor: grab; color: var(--muted); font-weight: 800; letter-spacing: -2px; padding: 4px 2px; user-select: none; }
 .bknum { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--brand); color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; }
 .bkmain { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
@@ -318,7 +319,8 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 .tui { position: absolute; z-index: 7; }
 .tui.plus { width: calc(var(--u) * 20); height: calc(var(--u) * 20); margin: calc(var(--u) * -10) 0 0 calc(var(--u) * -10); border-radius: 50%; background: var(--sel); color: #fff; font: 700 calc(var(--u) * 15)/calc(var(--u) * 20) sans-serif; text-align: center; cursor: pointer; opacity: .55; user-select: none; }
 .tui.plus:hover { opacity: 1; transform: scale(1.15); }
-.tui.tmove, .tui.tdel { width: calc(var(--u) * 32); height: calc(var(--u) * 28); border-radius: calc(var(--u) * 6); background: var(--sel); color: #fff; font: 700 calc(var(--u) * 18)/calc(var(--u) * 28) sans-serif; text-align: center; cursor: grab; }
+.tui.tmove svg.ic, .tui.tdel svg.ic { width: calc(var(--u) * 18); height: calc(var(--u) * 18); stroke: #fff; stroke-width: 2.4; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+.tui.tmove, .tui.tdel { position: absolute; width: calc(var(--u) * 32); height: calc(var(--u) * 28); border-radius: calc(var(--u) * 6); background: var(--sel); color: #fff; font: 700 calc(var(--u) * 18)/calc(var(--u) * 28) sans-serif; text-align: center; cursor: grab; }
 .tui.tdel { background: #C62828; cursor: pointer; }
 .tui.tmove:hover, .tui.tdel:hover { filter: brightness(1.15); }
 .tui.grip { background: rgba(60,120,255,.22); cursor: pointer; border-radius: calc(var(--u) * 2); }
@@ -823,6 +825,7 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
     fxSepia: 'M5 4h14v16H5zM5 9h14M5 14h14', fxHue: 'M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18', fxContrast: 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 3a9 9 0 010 18z', fxShadow: 'M5 5h11v11H5zM9 19h10V9', fxGlow: 'M12 8a4 4 0 100 8 4 4 0 000-8zM12 3v2M12 19v2M3 12h2M19 12h2M6 6l1 1M17 17l1 1M18 6l-1 1M7 17l-1 1',
     play: 'M7 4l13 8-13 8z', pause: 'M7 4v16M17 4v16', plus: 'M12 5v14M5 12h14', trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
     up: 'M6 15l6-6 6 6', down: 'M6 9l6 6 6-6', copy: 'M8 8h11v12H8zM5 16V4h11', text: 'M5 6V4h14v2M12 4v16M9 20h6',
+    move: 'M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3', grip: 'M9 5h.01M9 12h.01M9 19h.01M15 5h.01M15 12h.01M15 19h.01',
     shape: 'M4 4h16v16H4z', button: 'M3 8h18v8H3zM8 12h8', image: 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4', minus: 'M5 12h14', hand: 'M8 13V5a1.5 1.5 0 0 1 3 0v6M11 11V3.5a1.5 1.5 0 0 1 3 0V11M14 11V5a1.5 1.5 0 0 1 3 0v8c0 4-2 7-6 7-3 0-4-2-6-5l-1-2a1.5 1.5 0 0 1 2.5-1.5L8 14', fit: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5', close: 'M6 6l12 12M18 6L6 18', cursor: 'M5 4l14 7-6 2-2 6z', razor: 'M4 20L20 4M13 4h7v7M4 4l6 6', magnet: 'M6 4v8a6 6 0 0 0 12 0V4h-4v8a2 2 0 0 1-4 0V4z', split: 'M12 3v18M8 7l-4 5 4 5M16 7l4 5-4 5',
     audio: 'M4 10v4h4l5 4V6L8 10zM16 9a4 4 0 0 1 0 6', video: 'M3 6h13v12H3zM16 10l5-3v10l-5-3', layer: 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5',
     start: 'M6 5v14M18 5L9 12l9 7z', end: 'M18 5v14M6 5l9 7-9 7z', eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z', eyeoff: 'M3 3l18 18M10.6 6.2A9.6 9.6 0 0 1 12 6c6 0 10 6 10 6a17 17 0 0 1-3.2 3.7M6.6 7.6A17 17 0 0 0 2 12s4 6 10 6a9.7 9.7 0 0 0 4-.9', front: 'M8 8h12v12H8zM4 16V4h12', back: 'M4 4h12v12H4zM8 20h12V8',
@@ -1713,8 +1716,8 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     for (let i = 0; i < nr; i++) add('grip', 'top:' + ys[i] + 'px;left:' + U(-14) + ';height:' + (ys[i + 1] - ys[i]) + 'px;width:' + U(10), { title: 'Seleccionar la fila ' + (i + 1) + ' (Mayús para ampliar)', onpointerdown: (ev) => selRange(ev, 'row', i) });
     for (let j = 0; j <= nc; j++) add('plus', 'left:' + xs[j] + 'px;top:' + U(-30), { title: 'Insertar una columna aquí', textContent: '+', onpointerdown: (ev) => { kill(ev); edit(() => { tAddCol(e, j); S.tsel = null; S.tcell = { id: e.id, r: 0, c: j }; }, null, { full: true }); } });
     for (let i = 0; i <= nr; i++) add('plus', 'top:' + ys[i] + 'px;left:' + U(-30), { title: 'Insertar una fila aquí', textContent: '+', onpointerdown: (ev) => { kill(ev); edit(() => { tAddRow(e, i); S.tsel = null; S.tcell = { id: e.id, r: i, c: 0 }; }, null, { full: true }); } });
-    add('tmove', 'right:' + U(40) + ';top:' + U(-34) + ';', { title: 'Arrastra para mover la tabla', textContent: '✥' });
-    add('tdel', 'right:' + U(4) + ';top:' + U(-34) + ';', { title: 'Eliminar la tabla (Ctrl+Z la recupera)', textContent: '✕', onpointerdown: (ev) => { kill(ev); deleteSel(); toast('Tabla eliminada. Ctrl+Z para recuperarla.'); } });
+    add('tmove', 'right:' + U(40) + ';top:' + U(-34) + ';', { title: 'Arrastra para mover la tabla', 'aria-label': 'Mover la tabla' }).append(ic('move'));
+    add('tdel', 'right:' + U(4) + ';top:' + U(-34) + ';', { title: 'Eliminar la tabla (Ctrl+Z la recupera)', 'aria-label': 'Eliminar la tabla', onpointerdown: (ev) => { kill(ev); deleteSel(); toast('Tabla eliminada. Ctrl+Z para recuperarla.'); } }).append(ic('close'));
     const drag1 = (ev, horiz, i) => {
       kill(ev); const hd = ev.currentTarget; hd.setPointerCapture(ev.pointerId);
       const sc = S.scale || 1, p0 = horiz ? ev.clientX : ev.clientY, tot = horiz ? W : Hh;
@@ -1833,7 +1836,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     closeShapes(true);
     const r = anchor.getBoundingClientRect();
     const pop = h('div', { id: 'bgPop', class: 'newpop', onclick: (ev) => ev.stopPropagation(), style: 'left:' + Math.max(8, Math.min(r.left, innerWidth - 300)) + 'px;top:' + (r.bottom + 4) + 'px;padding:10px;min-width:260px' });
-    const fill = () => { pop.textContent = ''; pop.append(h('div', { class: 'pophead' }, h('b', null, 'Fondo de la diapositiva'), h('button', { type: 'button', 'aria-label': 'Cerrar', title: 'Cerrar (Esc)', onclick: () => pop.remove() }, '✕')), ...bgControls(fill)); };
+    const fill = () => { pop.textContent = ''; pop.append(h('div', { class: 'pophead' }, h('b', null, 'Fondo de la diapositiva'), h('button', { type: 'button', 'aria-label': 'Cerrar', title: 'Cerrar (Esc)', onclick: () => pop.remove() }, ic('close'))), ...bgControls(fill)); };
     fill(); document.body.append(pop);
   }
   const vids = {};
@@ -2573,7 +2576,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const pop = h('div', { id, class: 'newpop', onclick: (ev) => ev.stopPropagation(), style: pos });
     const closeSub = () => { const o = document.getElementById('subPop'); if (o) o.remove(); };
     const run = (fn, ev) => { if (!opts.sticky) { pop.remove(); closeSub(); } fn(ev); };
-    if (opts.sticky) pop.append(h('div', { class: 'pophead' }, h('b', null, opts.title || ''), h('button', { type: 'button', 'aria-label': 'Cerrar', title: 'Cerrar (Esc)', onclick: () => pop.remove() }, '✕')));
+    if (opts.sticky) pop.append(h('div', { class: 'pophead' }, h('b', null, opts.title || ''), h('button', { type: 'button', 'aria-label': 'Cerrar', title: 'Cerrar (Esc)', onclick: () => pop.remove() }, ic('close'))));
     // Un elemento con submenú: {sub: [icono, texto, [elementos…]]} → se abre a la derecha.
     const openSub = (btn, list) => {
       closeSub();
@@ -5123,7 +5126,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       const lista = h('div', { class: 'bklist' });
       if (!b.slides.length) lista.append(h('div', { class: 'bkempty' }, ic('layer'), h('b', null, 'Este banco está vacío'), h('span', null, 'Empieza añadiendo una pregunta con las tarjetas de arriba.')));
       b.slides.forEach((sl, i) => {
-        const q = sl.question, grip = h('span', { class: 'bkgrip', title: 'Arrastra para cambiar el orden', 'aria-hidden': 'true' }, '⋮⋮');
+        const q = sl.question, grip = h('span', { class: 'bkgrip', title: 'Arrastra para cambiar el orden', 'aria-hidden': 'true' }, ic('grip'));
         if (!q) {
           const c = h('article', { class: 'bkcard bad' }, h('div', { class: 'bknum' }, String(i + 1)), thumbOf(sl), h('div', { class: 'bkmain' }, h('div', { class: 'bktitle' }, sl.title || 'Diapositiva'), h('div', { class: 'bkwarnline' }, 'No es una pregunta: no se usará en el sorteo')),
             h('div', { class: 'bkacts' }, iconBtn('trash', 'Quitar del banco', () => edit(() => { b.slides.splice(b.slides.indexOf(sl), 1); }, null, { full: true }), 'small danger')));
@@ -5144,7 +5147,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
         makeSortable(card, 'bkq', sl.id, (from, to) => edit(() => { moveIn(b.slides, from, to); }, null, { full: true }), grip);
         lista.append(card);
       });
-      const cab = h('div', { class: 'bkh3' }, h('h3', null, h('span', { class: 'bkn1' }, '3'), 'Preguntas del banco', h('small', null, qs.length ? 'Arrastra ⋮⋮ para cambiar el orden' : '')));
+      const cab = h('div', { class: 'bkh3' }, h('h3', null, h('span', { class: 'bkn1' }, '3'), 'Preguntas del banco', h('small', null, qs.length ? 'Arrastra el asa de cada pregunta para cambiar el orden' : '')));
       if (raros.length) cab.append(h('div', { class: 'bkwarn' }, h('span', null, 'Hay ' + raros.length + (raros.length === 1 ? ' diapositiva' : ' diapositivas') + ' que no son preguntas. Un banco solo guarda preguntas.'),
         h('button', { class: 'btn small', type: 'button', onclick: () => edit(() => { b.slides = b.slides.filter((x) => x.question); }, null, { full: true }) }, 'Quitar las que no son preguntas')));
       box.append(h('section', { class: 'bksec list' }, cab, lista));
@@ -5942,7 +5945,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       const rbtns = Object.keys(RT).map((k) => h('button', { class: 'sbtn', type: 'button', 'data-sec': k, title: 'Mostrar u ocultar: ' + RT[k], onclick: () => api.r(k) }, RT[k]));
       app.append(h('div', { class: 'sidestrip ls' }, lbtn), h('div', { class: 'sidestrip rs' }, rbtns));
       const heads = (box, side) => {
-        const pin = h('button', { class: 'btn small', type: 'button', onclick: () => { cfg[side].pin = !cfg[side].pin; save(); apply(); } }), x = h('button', { class: 'btn small', type: 'button', title: 'Plegar', onclick: () => { cfg[side].open = false; save(); apply(); } }, '✕');
+        const pin = h('button', { class: 'btn small', type: 'button', onclick: () => { cfg[side].pin = !cfg[side].pin; save(); apply(); } }), x = h('button', { class: 'btn small', type: 'button', title: 'Plegar', onclick: () => { cfg[side].open = false; save(); apply(); } }, ic('close'));
         box.append(pin, x); return pin;
       };
       const lpin = heads($('#lBtns'), 'l'), rpin = heads($('#rBtns'), 'r');
