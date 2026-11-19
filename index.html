@@ -184,6 +184,8 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 .bktab select { width: 100%; min-width: 104px; }
 .bkq { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .bkq small { display: block; color: var(--muted); font-size: 11.5px; }
+.bkwarn { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: rgba(232,64,57,.14); border: 1px solid var(--accent, #E84039); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+.bkbad td { background: rgba(232,64,57,.12); }
 .bkq .th { flex: none; width: 112px; height: 63px; overflow: hidden; border: 1px solid var(--line); border-radius: 5px; background: #fff; position: relative; pointer-events: none; }
 .bkq .th > div { position: absolute; left: 0; top: 0; transform-origin: 0 0; zoom: .718; }
 .dlg.pub:has(.bkwin), .dlg.pub:has(.imp), .dlg.pub:has(.formview) { width: min(900px, calc(100vw - 32px)); }
@@ -1800,7 +1802,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
   const parseGaps = (t) => { t = String(t || ''); const segs = []; let last = 0; t.replace(/\{([^{}]+)\}/g, (m, g, i) => { if (i > last) segs.push({ v: t.slice(last, i) }); segs.push({ alts: g.split('|').map((x) => x.trim()).filter(Boolean) }); last = i + m.length; return m; }); if (last < t.length) segs.push({ v: t.slice(last) }); return segs; };
   function mockSpecial(sl) {
     if (sl.type === 'draw') {
-      const bs = bankOf((sl.draw || {}).bank), n = bs ? bs.slides.length : 0, k = (sl.draw || {}).pick > 0 ? Math.min(sl.draw.pick, n) : n;
+      const bs = bankOf((sl.draw || {}).bank), n = nq(bs), k = (sl.draw || {}).pick > 0 ? Math.min(sl.draw.pick, n) : n;
       const m = h('div', { class: 'drawmock', style: 'position:absolute;left:' + Math.round(course.width * 0.12) + 'px;top:' + Math.round(course.height * 0.3) + 'px;width:' + Math.round(course.width * 0.76) + 'px;height:' + Math.round(course.height * 0.4) + 'px' });
       m.append(h('b', null, bs ? 'Extraer ' + k + (k === 1 ? ' pregunta' : ' preguntas') + ' del banco «' + bs.title + '»' : 'Elige un banco de preguntas'), h('span', null, 'Esta diapositiva no se ve: el curso la sustituye por las preguntas sorteadas.'));
       return m;
@@ -2500,20 +2502,35 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     pop.style.top = Math.max(4, Math.min(y, innerHeight - r.height - 6)) + 'px';
     pop.style.maxHeight = (innerHeight - 12) + 'px'; pop.style.visibility = '';
   }
-  function insertSlideKind(kind) {
-    if (kind === 'draw' && !bankScenes().length) { toast('Primero crea un banco de preguntas.'); creaBancoDlg(); return; }
+  const nq = (b) => (b && b.slides ? b.slides.filter((x) => x.question).length : 0);
+  const QKINDS = ['choice', 'multi', 'tf', 'text', 'gaps', 'bank', 'match', 'likert', 'svchoice', 'svmulti', 'svtext'];
+  function insertSlideKind(kind, bankId) {
+    if (kind === 'draw' && !bankScenes().length) { toast('Primero crea un banco de preguntas.'); creaBancoDlg((id) => { abreBanco(id); }); return; }
+    if (isBank(course.scenes[S.sc]) && kind !== 'draw' && QKINDS.indexOf(kind) < 0) kind = 'choice';
+    if (kind === 'draw' && isBank(course.scenes[S.sc])) {
+      // La extracción va en la historia, no dentro de un banco.
+      const j = course.scenes.map((x, i) => (isBank(x) ? -1 : i)).filter((i) => i >= 0)[0];
+      if (j === undefined) { toast('Crea primero una escena normal.', true); return; }
+      S.sc = j; S.si = Math.max(0, course.scenes[j].slides.length - 1);
+    }
     let nuevo = null;
     edit(() => {
       const sl = slideFromKind(kind); nuevo = sl;
       if (isBank(course.scenes[S.sc]) && sl.question) disenaSlide(sl);
       slides().splice(S.si + 1, 0, sl); S.si++; S.ctx = 'base'; S.sel = null; S.t = 0;
+      if (sl.type === 'draw' && bankId) sl.draw.bank = bankId;
       if (sl.type === 'draw' && sl.draw.bank) sl.title = 'Extraer de «' + bankOf(sl.draw.bank).title + '»';
     }, null, { full: true });
     if (kind === 'draw' && nuevo) abreExtraccion(nuevo.id);
   }
   function newSlideMenu(anchor) {
-    const items = [['template', 'Desde una plantilla…', abrePlantillas]];
-    SLIDE_KINDS.forEach((k) => { if (!k[1]) items.push([k[0]]); else items.push([KIND_IC[k[1]] || 'blank', k[0], () => insertSlideKind(k[1])]); });
+    const enBanco = isBank(course.scenes[S.sc]);
+    const items = enBanco ? [['Solo preguntas en un banco']] : [['plus', 'Extraer preguntas de un banco…', () => insertSlideKind('draw')], ['template', 'Desde una plantilla…', abrePlantillas]];
+    SLIDE_KINDS.forEach((k) => {
+      if (enBanco && (k[1] === 'content' || k[1] === 'free' || k[1] === 'results' || k[1] === 'draw' || k[0] === 'Diapositiva' || k[0] === 'Otras')) return;
+      if (!enBanco && k[1] === 'draw') return;
+      if (!k[1]) items.push([k[0]]); else items.push([KIND_IC[k[1]] || 'blank', k[0], () => insertSlideKind(k[1])]);
+    });
     ribPop('newPop', anchor, items);
   }
   function dupSlide() {
@@ -4785,10 +4802,18 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     edit(() => { const ids = new Set(course.scenes.map((x) => x.id)); id = newId('banco', ids); course.scenes.push({ id, title: nombre, bank: true, slides: [] }); }, null, { full: true });
     return id;
   }
-  function creaBancoDlg(luego) { pidoNombre('Nuevo banco de preguntas', 'Escribe el nombre del nuevo banco de preguntas:', 'Banco de preguntas ' + (bankScenes().length + 1), (v) => { const id = creaBanco(v); if (luego) luego(id); else abreBanco(id); }); }
+  function preguntaColocar(id) {
+    const done = () => document.querySelectorAll('.dlgback').forEach((d) => d.remove());
+    const back = h('div', { class: 'dlgback', onclick: (ev) => { if (ev.target === back) done(); } }, h('div', { class: 'dlg', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Colocar el banco en el curso' },
+      h('h3', null, 'Banco creado'), h('p', null, 'Un banco no se ve en el curso hasta que añades una diapositiva «Extraer preguntas de un banco» en tu historia. ¿La añado ahora después de la diapositiva que tienes seleccionada?'),
+      h('div', { class: 'dlgbtns' }, h('button', { class: 'btn', type: 'button', onclick: () => { done(); abreBanco(id); } }, 'No, rellenar el banco'),
+        h('button', { class: 'btn primary', type: 'button', onclick: () => { done(); insertSlideKind('draw', id); } }, 'Sí, añadirla'))));
+    document.body.append(back);
+  }
+  function creaBancoDlg(luego) { pidoNombre('Nuevo banco de preguntas', 'Escribe el nombre del nuevo banco de preguntas:', 'Banco de preguntas ' + (bankScenes().length + 1), (v) => { const id = creaBanco(v); if (luego) luego(id); else preguntaColocar(id); }); }
   function bancosMenu(anchor) {
     const items = [['plus', 'Nueva extracción del banco…', () => insertSlideKind('draw')], ['Tus bancos']];
-    bankScenes().forEach((b) => items.push(['layer', b.title + ' (' + b.slides.length + ')', () => abreBanco(b.id)]));
+    bankScenes().forEach((b) => items.push(['layer', b.title + ' (' + nq(b) + ')', () => abreBanco(b.id)]));
     if (!bankScenes().length) items.push(['Todavía no hay ninguno']);
     items.push(['plus', 'Crear banco de preguntas…', () => creaBancoDlg()], ['edit', 'Administrar bancos de preguntas…', administraBancos]);
     ribPop('bancoPop', anchor, items);
@@ -4800,7 +4825,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       bankScenes().forEach((b, i) => {
         const nm = h('input', { type: 'text', value: b.title, 'aria-label': 'Nombre del banco' }); nm.addEventListener('input', () => edit(() => { b.title = nm.value; }, 'bkn' + b.id));
         const usos = allSlides().filter((x) => x.type === 'draw' && x.draw && x.draw.bank === b.id).length;
-        box.append(h('div', { class: 'bkrow' }, nm, h('span', { class: 'bkcount' }, b.slides.length + ' preguntas · usado en ' + usos + (usos === 1 ? ' extracción' : ' extracciones')),
+        box.append(h('div', { class: 'bkrow' }, nm, h('span', { class: 'bkcount' }, nq(b) + ' preguntas · usado en ' + usos + (usos === 1 ? ' extracción' : ' extracciones')),
           h('button', { class: 'btn small', type: 'button', onclick: () => { document.querySelector('.dlgback') && document.querySelector('.dlgback').remove(); abreBanco(b.id); } }, 'Abrir'),
           iconBtn('trash', 'Eliminar', () => edit(() => { course.scenes.splice(course.scenes.indexOf(b), 1); }, null, { full: true }), 'small danger')));
       });
@@ -4814,7 +4839,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       const b = bankOf(id), box = h('div', { class: 'bkwin' });
       if (!b) { box.append(h('p', { class: 'hint' }, 'Este banco ya no existe.')); return box; }
       const nm = h('input', { type: 'text', value: b.title, 'aria-label': 'Nombre del banco', style: 'font-weight:700;font-size:15px' }); nm.addEventListener('input', () => edit(() => { b.title = nm.value; }, 'bkn' + b.id));
-      box.append(h('div', { class: 'bkrow' }, nm, h('span', { class: 'bkcount' }, b.slides.length + ' preguntas')));
+      box.append(h('div', { class: 'bkrow' }, nm, h('span', { class: 'bkcount' }, nq(b) + ' preguntas')));
       box.append(h('div', { class: 'bkadd' }, h('b', null, 'Añadir pregunta calificada'), KIND_ADD.map((k) => h('button', { class: 'btn small', type: 'button', onclick: () => {
         let nuevo = null;
         edit(() => { const sl = slideFromKind(k[0]); b.slides.push(sl); disenaSlide(sl); const t = 'Pregunta ' + b.slides.length; sl.title = t; if (sl.elements[0]) sl.elements[0].text = t; nuevo = sl; }, null, { full: true });
@@ -4825,8 +4850,14 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       if (!b.slides.length) { box.append(h('p', { class: 'hint' }, 'Este banco está vacío. Añade preguntas con los botones de arriba o importa un Excel.')); return box; }
       const tb = h('table', { class: 'bktab' }, h('thead', null, h('tr', null, ['Pregunta', 'Intentos', 'Puntos', 'Sorteo', ''].map((t) => h('th', null, t)))));
       const body = h('tbody');
+      const raros = b.slides.filter((x) => !x.question);
       b.slides.forEach((sl, i) => {
         const q = sl.question;
+        if (!q) {
+          body.append(h('tr', { class: 'bkbad' }, h('td', { colspan: 4 }, h('div', { class: 'bkq' }, thumbOf(sl), h('div', null, h('b', null, (i + 1) + '. ' + (sl.title || 'Diapositiva')), h('small', null, 'No es una pregunta: no se usará en el sorteo')))),
+            h('td', null, h('div', { class: 'bkact' }, iconBtn('trash', 'Quitar del banco', () => edit(() => { b.slides.splice(b.slides.indexOf(sl), 1); }, null, { full: true }), 'small danger')))));
+          return;
+        }
         const num = (key, get, set) => { const inp = h('input', { type: 'number', min: 0, value: get(), style: 'width:64px', 'aria-label': key + ' de ' + (sl.title || sl.id) }); inp.addEventListener('input', () => { const v = Number(inp.value); if (!isNaN(v)) edit(() => set(v), key + sl.id); }); return inp; };
         const sm = h('select', { 'aria-label': 'Sorteo de ' + (sl.title || sl.id) }, [['', 'Al azar'], ['always', 'Siempre'], ['never', 'Nunca']].map((o) => h('option', { value: o[0], selected: (q.bankMode || '') === o[0] ? true : null }, o[1])));
         sm.addEventListener('change', () => edit(() => { if (sm.value) q.bankMode = sm.value; else delete q.bankMode; }, null, { full: true }));
@@ -4841,7 +4872,10 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
             h('button', { class: 'btn small', type: 'button', title: 'Abrir la pregunta en el editor para cambiar su diseño', onclick: () => { const d = document.querySelector('.dlgback'); d && d.remove(); gotoSlideId(sl.id); } }, 'Diapositiva'),
             mv, iconBtn('trash', 'Eliminar', () => edit(() => { b.slides.splice(b.slides.indexOf(sl), 1); }, null, { full: true }), 'small danger')))));
       });
-      tb.append(body); box.append(h('div', { class: 'bkscroll' }, tb));
+      tb.append(body);
+      if (raros.length) box.append(h('div', { class: 'bkwarn' }, h('span', null, 'Hay ' + raros.length + (raros.length === 1 ? ' diapositiva' : ' diapositivas') + ' que no son preguntas. Un banco solo guarda preguntas.'),
+        h('button', { class: 'btn small', type: 'button', onclick: () => edit(() => { b.slides = b.slides.filter((x) => x.question); }, null, { full: true }) }, 'Quitar las que no son preguntas')));
+      box.append(h('div', { class: 'bkscroll' }, tb));
       return box;
     });
   }
@@ -4861,7 +4895,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
   }
   function drawSection(sl) {
     const d = sl.draw = sl.draw || { bank: '', pick: 0, random: true }, bs = bankOf(d.bank);
-    return sec('Extraer de un banco', h('div', { class: 'hint' }, bs ? 'Extrae ' + (d.pick > 0 ? Math.min(d.pick, bs.slides.length) : bs.slides.length) + ' de las ' + bs.slides.length + ' preguntas del banco «' + bs.title + '»' + (d.random === false ? ' en orden.' : ', al azar.') : 'Elige un banco de preguntas.'),
+    return sec('Extraer de un banco', h('div', { class: 'hint' }, bs ? 'Extrae ' + (d.pick > 0 ? Math.min(d.pick, nq(bs)) : nq(bs)) + ' de las ' + nq(bs) + ' preguntas del banco «' + bs.title + '»' + (d.random === false ? ' en orden.' : ', al azar.') : 'Elige un banco de preguntas.'),
       h('button', { class: 'btn small', type: 'button', onclick: () => abreExtraccion(sl.id) }, ic('edit'), 'Editar la extracción de preguntas'),
       bs ? h('button', { class: 'btn small', type: 'button', style: 'margin-left:6px', onclick: () => abreBanco(bs.id) }, 'Editar el banco') : null);
   }
@@ -4871,12 +4905,12 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       if (!sl) return box;
       const d = sl.draw = sl.draw || { bank: '', pick: 0, random: true }, bs = bankOf(d.bank);
       const sel = h('select', { 'aria-label': 'Banco de preguntas' }, [h('option', { value: '' }, '— elige un banco —')].concat(bankScenes().map((b) => h('option', { value: b.id, selected: b.id === d.bank ? true : null }, b.title))));
-      sel.addEventListener('change', () => edit(() => { d.bank = sel.value; const b = bankOf(sel.value); sl.title = b ? 'Extraer de «' + b.title + '»' : 'Extraer de un banco'; if (b && d.pick > b.slides.length) d.pick = 0; }, null, { full: true }));
+      sel.addEventListener('change', () => edit(() => { d.bank = sel.value; const b = bankOf(sel.value); sl.title = b ? 'Extraer de «' + b.title + '»' : 'Extraer de un banco'; if (b && d.pick > nq(b)) d.pick = 0; }, null, { full: true }));
       box.append(h('div', { class: 'bkrow' }, h('label', { class: 'bkpick' }, 'Banco de preguntas', sel), bs ? h('button', { class: 'btn small', type: 'button', onclick: () => { document.querySelectorAll('.dlgback').forEach((x) => x.remove()); abreBanco(bs.id); } }, 'Editar banco') : null,
         h('button', { class: 'btn small', type: 'button', onclick: () => { document.querySelectorAll('.dlgback').forEach((x) => x.remove()); creaBancoDlg((id) => { edit(() => { sl.draw.bank = id; sl.title = 'Extraer de «' + bankOf(id).title + '»'; }, null, { full: true }); abreBanco(id); }); } }, ic('plus'), 'Nuevo banco')));
       box.append(checkField('Extraer las preguntas al azar', () => d.random !== false, (v) => { if (v) delete d.random; else d.random = false; }));
       if (bs) {
-        const n = bs.slides.length, cnt = h('select', { 'aria-label': 'Cuántas preguntas incluir' }, [h('option', { value: '0' }, 'Todas (' + n + ')')].concat(Array.from({ length: Math.max(0, n - 1) }, (_, i) => h('option', { value: String(i + 1), selected: d.pick === i + 1 ? true : null }, String(i + 1)))));
+        const n = nq(bs), cnt = h('select', { 'aria-label': 'Cuántas preguntas incluir' }, [h('option', { value: '0' }, 'Todas (' + n + ')')].concat(Array.from({ length: Math.max(0, n - 1) }, (_, i) => h('option', { value: String(i + 1), selected: d.pick === i + 1 ? true : null }, String(i + 1)))));
         cnt.value = String(d.pick > 0 && d.pick < n ? d.pick : 0);
         cnt.addEventListener('change', () => edit(() => { d.pick = Number(cnt.value); }, null, { full: true }));
         box.append(h('label', { class: 'bkpick', style: 'margin:6px 0' }, 'Incluir', cnt, 'preguntas'));
@@ -4884,6 +4918,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
         else {
           const tb = h('table', { class: 'bktab' }, h('thead', null, h('tr', null, ['Pregunta', 'Incluir en el sorteo'].map((t) => h('th', null, t))))), body = h('tbody');
           bs.slides.forEach((q, i) => {
+            if (!q.question) return;
             const sm = h('select', { 'aria-label': 'Sorteo de ' + (q.title || q.id) }, [['', 'Al azar'], ['always', 'Siempre'], ['never', 'Nunca']].map((o) => h('option', { value: o[0], selected: (q.question.bankMode || '') === o[0] ? true : null }, o[1])));
             sm.addEventListener('change', () => edit(() => { if (sm.value) q.question.bankMode = sm.value; else delete q.question.bankMode; }, null, { full: true }));
             body.append(h('tr', null, h('td', null, h('div', { class: 'bkq' }, thumbOf(q), h('div', null, h('b', null, (i + 1) + '. ' + (q.question.prompt || q.title || '').slice(0, 80)), h('small', null, tipoDe(q))))), h('td', null, sm)));
