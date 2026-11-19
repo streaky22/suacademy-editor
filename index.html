@@ -385,7 +385,20 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .stlinks circle.hd { pointer-events: all; cursor: move; fill: var(--panel); stroke-width: 2.5; }
 .modal.story { padding: 0 0 10px; gap: 0; }
 .stmain { padding: 10px 10px 0; }
-.stribbon { display: flex; align-items: stretch; background: var(--panel); border-bottom: 1px solid var(--line); flex: none; overflow-x: auto; min-height: 100px; }
+.galeria { width: min(580px, 94vw); padding: 8px 12px 12px; overflow: auto; z-index: 400; }
+.galeria h4 { margin: 10px 0 6px; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 8px; }
+.newpop.galeria button.tcard { display: flex; width: auto; text-align: center; padding: 10px 6px 8px; border: 1px solid var(--line); background: var(--panel-2); border-radius: 10px; }
+.newpop.galeria button.tcard:hover { background: var(--brand-soft); border-color: var(--brand); }
+.newpop.galeria h4 { margin: 10px 2px 6px; }
+.tcard { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; padding: 10px 6px 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); font-weight: 600; font-size: 12.5px; text-align: center; line-height: 1.2; }
+.tcard svg, .tcard svg.ic { width: 30px; height: 30px; stroke: var(--brand); fill: none; flex: none; }
+.tcard:hover, .tcard:focus-visible { border-color: var(--brand); background: var(--brand-soft); }
+.bankbadge { display: inline-flex; align-items: center; gap: 4px; background: var(--brand); color: var(--brand-ink, #fff); border-radius: 10px; padding: 1px 8px 1px 6px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.bankbadge svg { width: 13px; height: 13px; stroke: currentColor; fill: none; }
+.stribbon .rcolumn { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.stribbon .rtabs { padding-left: 6px; }
+.stribbon { display: flex; align-items: stretch; background: var(--panel); border-bottom: 1px solid var(--line); flex: none; overflow-x: auto; min-height: 138px; }
 .stribbon .rpanes { display: flex; align-items: stretch; padding: 4px 4px 2px; }
 .stribbon .rpin { align-items: center; padding-right: 8px; }
 .stribbon .ttl { align-self: center; font-weight: 800; padding: 0 12px; color: var(--brand); white-space: nowrap; }
@@ -2528,15 +2541,32 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     }, null, { full: true });
     if (kind === 'draw' && nuevo) abreExtraccion(nuevo.id);
   }
+  // Galería de tipos de diapositiva: tarjetas con icono, agrupadas. En un banco solo preguntas.
   function newSlideMenu(anchor) {
+    if ($('#newPop')) return closeShapes();
+    closeShapes(true);
     const enBanco = isBank(course.scenes[S.sc]);
-    const items = enBanco ? [['Solo preguntas en un banco']] : [['plus', 'Extraer preguntas de un banco…', () => insertSlideKind('draw')], ['template', 'Desde una plantilla…', abrePlantillas]];
+    S.si = Math.min(S.si, Math.max(0, slides().length - 1));
+    const pop = h('div', { id: 'newPop', class: 'newpop galeria', onclick: (ev) => ev.stopPropagation() });
+    const card = (icon, label, fn) => h('button', { class: 'tcard', type: 'button', title: label, onclick: () => { pop.remove(); fn(); } }, ic(icon), h('span', null, label));
+    const grupos = [];
+    let cur = null;
     SLIDE_KINDS.forEach((k) => {
-      if (enBanco && (k[1] === 'content' || k[1] === 'free' || k[1] === 'results' || k[1] === 'draw' || k[0] === 'Diapositiva' || k[0] === 'Otras')) return;
-      if (!enBanco && k[1] === 'draw') return;
-      if (!k[1]) items.push([k[0]]); else items.push([KIND_IC[k[1]] || 'blank', k[0], () => insertSlideKind(k[1])]);
+      if (!k[1]) { cur = { t: k[0], c: [] }; grupos.push(cur); return; }
+      if (!cur) { cur = { t: 'Diapositiva', c: [] }; grupos.push(cur); }
+      if (enBanco && (k[1] === 'content' || k[1] === 'free' || k[1] === 'results' || k[1] === 'draw')) return;
+      if (k[1] === 'draw') return;
+      cur.c.push(card(KIND_IC[k[1]] || 'blank', k[0].replace('Pregunta libre (con tus objetos y accionadores)', 'Pregunta libre'), () => insertSlideKind(k[1])));
     });
-    ribPop('newPop', anchor, items);
+    if (enBanco) pop.append(h('h4', null, 'Solo preguntas en un banco'));
+    else {
+      pop.append(h('h4', null, 'Banco de preguntas'), h('div', { class: 'tgrid' }, card('layer', 'Extraer preguntas de un banco…', () => insertSlideKind('draw'))));
+      grupos[0].c.unshift(card('template', 'Desde una plantilla…', abrePlantillas));
+    }
+    grupos.forEach((g) => { if (!g.c.length) return; pop.append(h('h4', null, g.t), h('div', { class: 'tgrid' }, g.c)); });
+    const r = anchor.getBoundingClientRect(), below = !anchor.closest('#slideFoot');
+    pop.style.cssText = 'left:' + Math.max(8, Math.min(r.left, innerWidth - 580)) + 'px;' + (below ? 'top:' + (r.bottom + 4) + 'px;max-height:calc(100vh - ' + (r.bottom + 16) + 'px)' : 'top:' + Math.max(8, r.top - 8) + 'px;transform:translateY(-100%);max-height:calc(100vh - 24px)');
+    document.body.append(pop);
   }
   function dupSlide() {
     if (dupSlides()) return;
@@ -3677,7 +3707,18 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     m.append(b('tree', 'Modo historia', st, openStory), b('newslide', 'Modo diapositiva', !st, closeStory));
   }
   function openStory() { $('#story').hidden = false; paintStory(); paintModeSw(); }
-  function closeStory() { $('#story').hidden = true; paintModeSw(); }
+  function selectSceneStory(i) {
+    const sc = course.scenes[i]; if (!sc || S.sc === i) return;
+    S.slm = [];
+    if (sc.slides.length) { gotoSlideId(sc.slides[0].id, true); return; }
+    S.sc = i; S.si = 0; S.ctx = 'base'; S.sel = null;
+    document.querySelectorAll('#stBody .stscene').forEach((n) => n.classList.toggle('cur', Number(n.dataset.scene) === i));
+    paintStoryRibbon(); paintSlSel();
+  }
+  function closeStory() {
+    if (!course.scenes[S.sc] || !course.scenes[S.sc].slides.length) { S.sc = Math.max(0, course.scenes.findIndex((x) => !x.bank && x.slides.length)); S.si = 0; S.ctx = 'base'; S.sel = null; refreshAll(); }
+    $('#story').hidden = true; paintModeSw();
+  }
   const isStart = (si, k, sl) => (course.start ? course.start === sl.id : si === 0 && k === 0);
   function thumbOf(sl) {
     const W = course.width, H = course.height, k = 156 / W;
@@ -3843,17 +3884,44 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
   function paintHand() { const b = $('#stBody'); if (b) b.classList.toggle('hand', !!S.stHand || !!S.space); }
   function paintStoryRibbon() {
     const r = $('#stRibbon'); r.textContent = '';
-    const si = S.sc, isS = startIdx() === si;
-    r.append(
-      h('div', { class: 'modeslot' }, h('div', { class: 'slotcol' }, h('div', { class: 'quickbar', id: 'quick2' }), h('div', { class: 'slotrow' }, h('span', { class: 'tgslot' }), h('div', { class: 'modesw', role: 'group', 'aria-label': 'Modo de trabajo' })))),
-      h('div', { class: 'rpanes' },
+    const si = S.sc, isS = startIdx() === si, enBanco = isBank(course.scenes[si]);
+    const T = S.stRib = S.stRib || 'hist';
+    const tab = (k, label) => h('button', { class: 'rtab' + (T === k ? ' on' : ''), type: 'button', onclick: () => { S.stRib = k; paintStoryRibbon(); } }, label);
+    const tipo = (icon, label, kind, title) => rbtn(icon, label, () => { S.si = Math.min(S.si, Math.max(0, slides().length - 1)); insertSlideKind(kind); }, { title: title || ('Insertar: ' + label) });
+    const grp = [];
+    if (T === 'hist') {
+      grp.push(
         rgroup('Escenas', rbtn('plus', 'Nueva escena', newScene, { title: 'Añadir una escena al curso' }),
           rbtn('play', 'Escena inicial', () => setStartScene(si), { title: 'El curso empieza por la primera diapositiva de esta escena', cls: isS ? 'primary' : '' }),
           rbtn('edit', 'Nombre', () => { const n = document.querySelector('#stBody .sh .nm[data-sn="' + si + '"]'); if (n) renameScene(si, n); }, { title: 'Cambiar el nombre de la escena' }),
           rbtn('trash', 'Eliminar escena', () => deleteScene(si), { title: 'Eliminar la escena seleccionada' })),
-        rgroup('Diapositiva', rsm('newslide', 'Nueva diapositiva ▾', (ev) => { ev.stopPropagation(); S.si = Math.min(S.si, Math.max(0, slides().length - 1)); newSlideMenu(ev.currentTarget); }, { title: 'Añadir una diapositiva después de la seleccionada: eliges el tipo' }),
-          rbtn('copy', 'Duplicar', dupSlide, { title: 'Duplicar la diapositiva (o las seleccionadas)' }), rbtn('trash', 'Eliminar', delSlide, { title: 'Eliminar la diapositiva (o las seleccionadas)' })),
-        rgroup('Selección', rbtn('copy', 'Copiar', () => { if (!copySlides()) copySlideXC(); }, { title: 'Copiar la diapositiva o las seleccionadas' }), rbtn('cut', 'Cortar', cutSlides, { title: 'Cortar la diapositiva o las seleccionadas' }), rbtn('paste', 'Pegar', pasteSlideXC, { title: 'Pegar después de la diapositiva seleccionada' }), h('div', { class: 'slcol' }, slCountNode(), h('span', { class: 'hint' }, 'Ctrl+clic · Mayús+clic · arrastra un recuadro')))));
+        rgroup('Nueva diapositiva', enBanco ? null : tipo('newslide', 'En blanco', 'content', 'Diapositiva de contenido en blanco'), enBanco ? null : rbtn('template', 'Plantilla', abrePlantillas, { title: 'Nueva diapositiva desde una plantilla' }),
+          tipo('radio', 'Opción única', 'choice'), tipo('check', 'Múltiple', 'multi', 'Respuesta múltiple'), tipo('tf', 'Verdadero o falso', 'tf'), tipo('textcur', 'Rellenar', 'gaps', 'Rellenar huecos'), tipo('likert', 'Relacionar', 'match', 'Relacionar concepto y definición'),
+          enBanco ? null : tipo('chart', 'Resultados', 'results'), enBanco ? null : tipo('layer', 'Extraer de banco', 'draw', 'Extraer preguntas de un banco'),
+          rbtn('arrange', 'Todos los tipos ▾', (ev) => { ev.stopPropagation(); newSlideMenu(ev.currentTarget); }, { title: 'Ver todos los tipos de diapositiva' })),
+        rgroup('Diapositiva', rbtn('copy', 'Duplicar', dupSlide, { title: 'Duplicar la diapositiva (o las seleccionadas)' }), rbtn('trash', 'Eliminar', delSlide, { title: 'Eliminar la diapositiva (o las seleccionadas)' })),
+        rgroup('Selección', rbtn('copy', 'Copiar', () => { if (!copySlides()) copySlideXC(); }, { title: 'Copiar la diapositiva o las seleccionadas' }), rbtn('cut', 'Cortar', cutSlides, { title: 'Cortar la diapositiva o las seleccionadas' }), rbtn('paste', 'Pegar', pasteSlideXC, { title: 'Pegar después de la diapositiva seleccionada' }), h('div', { class: 'slcol' }, slCountNode(), h('span', { class: 'hint' }, 'Ctrl+clic · Mayús+clic · arrastra un recuadro'))));
+    } else if (T === 'bancos') {
+      const bs = bankScenes();
+      grp.push(
+        rgroup('Bancos', rbtn('plus', 'Crear banco', () => creaBancoDlg(), { title: 'Crear un banco de preguntas nuevo' }), rbtn('layer', 'Nueva extracción', () => { S.si = Math.min(S.si, Math.max(0, slides().length - 1)); insertSlideKind('draw'); }, { title: 'Añadir a la historia una diapositiva que extrae preguntas de un banco' }),
+          rbtn('edit', 'Administrar', administraBancos, { title: 'Renombrar, abrir o eliminar bancos' }), rbtn('doc', 'Importar preguntas', abreImportar, { title: 'Crear preguntas desde Excel, CSV o Google Sheets' })),
+        rgroup('Tus bancos', ...(bs.length ? bs.map((b) => rbtn('layer', b.title + ' (' + nq(b) + ')', () => abreBanco(b.id), { title: 'Abrir el banco «' + b.title + '»: ' + nq(b) + ' preguntas' })) : [h('div', { class: 'hint', style: 'align-self:center;padding:0 12px' }, 'Todavía no hay bancos. Pulsa «Crear banco».')])));
+    } else if (T === 'curso') {
+      const gs = cursoGroups(true); gs.forEach((g) => g.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'))); grp.push(...gs);
+    } else if (T === 'ver') {
+      grp.push(rgroup('Zoom', rbtn('minus', 'Alejar', () => setStZoom(stZ() - 0.1), { title: 'Alejar' }), rbtn('plus', 'Acercar', () => setStZoom(stZ() + 0.1), { title: 'Acercar (Ctrl + rueda)' }), rbtn('fit', 'Ajustar', fitStory, { title: 'Ajustar a la pantalla' })),
+        rgroup('Lienzo', rbtn('hand', 'Mano', () => { S.stHand = !S.stHand; paintStoryRibbon(); paintHand(); }, { title: 'Mover el lienzo arrastrando (o mantén Espacio)', cls: S.stHand ? 'primary' : '' }),
+          rbtn('arrange', course.edgeStyle === 'curve' ? 'Flechas curvas' : 'Flechas angulares', () => { edit(() => { course.edgeStyle = course.edgeStyle === 'curve' ? 'angle' : 'curve'; }, null, { full: true }); }, { title: 'Cambiar el aspecto de las flechas' })));
+    } else {
+      grp.push(rgroup('Guías', rbtn('keyboard', 'Atajos de teclado', abreAtajos, { title: 'Lista de atajos de teclado y gestos del ratón' }), rbtn('book', 'Primeros pasos', abreGuia, { title: 'Guía corta para empezar a crear un curso' })),
+        rgroup('Actualizaciones', rbtn('refresh', 'Buscar actualizaciones', buscaActualizaciones, { title: 'Comprueba si hay una versión nueva del editor y la instala' })),
+        rgroup('Inteligencia artificial', rbtn('sparkle', 'Asistente IA', () => toast('Próximamente. Se activará cuando decidas conectar una clave de API; hasta entonces el editor funciona sin IA.'), { title: 'Próximamente' })));
+    }
+    r.append(
+      h('div', { class: 'modeslot' }, h('div', { class: 'slotcol' }, h('div', { class: 'quickbar', id: 'quick2' }), h('div', { class: 'slotrow' }, h('span', { class: 'tgslot' }), h('div', { class: 'modesw', role: 'group', 'aria-label': 'Modo de trabajo' })))),
+      h('div', { class: 'rcolumn' }, h('div', { class: 'rtabs' }, tab('hist', 'Historia'), tab('bancos', 'Bancos de preguntas'), tab('curso', 'Curso'), tab('ver', 'Ver'), h('span', { class: 'sp' }), tab('ayuda', 'Ayuda')),
+        h('div', { class: 'rpanes' }, ...grp.filter(Boolean))));
     paintQuick($('#quick2'), false);
     paintThemeBtn(); paintModeSw();
     const f = $('#stFloat'); f.textContent = '';
@@ -3903,6 +3971,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       const panel = h('div', { class: 'stscene' + (start ? ' start' : '') + (si === S.sc ? ' cur' : ''), 'data-scene': String(si), style: 'left:' + pos.x + 'px;top:' + pos.y + 'px' },
         h('div', { class: 'sh', title: 'Arrastra la cabecera para colocar la escena' },
           start ? h('span', { class: 'startbadge', title: 'Escena inicial: el curso empieza aquí' }, ic('play'), 'Inicio') : null,
+          isBank(sc) ? h('span', { class: 'bankbadge', title: 'Escena de banco de preguntas: no forma parte del recorrido; se usa desde una diapositiva «Extraer de banco»' }, ic('layer'), 'Banco · ' + nq(sc)) : null,
           h('span', { class: 'nm', 'data-sn': String(si), title: 'Doble clic para cambiar el nombre' }, (si + 1) + '. ' + sc.title),
           iconBtn('plus', 'Añadir una diapositiva a esta escena: eliges el tipo', (ev) => { S.sc = si; S.si = Math.max(0, sc.slides.length - 1); S.ctx = 'base'; S.sel = null; ev.stopPropagation(); newSlideMenu(ev.currentTarget); }, 'icon')), sb);
       sc.slides.forEach((sl, k) => {
@@ -4844,7 +4913,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
   const CSIZES = [['1920x1080', 'Pantalla panorámica 1920 × 1080'], ['1280x720', 'Panorámica 1280 × 720'], ['1440x1080', 'Clásica 4:3 · 1440 × 1080'], ['1080x1080', 'Cuadrada 1080 × 1080'], ['1080x1920', 'Vertical 1080 × 1920']];
   const passPct = () => (course.quiz && course.quiz.passPct != null ? course.quiz.passPct : 80);
   function rcurso(label, input) { return h('label', { class: 'rc' }, h('span', null, label), input); }
-  function cursoGroups() {
+  function cursoGroups(story) {
     const ti = h('input', { type: 'text', value: course.title || '', 'aria-label': 'Título del curso', style: 'width:230px', id: 'cursoTit' });
     ti.addEventListener('input', () => edit(() => { course.title = ti.value; $('#courseTitle').value = ti.value; }, 'ct'));
     const sz = h('select', { 'aria-label': 'Tamaño del lienzo', id: 'cursoSize', style: 'max-width:240px' });
@@ -4852,7 +4921,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       const cur = course.width + 'x' + course.height, opts = CSIZES.some((x) => x[0] === cur) ? CSIZES : CSIZES.concat([[cur, 'Personalizado ' + course.width + ' × ' + course.height]]);
       sz.textContent = ''; opts.forEach((o) => sz.append(h('option', { value: o[0], selected: o[0] === cur ? true : null }, o[1])));
     };
-    paintSz(); S.paintCursoTab = () => { paintSz(); if (document.activeElement !== ti) ti.value = course.title || ''; pass.value = passPct(); };
+    paintSz(); S[story ? 'paintCursoStory' : 'paintCursoTab'] = () => { paintSz(); if (document.activeElement !== ti) ti.value = course.title || ''; pass.value = passPct(); };
     sz.addEventListener('change', () => { const p = sz.value.split('x'); edit(() => { course.width = Number(p[0]); course.height = Number(p[1]); }, null, { full: true }); });
     const pass = h('input', { type: 'number', min: 0, max: 100, value: passPct(), 'aria-label': 'Nota para aprobar (%)', id: 'cursoPass' });
     pass.addEventListener('change', () => edit(() => { course.quiz = course.quiz || {}; course.quiz.passPct = clamp(pass.value === '' ? 80 : Number(pass.value), 0, 100); }, 'pass'));
@@ -5431,6 +5500,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     $('#courseTitle').value = course.title;
     refreshSlides(); paintSceneBar(); paintSlideFoot(); paintTools(); refreshCanvas(); refreshTimeline(); renderPanel(); paintUndo();
     if (S.paintCursoTab) S.paintCursoTab();
+    if (S.paintCursoStory) S.paintCursoStory();
     if (!$('#story').hidden) paintStory();
   }
 
@@ -5625,8 +5695,9 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     });
     $('#stBody').addEventListener('click', (ev) => {
       if (ev.target.closest('button')) return;
-      const sn = ev.target.closest('.sh .nm');
-      if (sn) { if (ev.detail >= 2) renameScene(Number(sn.dataset.sn), q('#stBody .sh .nm[data-sn="' + sn.dataset.sn + '"]')); return; }
+      const sn = ev.target.closest('.sh .nm'), shh = ev.target.closest('.stscene .sh');
+      if (sn && ev.detail >= 2) { renameScene(Number(sn.dataset.sn), q('#stBody .sh .nm[data-sn="' + sn.dataset.sn + '"]')); return; }
+      if (shh) { selectSceneStory(Number(shh.parentNode.dataset.scene)); return; }
       const c = ev.target.closest('.stcard'); if (!c) return;
       const id = c.dataset.cid;
       if (ev.ctrlKey || ev.metaKey) { toggleSl(id); return; }
