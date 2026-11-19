@@ -54,7 +54,16 @@ button { cursor: pointer; }
 .top .title { width: 200px; min-width: 80px; font-weight: 600; background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 5px 8px; }
 .top .title:hover, .top .title:focus { border-color: var(--line); background: var(--bg); }
 .sp { flex: 1; }
-.toast { color: var(--muted); font-size: 12px; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toast { color: var(--muted); font-size: 12px; }
+.toast:not(:empty) { position: fixed; left: 50%; bottom: 72px; pointer-events: none; transform: translateX(-50%); z-index: 500; max-width: min(560px, 90vw); white-space: normal; text-align: center; line-height: 1.4; background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 18px; font-size: 13.5px; box-shadow: 0 8px 28px rgba(0,0,0,.35); }
+.dlgback.aviso { z-index: 600; }
+.dlg.alerta { width: min(460px, 92vw); border-top: 4px solid var(--brand); }
+.avisohead { display: flex; align-items: center; gap: 10px; }
+.avisohead h3 { margin: 0; }
+.avisohead svg.ic { width: 30px; height: 30px; stroke: var(--brand); flex: none; }
+.avisomsg { margin: 12px 0 4px; font-size: 14.5px; line-height: 1.45; overflow-wrap: anywhere; }
+.avisoyuda { margin: 2px 0 8px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.avisoitem + .avisoitem { border-top: 1px solid var(--line); margin-top: 8px; }
 .toast.err { color: var(--brand); font-weight: 600; }
 .btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--panel-2); border-radius: 7px; padding: 5px 10px; font-weight: 600; white-space: nowrap; }
 .btn:hover { border-color: var(--muted); }
@@ -184,6 +193,69 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 .bktab select { width: 100%; min-width: 104px; }
 .bkq { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .bkq small { display: block; color: var(--muted); font-size: 11.5px; }
+.vivabody { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+.dlg.pub:has(.bk2) { max-height: calc(100vh - 32px) !important; overflow: hidden !important; }
+.bk2 { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; flex: 1 1 auto; overflow: auto; }
+.bk2 > * { flex: none; }
+.bk2 > .bksec.list { flex: 1 1 auto; min-height: 150px; }
+.bkcard .th { flex: none; width: 132px; height: 74px; overflow: hidden; border: 1px solid var(--line); border-radius: 6px; background: #fff; position: relative; pointer-events: none; }
+.bkcard .th > div { position: absolute; left: 0; top: 0; transform-origin: 0 0; zoom: .846; }
+.bkhead { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.bknamerow { display: flex; align-items: center; gap: 10px; flex: 1 1 280px; min-width: 0; }
+.bknamerow > svg.ic { width: 28px; height: 28px; stroke: var(--brand); flex: none; }
+.bkname { flex: 1; min-width: 0; font-size: 22px; font-weight: 800; background: transparent; border: 1px solid transparent; border-bottom-color: var(--line); border-radius: 6px; padding: 4px 6px; }
+.bkname:hover, .bkname:focus { border-color: var(--brand); background: var(--panel-2); }
+.bkpen { width: 16px; height: 16px; stroke: var(--muted); flex: none; }
+.bkstats { display: flex; gap: 8px; flex-wrap: wrap; }
+.bkstat { display: flex; flex-direction: column; align-items: center; min-width: 84px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); }
+.bkstat svg.ic { width: 16px; height: 16px; stroke: var(--brand); }
+.bkstat b { font-size: 20px; line-height: 1.1; }
+.bkstat span { font-size: 11px; color: var(--muted); text-align: center; }
+.bksec h3, .bkh3 h3 { display: flex; align-items: baseline; gap: 8px; margin: 0 0 8px; font-size: 14px; flex-wrap: wrap; }
+.bksec h3 small, .bkh3 h3 small { color: var(--muted); font-weight: 400; font-size: 12px; }
+.bkn1 { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--brand); color: #fff; font-size: 12px; font-weight: 800; flex: none; }
+.bktypes { display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; }
+.bktypes .bktype { grid-column: span 4; }
+.bktypes .bktype:nth-child(-n+4) { grid-column: span 3; }
+@media (max-width: 700px) { .bktypes { grid-template-columns: repeat(2, 1fr); } .bktypes .bktype, .bktypes .bktype:nth-child(-n+4) { grid-column: auto; } }
+.bktype { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; padding: 12px 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); cursor: pointer; }
+.bktype:hover, .bktype:focus-visible { border-color: var(--brand); background: var(--brand-soft); }
+.bktype svg.ic { width: 30px; height: 30px; stroke: var(--brand); }
+.bktype b { font-size: 13px; }
+.bktype small { font-size: 11.5px; color: var(--muted); line-height: 1.25; }
+.bksec.compact .bktype { padding: 6px 8px; flex-direction: row; gap: 8px; text-align: left; }
+.bksec.compact .bktype svg.ic { width: 20px; height: 20px; }
+.bksec.compact .bktype small { display: none; }
+
+.bkimp { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.bktype.wide { flex-direction: row; flex-wrap: wrap; gap: 4px 10px; text-align: left; padding: 10px 16px; align-items: center; }
+.bktype.wide small { flex-basis: 100%; padding-left: 40px; }
+.bksec.compact .bktype.wide small { display: block; }
+.bksec.list { display: flex; flex-direction: column; min-height: 0; }
+.bklist { display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto; min-height: 0; overflow: auto; padding: 2px 4px 2px 0; }
+.bkcard { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); }
+.bkcard.over { border-color: var(--brand); }
+.bkcard.drag { opacity: .4; }
+.bkcard.bad { border-color: var(--brand); background: rgba(232,64,57,.1); }
+.bkgrip { cursor: grab; color: var(--muted); font-weight: 800; letter-spacing: -2px; padding: 4px 2px; user-select: none; }
+.bknum { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--brand); color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+.bkmain { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.bktitle { font-weight: 700; font-size: 14px; overflow-wrap: anywhere; }
+.bktipo { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.bktipo svg.ic { width: 14px; height: 14px; stroke: var(--brand); }
+.bkset { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: flex-end; margin-top: 4px; }
+.bkfield { display: flex; flex-direction: column; gap: 2px; font-size: 11.5px; color: var(--muted); }
+.bkfield input[type=number] { width: 68px; }
+.bkseg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.bkseg button { border: 0; background: var(--panel); padding: 6px 10px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.bkseg button + button { border-left: 1px solid var(--line); }
+.bkseg button.on { background: var(--brand); color: #fff; }
+.bkacts { display: flex; flex-direction: column; gap: 6px; align-items: stretch; flex: none; }
+.bkwarnline { color: var(--brand); font-size: 12.5px; font-weight: 600; }
+.bkempty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 22px; border: 2px dashed var(--line); border-radius: 12px; color: var(--muted); text-align: center; }
+.bkempty svg.ic { width: 36px; height: 36px; stroke: var(--brand); }
+.bkempty b { color: var(--fg); font-size: 15px; }
+.bkfoot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--line); }
 .bkwarn { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: rgba(232,64,57,.14); border: 1px solid var(--accent, #E84039); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
 .bkbad td { background: rgba(232,64,57,.12); }
 .bkq .th { flex: none; width: 112px; height: 63px; overflow: hidden; border: 1px solid var(--line); border-radius: 5px; background: #fff; position: relative; pointer-events: none; }
@@ -777,9 +849,35 @@ input[type=color] { width: 36px; height: 28px; padding: 0; border: 1px solid var
   const iconBtn = (name, label, fn, cls) => h('button', { class: 'btn ' + (cls || 'small'), title: label, 'aria-label': label, onclick: fn }, ic(name), (cls && cls.indexOf('icon') === 0) ? null : label);
   const fmtT = (t) => Math.floor(t / 60) + ':' + (t % 60).toFixed(1).padStart(4, '0');
   let toastTimer = 0;
+  const AVISO_AYUDA = [
+    [/necesita al menos una escena/, 'Crea otra escena normal y después podrás eliminar esta.'],
+    [/necesita al menos una diapositiva/, 'Añade otra diapositiva, o deja alguna sin seleccionar, antes de eliminar.'],
+    [/solo guarda preguntas/, 'Usa los tipos de pregunta para el banco. Las diapositivas normales van en una escena de la historia.'],
+    [/Faltan archivos/, 'Vuelve a subirlos en el objeto que los usa y prueba otra vez.'],
+    [/Escribe un nombre/, 'El nombre no puede quedar vacío.'],
+    [/librería de zip/, 'Comprueba tu conexión a internet y recarga el editor.'],
+    [/Crea primero una escena normal/, 'Pulsa «Nueva escena» y vuelve a intentarlo.']
+  ];
+  // Los errores salen en una ventana centrada con «Entendido»; los avisos normales, como un mensaje legible abajo.
+  function alertaDlg(msg) {
+    const ya = document.querySelector('.dlgback.aviso');
+    const ayuda = (AVISO_AYUDA.find((a) => a[0].test(msg)) || [])[1];
+    const bloque = () => h('div', { class: 'avisoitem' }, h('p', { class: 'avisomsg' }, msg), ayuda ? h('p', { class: 'avisoyuda' }, h('b', null, 'Qué hacer: '), ayuda) : null);
+    if (ya) { if (![...ya.querySelectorAll('.avisomsg')].some((n) => n.textContent === msg)) ya.querySelector('.avisolista').append(bloque()); return; }
+    const done = () => { back.remove(); document.removeEventListener('keydown', onKey, true); };
+    const onKey = (ev) => { if (ev.key === 'Escape' || ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation(); done(); } };
+    const back = h('div', { class: 'dlgback aviso', onclick: (ev) => { if (ev.target === back) done(); } },
+      h('div', { class: 'dlg alerta', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': 'Aviso' },
+        h('div', { class: 'avisohead' }, ic('help'), h('h3', null, 'No se ha podido hacer')),
+        h('div', { class: 'avisolista' }, bloque()),
+        h('div', { class: 'dlgbtns' }, h('button', { class: 'btn primary', type: 'button', onclick: done }, 'Entendido'))));
+    document.body.append(back); document.addEventListener('keydown', onKey, true);
+    const ok = back.querySelector('.btn.primary'); if (ok) ok.focus();
+  }
   function toast(msg, err) {
-    const t = $('#toast'); t.textContent = msg; t.className = 'toast' + (err ? ' err' : '');
-    clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.textContent = ''; }, err ? 9000 : 4000);
+    if (err) { alertaDlg(String(msg)); return; }
+    const t = $('#toast'); t.textContent = msg; t.className = 'toast';
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.textContent = ''; }, 3500 + String(msg).length * 45);
   }
 
   /* ---------- Modelo del curso ---------- */
@@ -4937,7 +5035,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
   }
   // Ventana cuyo contenido se vuelve a pintar tras pulsar un botón (los formularios del panel se rehacen con edit()).
   function ventanaViva(titulo, pinta) {
-    const body = h('div'); const paint = () => { body.textContent = ''; body.append(pinta()); };
+    const body = h('div', { class: 'vivabody' }); const paint = () => { body.textContent = ''; body.append(pinta()); };
     paint(); body.addEventListener('click', (ev) => { if (ev.target.closest('button')) setTimeout(paint, 30); });
     body.addEventListener('change', (ev) => { if (ev.target.closest('select, input[type=checkbox]')) setTimeout(paint, 30); });
     ventanaInfo(titulo, body);
@@ -4994,48 +5092,63 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     });
   }
   function aplicaDisenoBanco(b) { edit(() => b.slides.forEach(disenaSlide), null, { full: true }); toast('Diseño «' + temaDelCurso().n + '» aplicado a las ' + b.slides.length + ' preguntas del banco.'); }
+  const KIND_DESC = { choice: 'Una respuesta correcta entre varias', multi: 'Varias respuestas correctas', tf: 'Verdadero o falso', text: 'El alumno escribe la respuesta', gaps: 'Completar los huecos de una frase', bank: 'Arrastrar palabras a los huecos', match: 'Unir cada concepto con su pareja' };
   function abreBanco(id) {
     ventanaViva('Banco de preguntas', () => {
-      const b = bankOf(id), box = h('div', { class: 'bkwin' });
+      const b = bankOf(id), box = h('div', { class: 'bkwin bk2' });
       if (!b) { box.append(h('p', { class: 'hint' }, 'Este banco ya no existe.')); return box; }
-      const nm = h('input', { type: 'text', value: b.title, 'aria-label': 'Nombre del banco', style: 'font-weight:700;font-size:15px' }); nm.addEventListener('input', () => edit(() => { b.title = nm.value; }, 'bkn' + b.id));
-      box.append(h('div', { class: 'bkrow' }, nm, h('span', { class: 'bkcount' }, nq(b) + ' preguntas')));
-      box.append(h('div', { class: 'bkadd' }, h('b', null, 'Añadir pregunta calificada'), KIND_ADD.map((k) => h('button', { class: 'btn small', type: 'button', onclick: () => {
-        let nuevo = null;
-        edit(() => { const sl = slideFromKind(k[0]); b.slides.push(sl); disenaSlide(sl); const t = 'Pregunta ' + b.slides.length; sl.title = t; if (sl.elements[0]) sl.elements[0].text = t; nuevo = sl; }, null, { full: true });
-        if (nuevo) abreFormulario(nuevo.id, id);
-      } }, ic('plus'), k[1]))));
-      box.append(h('div', { class: 'bkadd' }, h('button', { class: 'btn small', type: 'button', onclick: () => { const d = document.querySelector('.dlgback'); d && d.remove(); abreImportar({ bank: id }); } }, ic('doc'), 'Importar preguntas (Excel, CSV, Google Sheets)'),
-        h('button', { class: 'btn small', type: 'button', disabled: b.slides.length ? null : true, onclick: () => aplicaDisenoBanco(b) }, ic('palette'), 'Volver a aplicar el diseño del curso a todas')));
-      if (!b.slides.length) { box.append(h('p', { class: 'hint' }, 'Este banco está vacío. Añade preguntas con los botones de arriba o importa un Excel.')); return box; }
-      const tb = h('table', { class: 'bktab' }, h('thead', null, h('tr', null, ['Pregunta', 'Intentos', 'Puntos', 'Sorteo', ''].map((t) => h('th', null, t)))));
-      const body = h('tbody');
+      const qs = b.slides.filter((x) => x.question), pts = qs.reduce((n, x) => n + (Number(x.question.points) || 0), 0);
+      const usos = allSlides().filter((x) => x.type === 'draw' && x.draw && x.draw.bank === id).length;
+      // Cabecera: nombre grande y tres indicadores
+      const nm = h('input', { type: 'text', class: 'bkname', value: b.title, 'aria-label': 'Nombre del banco', placeholder: 'Nombre del banco' }); nm.addEventListener('input', () => edit(() => { b.title = nm.value; }, 'bkn' + b.id));
+      const stat = (n, t, icon) => h('div', { class: 'bkstat' }, ic(icon), h('b', null, String(n)), h('span', null, t));
+      box.append(h('div', { class: 'bkhead' }, h('div', { class: 'bknamerow' }, ic('layer'), nm, ic('edit', 'bkpen')),
+        h('div', { class: 'bkstats' }, stat(qs.length, qs.length === 1 ? 'pregunta' : 'preguntas', 'check'), stat(pts, 'puntos en total', 'star'), stat(usos, usos === 1 ? 'extracción en la historia' : 'extracciones en la historia', 'tree'))));
+      // Añadir preguntas
+      const compact = qs.length >= 3;
+      box.append(h('section', { class: 'bksec' + (compact ? ' compact' : '') },
+        h('h3', null, h('span', { class: 'bkn1' }, '1'), 'Añadir preguntas', h('small', null, 'Elige el tipo de pregunta; se crea con el diseño de tu curso')),
+        h('div', { class: 'bktypes' }, KIND_ADD.map((k) => h('button', { class: 'bktype', type: 'button', title: KIND_DESC[k[0]], onclick: () => {
+          let nuevo = null;
+          edit(() => { const sl = slideFromKind(k[0]); b.slides.push(sl); disenaSlide(sl); const t = 'Pregunta ' + b.slides.length; sl.title = t; if (sl.elements[0]) sl.elements[0].text = t; nuevo = sl; }, null, { full: true });
+          if (nuevo) abreFormulario(nuevo.id, id);
+        } }, ic(KIND_IC[k[0]] || 'blank'), h('b', null, k[1]), h('small', null, KIND_DESC[k[0]]))))));
+      // Importar
+      box.append(h('section', { class: 'bksec' + (compact ? ' compact' : '') },
+        h('h3', null, h('span', { class: 'bkn1' }, '2'), 'O importa muchas de golpe'),
+        h('div', { class: 'bkimp' }, h('button', { class: 'bktype wide', type: 'button', onclick: () => { document.querySelectorAll('.dlgback').forEach((d) => d.remove()); abreImportar({ bank: id }); } }, ic('doc'), h('b', null, 'Importar desde Excel, CSV o Google Sheets'), h('small', null, 'Una fila por pregunta')),
+          h('button', { class: 'btn small', type: 'button', onclick: () => impPlantilla().catch((e) => toast('No se ha podido crear la plantilla: ' + e.message, true)) }, ic('save'), 'Descargar plantilla de Excel'))));
+      // Lista
       const raros = b.slides.filter((x) => !x.question);
+      const lista = h('div', { class: 'bklist' });
+      if (!b.slides.length) lista.append(h('div', { class: 'bkempty' }, ic('layer'), h('b', null, 'Este banco está vacío'), h('span', null, 'Empieza añadiendo una pregunta con las tarjetas de arriba.')));
       b.slides.forEach((sl, i) => {
-        const q = sl.question;
+        const q = sl.question, grip = h('span', { class: 'bkgrip', title: 'Arrastra para cambiar el orden', 'aria-hidden': 'true' }, '⋮⋮');
         if (!q) {
-          body.append(h('tr', { class: 'bkbad' }, h('td', { colspan: 4 }, h('div', { class: 'bkq' }, thumbOf(sl), h('div', null, h('b', null, (i + 1) + '. ' + (sl.title || 'Diapositiva')), h('small', null, 'No es una pregunta: no se usará en el sorteo')))),
-            h('td', null, h('div', { class: 'bkact' }, iconBtn('trash', 'Quitar del banco', () => edit(() => { b.slides.splice(b.slides.indexOf(sl), 1); }, null, { full: true }), 'small danger')))));
-          return;
+          const c = h('article', { class: 'bkcard bad' }, h('div', { class: 'bknum' }, String(i + 1)), thumbOf(sl), h('div', { class: 'bkmain' }, h('div', { class: 'bktitle' }, sl.title || 'Diapositiva'), h('div', { class: 'bkwarnline' }, 'No es una pregunta: no se usará en el sorteo')),
+            h('div', { class: 'bkacts' }, iconBtn('trash', 'Quitar del banco', () => edit(() => { b.slides.splice(b.slides.indexOf(sl), 1); }, null, { full: true }), 'small danger')));
+          lista.append(c); return;
         }
-        const num = (key, get, set) => { const inp = h('input', { type: 'number', min: 0, value: get(), style: 'width:64px', 'aria-label': key + ' de ' + (sl.title || sl.id) }); inp.addEventListener('input', () => { const v = Number(inp.value); if (!isNaN(v)) edit(() => set(v), key + sl.id); }); return inp; };
-        const sm = h('select', { 'aria-label': 'Sorteo de ' + (sl.title || sl.id) }, [['', 'Al azar'], ['always', 'Siempre'], ['never', 'Nunca']].map((o) => h('option', { value: o[0], selected: (q.bankMode || '') === o[0] ? true : null }, o[1])));
-        sm.addEventListener('change', () => edit(() => { if (sm.value) q.bankMode = sm.value; else delete q.bankMode; }, null, { full: true }));
-        const otros = bankScenes().filter((x) => x !== b), mv = h('select', { 'aria-label': 'Mover ' + (sl.title || sl.id) + ' a otro banco', disabled: otros.length ? null : true }, [h('option', { value: '' }, 'Mover a…')].concat(otros.map((x) => h('option', { value: x.id }, x.title))));
+        const num = (label, key, get, set) => { const inp = h('input', { type: 'number', min: 0, value: get(), 'aria-label': label + ' de ' + (sl.title || sl.id) }); inp.addEventListener('input', () => { const v = Number(inp.value); if (!isNaN(v)) edit(() => set(v), key + sl.id); }); return h('label', { class: 'bkfield' }, h('span', null, label), inp); };
+        const modo = q.bankMode || '';
+        const seg = h('div', { class: 'bkseg', role: 'group', 'aria-label': 'En el sorteo: ' + (sl.title || sl.id) }, [['', 'Al azar', 'Puede salir o no'], ['always', 'Siempre', 'Sale siempre'], ['never', 'Nunca', 'No sale']].map((o) => h('button', { type: 'button', class: modo === o[0] ? 'on' : '', title: o[2], 'aria-pressed': modo === o[0] ? 'true' : 'false', onclick: () => edit(() => { if (o[0]) q.bankMode = o[0]; else delete q.bankMode; }, null, { full: true }) }, o[1])));
+        const otros = bankScenes().filter((x) => x !== b), mv = h('select', { 'aria-label': 'Mover ' + (sl.title || sl.id) + ' a otro banco', disabled: otros.length ? null : true, title: otros.length ? 'Mover a otro banco' : 'Crea otro banco para poder mover preguntas' }, [h('option', { value: '' }, 'Mover a…')].concat(otros.map((x) => h('option', { value: x.id }, x.title))));
         mv.addEventListener('change', () => { if (!mv.value) return; const dst = bankOf(mv.value); edit(() => { b.slides.splice(b.slides.indexOf(sl), 1); dst.slides.push(sl); }, null, { full: true }); });
-        const th = thumbOf(sl);
-        body.append(h('tr', null,
-          h('td', null, h('div', { class: 'bkq' }, th, h('div', null, h('b', null, (i + 1) + '. ' + (q.prompt || sl.title || '').slice(0, 80)), h('small', null, tipoDe(sl))))),
-          h('td', null, num('Intentos', () => q.attempts || 1, (v) => { q.attempts = Math.max(1, v || 1); })), h('td', null, num('Puntos', () => q.points, (v) => { q.points = v; })), h('td', null, sm),
-          h('td', null, h('div', { class: 'bkact' },
-            h('button', { class: 'btn small', type: 'button', title: 'Rellenar la pregunta en un formulario', onclick: () => abreFormulario(sl.id, id) }, 'Formulario'),
-            h('button', { class: 'btn small', type: 'button', title: 'Abrir la pregunta en el editor para cambiar su diseño', onclick: () => { const d = document.querySelector('.dlgback'); d && d.remove(); gotoSlideId(sl.id); } }, 'Diapositiva'),
-            mv, iconBtn('trash', 'Eliminar', () => edit(() => { b.slides.splice(b.slides.indexOf(sl), 1); }, null, { full: true }), 'small danger')))));
+        const card = h('article', { class: 'bkcard' }, grip, h('div', { class: 'bknum' }, String(i + 1)), thumbOf(sl),
+          h('div', { class: 'bkmain' }, h('div', { class: 'bktitle' }, (q.prompt || sl.title || 'Pregunta').slice(0, 90)), h('div', { class: 'bktipo' }, ic(KIND_IC[(sl.question && sl.question.kind) || 'choice'] || 'radio'), tipoDe(sl)),
+            h('div', { class: 'bkset' }, num('Intentos', 'Intentos', () => q.attempts || 1, (v) => { q.attempts = Math.max(1, v || 1); }), num('Puntos', 'Puntos', () => q.points, (v) => { q.points = v; }), h('div', { class: 'bkfield' }, h('span', null, 'En el sorteo'), seg))),
+          h('div', { class: 'bkacts' },
+            h('button', { class: 'btn small', type: 'button', title: 'Rellenar la pregunta en un formulario', onclick: () => abreFormulario(sl.id, id) }, ic('edit'), 'Formulario'),
+            h('button', { class: 'btn small', type: 'button', title: 'Abrir la pregunta en el editor para cambiar su diseño', onclick: () => { document.querySelectorAll('.dlgback').forEach((d) => d.remove()); gotoSlideId(sl.id); } }, ic('newslide'), 'Diapositiva'),
+            mv, iconBtn('trash', 'Eliminar', () => edit(() => { b.slides.splice(b.slides.indexOf(sl), 1); }, null, { full: true }), 'small danger')));
+        makeSortable(card, 'bkq', sl.id, (from, to) => edit(() => { moveIn(b.slides, from, to); }, null, { full: true }), grip);
+        lista.append(card);
       });
-      tb.append(body);
-      if (raros.length) box.append(h('div', { class: 'bkwarn' }, h('span', null, 'Hay ' + raros.length + (raros.length === 1 ? ' diapositiva' : ' diapositivas') + ' que no son preguntas. Un banco solo guarda preguntas.'),
+      const cab = h('div', { class: 'bkh3' }, h('h3', null, h('span', { class: 'bkn1' }, '3'), 'Preguntas del banco', h('small', null, qs.length ? 'Arrastra ⋮⋮ para cambiar el orden' : '')));
+      if (raros.length) cab.append(h('div', { class: 'bkwarn' }, h('span', null, 'Hay ' + raros.length + (raros.length === 1 ? ' diapositiva' : ' diapositivas') + ' que no son preguntas. Un banco solo guarda preguntas.'),
         h('button', { class: 'btn small', type: 'button', onclick: () => edit(() => { b.slides = b.slides.filter((x) => x.question); }, null, { full: true }) }, 'Quitar las que no son preguntas')));
-      box.append(h('div', { class: 'bkscroll' }, tb));
+      box.append(h('section', { class: 'bksec list' }, cab, lista));
+      box.append(h('div', { class: 'bkfoot' }, h('button', { class: 'btn small', type: 'button', disabled: qs.length ? null : true, onclick: () => aplicaDisenoBanco(b) }, ic('palette'), 'Volver a aplicar el diseño del curso a todas'), h('span', { class: 'hint' }, 'Usa el diseño elegido en Curso > Aplicar diseño.')));
       return box;
     });
   }
