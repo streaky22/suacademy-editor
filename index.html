@@ -428,6 +428,11 @@ svg.ic.big { width: 30px; height: 30px; stroke: var(--brand); stroke-width: 1.6;
 .stcard .cap { font-size: 12px; margin-top: 4px; display: flex; gap: 4px; align-items: center; }
 .stcard .cap b { color: var(--brand); }
 .stcard .cap .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.stcard.msel .th, #slideList li.msel > button { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand); }
+#slideList li.msel > button { background: rgba(232,64,57,.16); }
+.rband { position: fixed; z-index: 300; border: 1.5px solid var(--brand); background: rgba(232,64,57,.14); pointer-events: none; }
+.slcount { display: inline-block; background: var(--brand); color: #fff; border-radius: 10px; padding: 1px 9px; font-size: 12px; font-weight: 700; margin: 4px 0 0 8px; }
+.slcol { display: flex; flex-direction: column; justify-content: center; max-width: 150px; }
 .stcard.drag { opacity: .4; } .stcard.over .th { outline: 3px solid var(--sel); }
 .stlinks { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 2; overflow: visible; }
 .stlinks text { font-size: 11px; font-weight: 700; paint-order: stroke; stroke: var(--panel-2); stroke-width: 4px; stroke-linejoin: round; }
@@ -2517,7 +2522,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     edit(() => {
       const sl = slideFromKind(kind); nuevo = sl;
       if (isBank(course.scenes[S.sc]) && sl.question) disenaSlide(sl);
-      slides().splice(S.si + 1, 0, sl); S.si++; S.ctx = 'base'; S.sel = null; S.t = 0;
+      slides().splice(S.si + 1, 0, sl); S.si = slides().indexOf(sl); S.ctx = 'base'; S.sel = null; S.t = 0;
       if (sl.type === 'draw' && bankId) sl.draw.bank = bankId;
       if (sl.type === 'draw' && sl.draw.bank) sl.title = 'Extraer de «' + bankOf(sl.draw.bank).title + '»';
     }, null, { full: true });
@@ -2534,6 +2539,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     ribPop('newPop', anchor, items);
   }
   function dupSlide() {
+    if (dupSlides()) return;
     edit(() => {
       const c = JSON.parse(JSON.stringify(slide()));
       c.id = newId('d', new Set(allSlides().map((s) => s.id))); c.title += ' (copia)';
@@ -2958,11 +2964,97 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
         h('div', { class: 'dlgbtns', style: 'margin-top:14px' }, h('button', { class: 'btn', type: 'button', onclick: done }, 'Cancelar'), h('button', { class: 'btn primary', type: 'button', id: 'tplOk', onclick: ok }, 'Guardar'))));
     document.body.append(back); document.addEventListener('keydown', onKey, true); inp.focus(); inp.select();
   }
+
+  /* ---------- Selección de varias diapositivas (lista lateral y modo historia) ---------- */
+  const slSel = () => { const m = (S.slm || []).filter((id) => slideById(id)); const cur = slide() && slide().id; return m.length > 1 ? allSlides().filter((x) => m.indexOf(x.id) >= 0).map((x) => x.id) : (cur ? [cur] : []); };
+  function paintSlSel() {
+    const m = new Set(S.slm && S.slm.length > 1 ? S.slm : []);
+    document.querySelectorAll('#slideList li[data-sid], #stBody .stcard').forEach((n) => n.classList.toggle('msel', m.has(n.dataset.sid || n.dataset.cid)));
+    document.querySelectorAll('.slcount').forEach((n) => { n.hidden = m.size < 2; n.textContent = m.size + ' seleccionadas'; });
+  }
+  const slCountNode = () => h('span', { class: 'slcount', hidden: true, title: 'Diapositivas seleccionadas. Ctrl o Cmd + clic suma o quita; Mayús + clic marca un rango.' });
+  function setSlSel(ids) { S.slm = ids.length > 1 ? ids.slice() : []; paintSlSel(); }
+  function toggleSl(id) {
+    const base = slSel(), r = base.indexOf(id) >= 0 ? base.filter((x) => x !== id) : base.concat(id);
+    if (r.length === 1 && r[0] !== slide().id) { S.slm = []; gotoSlideId(r[0], true); return; }
+    setSlSel(r);
+  }
+  function rangeSl(id) {
+    const all = allSlides().map((x) => x.id), a = all.indexOf(slide().id), b = all.indexOf(id); if (a < 0 || b < 0) return;
+    setSlSel(all.slice(Math.min(a, b), Math.max(a, b) + 1));
+  }
+  function selectAllSlides() { const ids = slides().map((x) => x.id); setSlSel(ids); if (ids.length < 2) toast('Solo hay una diapositiva en esta escena.'); }
+  function sceneEmptied(set, except) { return course.scenes.find((sc) => sc !== except && !sc.bank && sc.slides.length && sc.slides.every((x) => set.has(x.id))); }
+  function delSlides() {
+    const ids = slSel(); if (ids.length < 2) return false;
+    const set = new Set(ids), bad = sceneEmptied(set);
+    if (bad) { toast('Una escena necesita al menos una diapositiva: deja alguna sin seleccionar en «' + bad.title + '».', true); return true; }
+    const cur = slide().id;
+    edit(() => {
+      course.scenes.forEach((sc) => { for (let i = sc.slides.length - 1; i >= 0; i--) if (set.has(sc.slides[i].id)) sc.slides.splice(i, 1); });
+      S.slm = []; S.ctx = 'base'; S.sel = null; S.t = 0;
+      if (slideById(cur)) followSlide(cur);
+      else { if (!course.scenes[S.sc] || !course.scenes[S.sc].slides.length) S.sc = Math.max(0, course.scenes.findIndex((x) => !x.bank && x.slides.length)); S.si = Math.min(S.si, Math.max(0, slides().length - 1)); }
+    }, null, { full: true });
+    toast(ids.length + ' diapositivas eliminadas (Ctrl+Z para deshacer).');
+    return true;
+  }
+  function dupSlides() {
+    const ids = slSel(); if (ids.length < 2) return false;
+    const taken = new Set(allSlides().map((x) => x.id)), nuevos = [];
+    edit(() => {
+      course.scenes.forEach((sc) => { for (let i = sc.slides.length - 1; i >= 0; i--) { const o = sc.slides[i]; if (ids.indexOf(o.id) < 0) continue; const c = JSON.parse(JSON.stringify(o)); c.id = newId('d', taken); taken.add(c.id); c.title = (o.title || 'Diapositiva') + ' (copia)'; sc.slides.splice(i + 1, 0, c); nuevos.push(c.id); } });
+      S.slm = nuevos.slice(); S.ctx = 'base'; S.sel = null;
+    }, null, { full: true });
+    return true;
+  }
+  function copySlides() { const ids = slSel(); if (ids.length < 2) return false; guardaXC('slides', ids.map((id) => JSON.parse(JSON.stringify(slideById(id))))); toast(ids.length + ' diapositivas copiadas. Puedes pegarlas en este u otro proyecto.'); return true; }
+  function cutSlides() { const ids = slSel(); if (ids.length < 2) { if (slides().length < 2) { toast('El curso necesita al menos una diapositiva.', true); return; } copySlideXC(); delSlide(); return; } if (sceneEmptied(new Set(ids))) { delSlides(); return; } copySlides(); delSlides(); }
+  function moveSlidesBy(d) {
+    const ids = slSel(); if (ids.length < 2) return false; const set = new Set(ids);
+    edit(() => {
+      course.scenes.forEach((sc) => { const a = sc.slides;
+        if (d < 0) { for (let i = 1; i < a.length; i++) if (set.has(a[i].id) && !set.has(a[i - 1].id)) { const t = a[i]; a[i] = a[i - 1]; a[i - 1] = t; } }
+        else { for (let i = a.length - 2; i >= 0; i--) if (set.has(a[i].id) && !set.has(a[i + 1].id)) { const t = a[i]; a[i] = a[i + 1]; a[i + 1] = t; } } });
+      followSlide(slide().id);
+    }, null, { full: true });
+    return true;
+  }
+  function moveSlidesTo(ids, ti, beforeId) {
+    const set = new Set(ids), dst = course.scenes[ti]; if (!dst || (beforeId && set.has(beforeId))) return;
+    const list = allSlides().filter((x) => set.has(x.id)); if (!list.length) return;
+    if (isBank(dst) && list.some((x) => !x.question)) { toast('Un banco solo guarda preguntas.', true); return; }
+    const bad = sceneEmptied(set, dst); if (bad) { toast('Una escena necesita al menos una diapositiva.', true); return; }
+    const cur = slide().id;
+    edit(() => {
+      course.scenes.forEach((sc) => { for (let i = sc.slides.length - 1; i >= 0; i--) if (set.has(sc.slides[i].id)) sc.slides.splice(i, 1); });
+      let k = beforeId ? dst.slides.findIndex((x) => x.id === beforeId) : dst.slides.length; if (k < 0) k = dst.slides.length;
+      dst.slides.splice(k, 0, ...list); followSlide(cur);
+    }, null, { full: true });
+  }
+  function multiMenuItems() {
+    const n = slSel().length;
+    return [[n + ' diapositivas seleccionadas'], ['copy', 'Copiar', copySlides], ['cut', 'Cortar', cutSlides], ['paste', 'Pegar después', pasteSlideXC, !hayXC()], ['copy', 'Duplicar', dupSlides],
+      ['up', 'Subir', () => moveSlidesBy(-1)], ['down', 'Bajar', () => moveSlidesBy(1)], ['trash', 'Eliminar ' + n + ' diapositivas', delSlides]];
+  }
+  // Atajos con el foco en la lista de diapositivas o en el modo historia.
+  function slKeys(ev) {
+    const mod = ev.ctrlKey || ev.metaKey, k = ev.key.toLowerCase();
+    if (mod && k === 'a') { ev.preventDefault(); selectAllSlides(); return true; }
+    if (mod && k === 'c') { ev.preventDefault(); if (!copySlides()) copySlideXC(); return true; }
+    if (mod && k === 'x') { ev.preventDefault(); cutSlides(); return true; }
+    if (mod && k === 'v') { ev.preventDefault(); pasteSlideXC(); return true; }
+    if (mod && k === 'd') { ev.preventDefault(); if (!dupSlides()) dupSlide(); return true; }
+    if (!mod && (ev.key === 'Delete' || ev.key === 'Backspace')) { ev.preventDefault(); if (!delSlides()) delSlide(); return true; }
+    return false;
+  }
   function delSlide() {
+    if (delSlides()) return;
     if (slides().length < 2) { toast('El curso necesita al menos una diapositiva.', true); return; }
     edit(() => { slides().splice(S.si, 1); S.si = Math.min(S.si, slides().length - 1); S.ctx = 'base'; S.sel = null; }, null, { full: true });
   }
   function moveSlideBy(d) {
+    if (moveSlidesBy(d)) return;
     const j = S.si + d; if (j < 0 || j >= slides().length) return;
     edit(() => { const a = slides(); [a[j], a[S.si]] = [a[S.si], a[j]]; S.si = j; }, null, { full: true });
   }
@@ -3019,13 +3111,16 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       setMulti(ids);
     }, null, { full: true });
   }
-  function copySlideXC() { guardaXC('slide', slide()); toast('Diapositiva copiada. Puedes pegarla en este u otro proyecto.'); }
+  function copySlideXC() { if (copySlides()) return; guardaXC('slide', slide()); toast('Diapositiva copiada. Puedes pegarla en este u otro proyecto.'); }
   function pasteSlideXC() {
-    const y = leeXC(); if (!y || y.kind !== 'slide') { toast('No hay ninguna diapositiva copiada.'); return; }
+    const y = leeXC(); if (!y || (y.kind !== 'slide' && y.kind !== 'slides')) { toast('No hay ninguna diapositiva copiada.'); return; }
+    let arr = [].concat(y.data).filter(Boolean);
+    if (isBank(course.scenes[S.sc])) { const n0 = arr.length; arr = arr.filter((x) => x.question); if (arr.length < n0) toast(arr.length ? 'Un banco solo guarda preguntas: se han pegado solo las preguntas.' : 'Un banco solo guarda preguntas.', !arr.length); if (!arr.length) return; }
+    const taken = new Set(allSlides().map((q) => q.id)), ids = [];
     edit(() => {
-      const c = JSON.parse(JSON.stringify(y.data));
-      c.id = newId('d', new Set(allSlides().map((q) => q.id))); c.title = (c.title || 'Diapositiva') + ' (pegada)';
-      slides().splice(S.si + 1, 0, c); S.si++; S.ctx = 'base'; S.sel = null;
+      const base = S.si + 1; let last = S.si;
+      arr.forEach((o, i) => { const c = JSON.parse(JSON.stringify(o)); c.id = newId('d', taken); taken.add(c.id); c.title = (c.title || 'Diapositiva') + ' (pegada)'; slides().splice(base + i, 0, c); ids.push(c.id); last = base + i; });
+      S.si = last; S.ctx = 'base'; S.sel = null; S.slm = ids.length > 1 ? ids.slice() : [];
     }, null, { full: true });
   }
   function orderSel(mode) {
@@ -3124,6 +3219,8 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const li = ev.target.closest('li[data-sid]'); if (!li) return;
     ev.preventDefault();
     const sid = li.dataset.sid, i = slides().findIndex((x) => x.id === sid);
+    if (slSel().length > 1 && slSel().indexOf(sid) >= 0) { ctxPop(ev.clientX, ev.clientY, multiMenuItems()); return; }
+    S.slm = [];
     if (i >= 0 && i !== S.si) gotoSlide(i);
     ctxPop(ev.clientX, ev.clientY, qMenuItems(slide()).concat([['Diapositiva'],
       ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['template', 'Nueva desde plantilla…', abrePlantillas], ['copy', 'Duplicar', dupSlide], ['copy', 'Copiar diapositiva (para otro proyecto)', copySlideXC], ['paste', 'Pegar diapositiva', pasteSlideXC, !hayXC()],
@@ -3478,11 +3575,12 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     paintLayers();
     const ol = $('#slideList'); ol.textContent = '';
     slides().forEach((s, i) => {
-      const li = h('li', { class: i === S.si ? 'on' : '', 'data-sid': s.id, title: 'Arrastra para cambiar el orden · doble clic para cambiar el nombre · clic derecho para más opciones' }, h('button', { onclick: () => gotoSlide(i), 'aria-current': i === S.si ? 'true' : null },
+      const li = h('li', { class: i === S.si ? 'on' : '', 'data-sid': s.id, title: 'Arrastra para cambiar el orden · doble clic para cambiar el nombre · clic derecho para más opciones' }, h('button', { onclick: (ev) => { if (ev.ctrlKey || ev.metaKey) { toggleSl(s.id); return; } if (ev.shiftKey) { rangeSl(s.id); return; } S.slm = []; gotoSlide(i); }, 'aria-current': i === S.si ? 'true' : null },
         h('span', { class: 'n' }, i + 1), h('span', { class: 'nm' }, s.title || s.id), slideThumb(s), h('span', { class: 'du' }, kindTag(s), s.duration + ' s' + ((s.layers || []).length ? ' · ' + s.layers.length + ' capa(s)' : ''))));
-      makeSortable(li, 'slide', s.id, (from, to) => edit(() => { const cur = slide().id; moveIn(slides(), from, to); S.si = Math.max(0, slides().findIndex((x) => x.id === cur)); }, null, { full: true }));
+      makeSortable(li, 'slide', s.id, (from, to) => { const g = slSel(); if (g.length > 1 && g.indexOf(from) >= 0) { moveSlidesTo(g, S.sc, to); return; } edit(() => { const cur = slide().id; moveIn(slides(), from, to); S.si = Math.max(0, slides().findIndex((x) => x.id === cur)); }, null, { full: true }); });
       ol.append(li);
     });
+    paintSlSel();
   }
   // Arrastrar y soltar para reordenar (capas del panel y objetos de la línea de tiempo).
   let dragKey = null;
@@ -3568,18 +3666,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const j = i + d; if (j < 0 || j >= course.scenes.length) return;
     edit(() => { const cur = slide().id; const a = course.scenes; [a[i], a[j]] = [a[j], a[i]]; followSlide(cur); }, null, { full: true });
   }
-  function moveSlideTo(fromId, toScene, beforeId) {
-    const src = course.scenes.find((sc) => sc.slides.some((x) => x.id === fromId)); if (!src) return;
-    const sl = src.slides.find((x) => x.id === fromId), dst = course.scenes[toScene];
-    if (!dst || beforeId === fromId) return;
-    if (src !== dst && src.slides.length < 2) { toast('Una escena necesita al menos una diapositiva.', true); return; }
-    edit(() => {
-      const cur = slide().id;
-      src.slides.splice(src.slides.indexOf(sl), 1);
-      let k = beforeId ? dst.slides.findIndex((x) => x.id === beforeId) : dst.slides.length; if (k < 0) k = dst.slides.length;
-      dst.slides.splice(k, 0, sl); followSlide(cur);
-    }, null, { full: true });
-  }
+  function moveSlideTo(fromId, toScene, beforeId) { moveSlidesTo([fromId], toScene, beforeId); }
   function paintModeSw() {
     const st = !$('#story').hidden;
     document.querySelectorAll('.modesw').forEach((m) => paintOneSw(m, st));
@@ -3764,8 +3851,9 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
           rbtn('play', 'Escena inicial', () => setStartScene(si), { title: 'El curso empieza por la primera diapositiva de esta escena', cls: isS ? 'primary' : '' }),
           rbtn('edit', 'Nombre', () => { const n = document.querySelector('#stBody .sh .nm[data-sn="' + si + '"]'); if (n) renameScene(si, n); }, { title: 'Cambiar el nombre de la escena' }),
           rbtn('trash', 'Eliminar escena', () => deleteScene(si), { title: 'Eliminar la escena seleccionada' })),
-        rgroup('Diapositiva', rbtn('newslide', 'Nueva diapositiva', () => insertSlideKind('content'), { title: 'Añadir una diapositiva después de la seleccionada' }),
-          rbtn('copy', 'Duplicar', dupSlide, { title: 'Duplicar la diapositiva' }), rbtn('trash', 'Eliminar', delSlide, { title: 'Eliminar la diapositiva' }))));
+        rgroup('Diapositiva', rsm('newslide', 'Nueva diapositiva ▾', (ev) => { ev.stopPropagation(); S.si = Math.min(S.si, Math.max(0, slides().length - 1)); newSlideMenu(ev.currentTarget); }, { title: 'Añadir una diapositiva después de la seleccionada: eliges el tipo' }),
+          rbtn('copy', 'Duplicar', dupSlide, { title: 'Duplicar la diapositiva (o las seleccionadas)' }), rbtn('trash', 'Eliminar', delSlide, { title: 'Eliminar la diapositiva (o las seleccionadas)' })),
+        rgroup('Selección', rbtn('copy', 'Copiar', () => { if (!copySlides()) copySlideXC(); }, { title: 'Copiar la diapositiva o las seleccionadas' }), rbtn('cut', 'Cortar', cutSlides, { title: 'Cortar la diapositiva o las seleccionadas' }), rbtn('paste', 'Pegar', pasteSlideXC, { title: 'Pegar después de la diapositiva seleccionada' }), h('div', { class: 'slcol' }, slCountNode(), h('span', { class: 'hint' }, 'Ctrl+clic · Mayús+clic · arrastra un recuadro')))));
     paintQuick($('#quick2'), false);
     paintThemeBtn(); paintModeSw();
     const f = $('#stFloat'); f.textContent = '';
@@ -3807,7 +3895,8 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     const world = h('div', { class: 'stworld', id: 'stWorld' }), sizer = h('div', { class: 'stsizer', id: 'stSizer' }, world);
     body.append(sizer);
     const cur = slide() && slide().id;
-    let dragId = null;
+    let dragId = null, dragGroup = null;
+    const moveDrag = (f, si, before) => { if (dragGroup) { const g = dragGroup; dragGroup = null; moveSlidesTo(g, si, before); } else moveSlideTo(f, si, before); };
     course.scenes.forEach((sc, si) => {
       const sb = h('div', { class: 'sb' });
       const start = startIdx() === si, pos = scPos(sc, si);
@@ -3815,22 +3904,22 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
         h('div', { class: 'sh', title: 'Arrastra la cabecera para colocar la escena' },
           start ? h('span', { class: 'startbadge', title: 'Escena inicial: el curso empieza aquí' }, ic('play'), 'Inicio') : null,
           h('span', { class: 'nm', 'data-sn': String(si), title: 'Doble clic para cambiar el nombre' }, (si + 1) + '. ' + sc.title),
-          iconBtn('plus', 'Añadir una diapositiva a esta escena', () => edit(() => { S.sc = si; const ns = slideFromKind('content'); sc.slides.push(ns); S.si = sc.slides.length - 1; S.ctx = 'base'; S.sel = null; S.t = 0; }, null, { full: true }), 'icon')), sb);
+          iconBtn('plus', 'Añadir una diapositiva a esta escena: eliges el tipo', (ev) => { S.sc = si; S.si = Math.max(0, sc.slides.length - 1); S.ctx = 'base'; S.sel = null; ev.stopPropagation(); newSlideMenu(ev.currentTarget); }, 'icon')), sb);
       sc.slides.forEach((sl, k) => {
         if (k > 0) sb.append(h('div', { class: 'stnext', title: 'Siguiente' }));
         const card = h('div', { class: 'stcard' + (sl.id === cur ? ' on' : ''), draggable: 'true', 'data-cid': sl.id, title: 'Clic: seleccionar y ver sus enlaces · doble clic: abrir · arrastra para mover' },
           thumbOf(sl),
           h('div', { class: 'cap' }, h('b', null, (si + 1) + '.' + (k + 1)), h('span', { class: 'nm' }, sl.title || sl.id)));
-        card.addEventListener('dragstart', (ev) => { dragId = sl.id; ev.dataTransfer.setData('text/plain', sl.id); ev.dataTransfer.effectAllowed = 'move'; setTimeout(() => card.classList.add('drag'), 0); });
+        card.addEventListener('dragstart', (ev) => { dragId = sl.id; dragGroup = slSel().length > 1 && slSel().indexOf(sl.id) >= 0 ? slSel() : null; ev.dataTransfer.setData('text/plain', sl.id); ev.dataTransfer.effectAllowed = 'move'; setTimeout(() => card.classList.add('drag'), 0); });
         card.addEventListener('dragend', () => { dragId = null; body.querySelectorAll('.drag, .over').forEach((n) => n.classList.remove('drag', 'over')); });
         card.addEventListener('dragover', (ev) => { if (dragId && dragId !== sl.id) { ev.preventDefault(); ev.stopPropagation(); card.classList.add('over'); } });
         card.addEventListener('dragleave', () => card.classList.remove('over'));
-        card.addEventListener('drop', (ev) => { ev.preventDefault(); ev.stopPropagation(); card.classList.remove('over'); const f = dragId; dragId = null; if (f) moveSlideTo(f, si, sl.id); });
+        card.addEventListener('drop', (ev) => { ev.preventDefault(); ev.stopPropagation(); card.classList.remove('over'); const f = dragId; dragId = null; if (f) moveDrag(f, si, sl.id); });
         sb.append(card);
       });
       panel.addEventListener('dragover', (ev) => { if (dragId) { ev.preventDefault(); panel.classList.add('over'); } });
       panel.addEventListener('dragleave', (ev) => { if (!panel.contains(ev.relatedTarget)) panel.classList.remove('over'); });
-      panel.addEventListener('drop', (ev) => { ev.preventDefault(); panel.classList.remove('over'); const f = dragId; dragId = null; if (f) moveSlideTo(f, si, null); });
+      panel.addEventListener('drop', (ev) => { ev.preventDefault(); panel.classList.remove('over'); const f = dragId; dragId = null; if (f) moveDrag(f, si, null); });
       // colocar la escena arrastrando la cabecera
       const sh = panel.querySelector('.sh');
       sh.addEventListener('pointerdown', (ev) => {
@@ -3861,6 +3950,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     body.onwheel = (ev) => { if (!(ev.ctrlKey || ev.metaKey)) return; ev.preventDefault(); setStZoom(stZ() + (ev.deltaY < 0 ? 0.1 : -0.1)); };
     requestAnimationFrame(() => { applyStZoom(); drawStoryEdges(); body.scrollTop = top; body.scrollLeft = left; });
     paintStorySide(storyEdges());
+    paintSlSel();
   }
   function gotoSlide(i) { stopT(); S.si = i; S.ctx = 'base'; S.sel = null; S.t = 0; fitPps(); refreshAll(); dirty(); }
   function paintSlideFoot() {
@@ -3871,7 +3961,8 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
         h('button', { class: 'main', type: 'button', title: 'Añadir una diapositiva en blanco', onclick: () => insertSlideKind('content') }, ic('plus'), 'Nueva diapositiva'),
         h('button', { class: 'caret', type: 'button', title: 'Elegir el tipo: pregunta, encuesta, resultados…', 'aria-label': 'Elegir el tipo de diapositiva', onclick: (ev) => { ev.stopPropagation(); newSlideMenu(ev.currentTarget.parentNode); } }, ic('down'))),
       h('div', { class: 'fbtns' },
-        fb('copy', 'Duplicar', dupSlide), fb('up', 'Subir', () => moveSlideBy(-1), '', S.si === 0), fb('down', 'Bajar', () => moveSlideBy(1), '', S.si >= slides().length - 1), fb('trash', 'Eliminar', delSlide, 'danger')));
+        fb('copy', 'Duplicar', dupSlide), fb('up', 'Subir', () => moveSlideBy(-1), '', S.si === 0), fb('down', 'Bajar', () => moveSlideBy(1), '', S.si >= slides().length - 1), fb('trash', 'Eliminar', delSlide, 'danger')), slCountNode());
+    paintSlSel();
   }
 
   /* ---------- Línea de tiempo ---------- */
@@ -5522,8 +5613,9 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     $('#stBody').addEventListener('contextmenu', (ev) => {
       const c = ev.target.closest('.stcard'), sh = ev.target.closest('.stscene .sh');
       if (!c && !sh) return; ev.preventDefault();
+      if (c && slSel().length > 1 && slSel().indexOf(c.dataset.cid) >= 0) { ctxPop(ev.clientX, ev.clientY, multiMenuItems()); return; }
       if (c) {
-        const id = c.dataset.cid; gotoSlideId(id, true);
+        const id = c.dataset.cid; S.slm = []; gotoSlideId(id, true);
         ctxPop(ev.clientX, ev.clientY, [['Diapositiva'], ['edit', 'Abrir para editar', () => { gotoSlideId(id); closeStory(); }], ['Interactividad'], ['play', 'Accionadores…', () => { S.sel = null; S.multi = []; S.tab = 'trig'; gotoSlideId(id); closeStory(); }],
           ['Estructura'], ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['template', 'Nueva desde plantilla…', abrePlantillas], ['copy', 'Duplicar', dupSlide], ['copy', 'Copiar diapositiva (para otro proyecto)', copySlideXC], ['paste', 'Pegar diapositiva', pasteSlideXC, !hayXC()], ['trash', 'Eliminar', delSlide, slides().length < 2]]);
       } else {
@@ -5537,9 +5629,31 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       if (sn) { if (ev.detail >= 2) renameScene(Number(sn.dataset.sn), q('#stBody .sh .nm[data-sn="' + sn.dataset.sn + '"]')); return; }
       const c = ev.target.closest('.stcard'); if (!c) return;
       const id = c.dataset.cid;
+      if (ev.ctrlKey || ev.metaKey) { toggleSl(id); return; }
+      if (ev.shiftKey) { rangeSl(id); return; }
+      if (ev.detail < 2) S.slm = [];
       if (ev.detail >= 2) { if (ev.target.closest('.cap .nm')) renameSlide(id, q('#stBody .stcard[data-cid="' + id + '"] .cap .nm')); else { gotoSlideId(id); closeStory(); } }
       else gotoSlideId(id, true);
     });
+    $('#stBody').addEventListener('pointerdown', (ev) => {
+      if (ev.button !== 0 || S.stHand || S.space || ev.target.closest('.stcard, .sh, button, input, svg .hd, svg .hit')) return;
+      const body = $('#stBody'), o = { x: ev.clientX, y: ev.clientY, moved: false }, keep = ev.ctrlKey || ev.metaKey || ev.shiftKey ? slSel().slice() : [];
+      let band = null;
+      const mv = (e2) => {
+        if (!o.moved) { if (Math.abs(e2.clientX - o.x) + Math.abs(e2.clientY - o.y) < 5) return; o.moved = true; band = h('div', { class: 'rband' }); document.body.append(band); }
+        const x1 = Math.min(o.x, e2.clientX), y1 = Math.min(o.y, e2.clientY), x2 = Math.max(o.x, e2.clientX), y2 = Math.max(o.y, e2.clientY);
+        band.style.cssText = 'left:' + x1 + 'px;top:' + y1 + 'px;width:' + (x2 - x1) + 'px;height:' + (y2 - y1) + 'px';
+        const ids = keep.slice(); body.querySelectorAll('.stcard').forEach((c) => { const r = c.querySelector('.th').getBoundingClientRect(); if (r.right >= x1 && r.left <= x2 && r.bottom >= y1 && r.top <= y2 && ids.indexOf(c.dataset.cid) < 0) ids.push(c.dataset.cid); });
+        S.slm = ids.length > 1 ? ids : []; paintSlSel(); S.bandIds = ids;
+      };
+      const up = () => {
+        window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); if (band) band.remove();
+        if (o.moved) { const ids = S.bandIds || []; if (ids.length === 1) { S.slm = []; gotoSlideId(ids[0], true); } else setSlSel(allSlides().map((x) => x.id).filter((id) => ids.indexOf(id) >= 0)); }
+        else if (!keep.length && S.slm && S.slm.length) { S.slm = []; paintSlSel(); }
+      };
+      window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+    });
+    document.addEventListener('pointerdown', (ev) => { S.slFocus = !!(ev.target.closest && ev.target.closest('#slideList, #slideFoot')); }, true);
     $('#pvClose').addEventListener('click', () => { $('#pv').hidden = true; $('#pvFrame').srcdoc = ''; });
     $('#exportBtn').addEventListener('click', (ev) => { ev.stopPropagation(); exportMenu(); });
     $('#courseTitle').addEventListener('input', (ev) => { edit(() => { course.title = ev.target.value; }, 'title'); });
@@ -5582,7 +5696,9 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       if (ev.key === ' ' && !$('#story').hidden && !/^(input|textarea|select|button)$/i.test(ev.target.tagName || '') && !ev.target.isContentEditable) { ev.preventDefault(); if (!S.space) { S.space = true; paintHand(); } return; }
       if (ev.key === 'Escape') closeShapes();
       if ((ev.key === 'Escape' || ev.key === 'Enter') && S.crop) { ev.preventDefault(); stopCrop(); return; }
-      if (!$('#story').hidden) { if (ev.key === 'Escape') closeStory(); return; }
+      { const tg0 = (ev.target.tagName || '').toLowerCase(), ty0 = tg0 === 'input' || tg0 === 'textarea' || tg0 === 'select' || ev.target.isContentEditable;
+        if (!ty0 && (!$('#story').hidden || S.slFocus) && $('#pv').hidden && slKeys(ev)) return; }
+      if (!$('#story').hidden) { if (ev.key === 'Escape') { if (S.slm && S.slm.length) { S.slm = []; paintSlSel(); } else closeStory(); } return; }
       if (!$('#pv').hidden) { if (ev.key === 'Escape') $('#pvClose').click(); return; }
       const tag = (ev.target.tagName || '').toLowerCase();
       const typing = tag === 'input' || tag === 'textarea' || tag === 'select' || ev.target.isContentEditable;
