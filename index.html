@@ -149,8 +149,31 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 .cardhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .cardhead > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cardhead > button { flex: none; }
-.sec.fold > summary { cursor: pointer; font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding: 6px 0; }
-.sec.fold > summary:hover { color: var(--fg); }
+.sec.fold { padding: 0; margin: 8px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); }
+.sec.fold:last-child { border-bottom: 1px solid var(--line); }
+.sec.fold > summary { list-style: none; display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 9px 10px; font-size: 12.5px; font-weight: 700; color: var(--fg); border-radius: 10px; }
+.sec.fold > summary::-webkit-details-marker { display: none; }
+.sec.fold > summary:hover { background: color-mix(in srgb, var(--brand) 8%, transparent); }
+.sec.fold > summary:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+.sec.fold > summary svg { width: 16px; height: 16px; color: var(--brand); flex: none; }
+.sec.fold > summary::after { content: ''; margin-left: auto; width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); transition: transform .15s; flex: none; }
+.sec.fold[open] > summary::after { transform: rotate(45deg); }
+.sec.fold > :not(summary) { margin-left: 10px; margin-right: 10px; }
+.sec.fold[open] { padding-bottom: 6px; }
+.pbody .f.check { padding: 3px 0; }
+.pbody .f.check input[type=checkbox] { appearance: none; -webkit-appearance: none; width: 32px; height: 18px; border-radius: 999px; background: var(--line); position: relative; flex: none; cursor: pointer; transition: background .15s; margin: 0; border: 0; padding: 0; }
+.pbody .f.check input[type=checkbox]::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.pbody .f.check input[type=checkbox]:checked { background: var(--brand); }
+.pbody .f.check input[type=checkbox]:checked::after { transform: translateX(14px); }
+.pbody .f.check input[type=checkbox]:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.ccards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ccard { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; padding: 8px; border: 2px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); cursor: pointer; }
+.ccard:hover { border-color: color-mix(in srgb, var(--brand) 50%, var(--line)); }
+.ccard.on { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 10%, var(--bg)); }
+.ccard .cpic { display: block; color: var(--muted); } .ccard.on .cpic { color: var(--brand); }
+.ccard .cpic svg { width: 100%; height: 40px; display: block; }
+.ccard b { font-size: 12.5px; } .ccard small { font-size: 11px; color: var(--muted); line-height: 1.25; }
+.optrow.hd { margin-bottom: 2px; } .optrow.hd span { font-size: 11px; font-weight: 600; color: var(--muted); }
 .rtab.ctx { background: var(--brand); color: #fff; border-color: var(--brand); font-weight: 700; }
 .rtab.ctx.on { background: var(--panel); color: var(--brand); }
 .rhint { font-size: 12px; color: var(--muted); max-width: 260px; line-height: 1.25; }
@@ -2980,19 +3003,45 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       items.push({ sub: ['tofront', 'Orden', ord] });
       items.push(['Objeto'], ['copy', 'Duplicar', duplicateSel], ['trash', 'Eliminar', deleteSel]);
     }
-    ctxPop(ev.clientX, ev.clientY, items);
+    ctxPop(ev.clientX, ev.clientY, !n && slide().question ? qMenuItems(slide()).concat(items) : items);
   }
   // Menú contextual de la lista de diapositivas.
+  // Opciones rápidas de una actividad (clic derecho).
+  function qMenuItems(sl) {
+    const q = sl && sl.question; if (!q) return [];
+    const go = (fn) => () => edit(fn, null, { full: true });
+    const pick = (vals, cur, fmt, apply) => vals.map((v) => [cur === v ? 'tick' : 'minus', fmt(v), go(() => apply(v))]);
+    const tog = (label, get, apply) => [get() ? 'tick' : 'tickNo', label, go(() => apply(!get()))];
+    const graded = q.graded !== false && q.kind !== 'free', items = [['Actividad']];
+    if (graded) {
+      items.push({ sub: ['star', 'Puntos', pick([0, 1, 5, 10, 20, 50], q.points, (v) => v + (v === 1 ? ' punto' : ' puntos'), (v) => { q.points = v; })] });
+      items.push({ sub: ['refresh', 'Intentos', pick([1, 2, 3, 5], q.attempts || 1, (v) => v + (v === 1 ? ' intento' : ' intentos'), (v) => { q.attempts = v; })] });
+      const dest = (w) => pick(['', 'next'], (q.dest && q.dest[w]) || '', (v) => (v ? 'Ir a la siguiente diapositiva' : 'Seguir con normalidad'), (v) => { q.dest = q.dest || {}; if (v) q.dest[w] = v; else delete q.dest[w]; });
+      items.push({ sub: ['tick', 'Si acierta', dest('correct')] }, { sub: ['tickNo', 'Si falla', dest('incorrect')] });
+    }
+    items.push(tog('Hay que responder para continuar', () => (q.required !== undefined ? q.required : q.graded !== false), (v) => { q.required = v; }));
+    if (q.kind === 'match') {
+      items.push({ sub: ['line', 'Unir con', pick(['', 'arrows'], q.link || '', (v) => (v ? 'Flechas' : 'Números'), (v) => { if (v) q.link = v; else delete q.link; })] });
+      items.push(tog('Mezclar las definiciones', () => q.shuffle !== false, (v) => { q.shuffle = v; }));
+    }
+    if (['gaps', 'bank', 'text'].includes(q.kind) && graded) {
+      items.push(tog('Distinguir mayúsculas', () => q.caseSensitive, (v) => { q.caseSensitive = v; }), tog('Ignorar las tildes', () => q.ignoreAccents, (v) => { q.ignoreAccents = v; }));
+    }
+    if (['gaps', 'match'].includes(q.kind) && graded) items.push(tog('Puntuar cada parte por separado', () => q.partial, (v) => { q.partial = v; }));
+    if (['choice', 'multi'].includes(q.kind)) items.push(tog('Barajar las opciones', () => q.shuffle, (v) => { q.shuffle = v; }));
+    items.push(['edit', 'Todas las opciones de la pregunta…', () => { S.ctx = 'base'; S.sel = null; S.multi = []; S.tab = 'props'; refreshAll(); }]);
+    return items;
+  }
   function slideMenu(ev) {
     const li = ev.target.closest('li[data-sid]'); if (!li) return;
     ev.preventDefault();
     const sid = li.dataset.sid, i = slides().findIndex((x) => x.id === sid);
     if (i >= 0 && i !== S.si) gotoSlide(i);
-    ctxPop(ev.clientX, ev.clientY, [['Diapositiva'],
+    ctxPop(ev.clientX, ev.clientY, qMenuItems(slide()).concat([['Diapositiva'],
       ['newslide', 'Nueva diapositiva', () => insertSlideKind('content')], ['template', 'Nueva desde plantilla…', abrePlantillas], ['copy', 'Duplicar', dupSlide], ['copy', 'Copiar diapositiva (para otro proyecto)', copySlideXC], ['paste', 'Pegar diapositiva', pasteSlideXC, !hayXC()],
       ['edit', 'Cambiar nombre', () => renameSlide(sid, () => document.querySelector('#slideList li[data-sid="' + sid + '"] .nm'))], ['Interactividad'], ['play', 'Accionadores de la diapositiva…', () => { S.sel = null; S.multi = []; S.tab = 'trig'; refreshAll(); }],
       ['Orden'], ['up', 'Subir', () => moveSlideBy(-1), S.si === 0], ['down', 'Bajar', () => moveSlideBy(1), S.si >= slides().length - 1],
-      ['Eliminar'], ['trash', 'Eliminar diapositiva', delSlide, slides().length < 2]]);
+      ['Eliminar'], ['trash', 'Eliminar diapositiva', delSlide, slides().length < 2]]));
   }
   const isDark = () => { const r = document.documentElement; return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
   function paintThemeBtn() { document.querySelectorAll('.themetog').forEach((b) => b.setAttribute('aria-checked', isDark() ? 'true' : 'false')); }
@@ -4154,13 +4203,26 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
     return h('div', { class: 'f' }, h('span', null, label), h('div', { class: 'colorf' }, pick, txt));
   }
   const FOLD = (() => { try { return JSON.parse(localStorage.getItem('sua.pliegues') || '{}'); } catch (e) { return {}; } })();
+  // Qué secciones nacen cerradas (lo secundario); el resto nace abierto. Lo que el usuario abre o cierra se recuerda.
+  const CLOSED0 = new Set(['pos', 'tiempo', 'acc', 'sec:Estados', 'q:rules', 'q:fb', 'q:adv']);
+  const FOLD_IC = { 'Diapositiva': 'blank', 'Capa': 'layer', 'Objeto': 'cursor', 'Forma': 'shape', 'Apariencia': 'palette', 'Archivo': 'folder', 'Estados': 'copy', 'Carrusel de imágenes': 'carousel', 'Resultados': 'chart', 'Evaluación del curso': 'star', 'Variables': 'tree', 'Posición y tamaño': 'ruler', 'Tiempo': 'play', 'Accesibilidad': 'eye', 'Puntuación e intentos': 'star', 'Respuesta': 'check', 'Al acertar o fallar': 'tick', 'Mensaje final': 'tick', 'Corrección': 'edit', 'Opciones avanzadas': 'tree', 'Accionadores': 'play' };
   const fold = (title, key, ...kids) => {
-    const d = h('details', { class: 'sec fold' }, h('summary', null, title), kids);
-    d.open = !!FOLD[key];
+    const ico = FOLD_IC[title] || (/^Pregunta/.test(title) ? 'check' : /^Accionadores/.test(title) ? 'play' : null);
+    const d = h('details', { class: 'sec fold' }, h('summary', null, ico ? ic(ico) : null, h('b', null, title)), kids);
+    d.open = key in FOLD ? !!FOLD[key] : !CLOSED0.has(key);
     d.addEventListener('toggle', () => { FOLD[key] = d.open; try { localStorage.setItem('sua.pliegues', JSON.stringify(FOLD)); } catch (e) { /* nada */ } });
     return d;
   };
-  const sec = (title, ...kids) => h('div', { class: 'sec' }, title ? h('h3', null, title) : null, kids);
+  const sec = (title, ...kids) => title && title !== 'Selección' ? fold(title, 'sec:' + title.replace(/ de [«“].*$/, '').replace(/ de la (diapositiva|capa)$/, ''), ...kids) : h('div', { class: 'sec' }, title ? h('h3', null, title) : null, kids);
+  function choiceCards(label, opts, get, set) {
+    const cur = get() || '', g = h('div', { class: 'ccards', role: 'radiogroup', 'aria-label': label });
+    opts.forEach((o) => {
+      const on = o.v === cur, b = h('button', { type: 'button', class: 'ccard' + (on ? ' on' : ''), role: 'radio', 'aria-checked': on ? 'true' : 'false', title: o.desc, onclick: () => { if (!on) edit(() => set(o.v), null, { full: true }); } });
+      const pic = h('span', { class: 'cpic' }); pic.innerHTML = o.svg;
+      b.append(pic, h('b', null, o.t), h('small', null, o.desc)); g.append(b);
+    });
+    return h('div', { class: 'f' }, h('span', null, label), g);
+  }
   const row = (...kids) => h('div', { class: 'row' }, kids);
 
   /* ---------- Panel: propiedades ---------- */
@@ -4456,7 +4518,7 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
       h('div', { class: 'chips' }, iconBtn('group', 'Agrupar', groupSel), iconBtn('ungroup', 'Desagrupar', ungroupSel), iconBtn('trash', 'Eliminar', deleteSel, 'small danger')))];
   }
   function questionSection(sl) {
-    const q = sl.question, graded = q.graded !== false, out = [];
+    const q = sl.question, graded = q.graded !== false, out = [], rules = [];
     const kindName = q.kind === 'free' ? 'Pregunta libre' : (graded ? 'Pregunta calificada' : 'Pregunta de encuesta');
     if (q.kind === 'free') {
       out.push(sec(kindName, h('div', { class: 'hint' }, 'Diseña la pregunta con tus propios objetos. Usa la acción «Registrar el resultado de esta pregunta» en un accionador para decir si la respuesta es correcta o no.'),
@@ -4471,26 +4533,30 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
         const nG = parseGaps(q.text).filter((x) => x.alts).length;
         k.append(h('div', { class: 'hint' }, nG ? 'Huecos: ' + nG + '.' : 'Todavía no hay ningún hueco: escribe una palabra entre llaves.'));
         if (graded) {
-          k.append(checkField('Distinguir mayúsculas y minúsculas', () => q.caseSensitive, (v) => { q.caseSensitive = v; }));
-          k.append(checkField('Ignorar las tildes', () => q.ignoreAccents, (v) => { q.ignoreAccents = v; }));
-          k.append(checkField('Puntuar cada hueco por separado', () => q.partial, (v) => { q.partial = v; }));
+          rules.push(checkField('Distinguir mayúsculas y minúsculas', () => q.caseSensitive, (v) => { q.caseSensitive = v; }));
+          rules.push(checkField('Ignorar las tildes', () => q.ignoreAccents, (v) => { q.ignoreAccents = v; }));
+          rules.push(checkField('Puntuar cada hueco por separado', () => q.partial, (v) => { q.partial = v; }));
         }
       } else if (q.kind === 'match') {
         k.append(h('div', { class: 'hint' }, 'Escribe cada pareja: a la izquierda el concepto y a la derecha su definición. El alumno las verá mezcladas.'));
+        k.append(h('div', { class: 'optrow pair hd', 'aria-hidden': 'true' }, h('span', null, 'Concepto'), h('span', null, 'Definición'), h('span')));
         (q.pairs = q.pairs || []).forEach((pr, i) => {
           const a = h('input', { type: 'text', value: pr.a || '', placeholder: 'Concepto', 'aria-label': 'Concepto ' + (i + 1) }), b = h('input', { type: 'text', value: pr.b || '', placeholder: 'Definición', 'aria-label': 'Definición ' + (i + 1) });
           a.addEventListener('input', () => edit(() => { pr.a = a.value; }, 'qpa' + i)); b.addEventListener('input', () => edit(() => { pr.b = b.value; }, 'qpb' + i));
           k.append(h('div', { class: 'optrow pair' }, a, b, iconBtn('trash', 'Quitar la pareja', () => { if (q.pairs.length > 2) edit(() => { q.pairs.splice(i, 1); }, null, { panel: true }); else toast('Hacen falta al menos 2 parejas.', true); }, 'icon danger')));
         });
         k.append(h('button', { class: 'btn small', onclick: () => edit(() => { q.pairs.push({ a: 'Concepto ' + (q.pairs.length + 1), b: 'Definición ' + (q.pairs.length + 1) }); }, null, { panel: true }) }, ic('plus'), 'Añadir pareja'));
-        k.append(selectField('Unir con', [['', 'Números (pulsar concepto y definición)'], ['arrows', 'Flechas (arrastrar o pulsar)']], () => q.link || '', (v) => { if (v) q.link = v; else delete q.link; }, { full: true }));
-        k.append(checkField('Mezclar las definiciones', () => q.shuffle !== false, (v) => { q.shuffle = v; }));
-        if (graded) k.append(checkField('Puntuar cada pareja por separado', () => q.partial, (v) => { q.partial = v; }));
+        k.append(choiceCards('Cómo se unen', [
+          { v: '', t: 'Números', desc: 'Pulsa el concepto y su definición.', svg: '<svg viewBox="0 0 80 40" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="28" height="9" rx="3"/><rect x="4" y="16" width="28" height="9" rx="3"/><rect x="4" y="28" width="28" height="9" rx="3"/><rect x="48" y="4" width="28" height="9" rx="3"/><rect x="48" y="16" width="28" height="9" rx="3"/><rect x="48" y="28" width="28" height="9" rx="3"/><text x="38" y="12" font-size="8" fill="currentColor" stroke="none">1</text><text x="38" y="24" font-size="8" fill="currentColor" stroke="none">2</text><text x="38" y="36" font-size="8" fill="currentColor" stroke="none">3</text></svg>' },
+          { v: 'arrows', t: 'Flechas', desc: 'Arrastra de un punto a otro.', svg: '<svg viewBox="0 0 80 40" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="26" height="9" rx="3"/><rect x="4" y="16" width="26" height="9" rx="3"/><rect x="4" y="28" width="26" height="9" rx="3"/><rect x="50" y="4" width="26" height="9" rx="3"/><rect x="50" y="16" width="26" height="9" rx="3"/><rect x="50" y="28" width="26" height="9" rx="3"/><path d="M32 8.5 48 32.5M32 20.5 48 8.5M32 32.5 48 20.5"/></svg>' }],
+          () => q.link || '', (v) => { if (v) q.link = v; else delete q.link; }));
+        rules.push(checkField('Mezclar las definiciones', () => q.shuffle !== false, (v) => { q.shuffle = v; }));
+        if (graded) rules.push(checkField('Puntuar cada pareja por separado', () => q.partial, (v) => { q.partial = v; }));
       } else if (q.kind === 'text') {
         if (graded) {
           k.append(textArea('Respuestas válidas (una por línea)', () => (q.answers || []).join('\n'), (v) => { q.answers = v.split('\n').map((x) => x.trim()).filter(Boolean); }, 'qans'));
-          k.append(checkField('Distinguir mayúsculas y minúsculas', () => q.caseSensitive, (v) => { q.caseSensitive = v; }));
-          k.append(checkField('Ignorar las tildes', () => q.ignoreAccents, (v) => { q.ignoreAccents = v; }));
+          rules.push(checkField('Distinguir mayúsculas y minúsculas', () => q.caseSensitive, (v) => { q.caseSensitive = v; }));
+          rules.push(checkField('Ignorar las tildes', () => q.ignoreAccents, (v) => { q.ignoreAccents = v; }));
         }
       } else {
         k.append(h('div', { class: 'hint' }, graded ? (q.kind === 'multi' ? 'Marca todas las respuestas correctas.' : 'Marca la respuesta correcta.') : 'Las opciones de la encuesta.'));
@@ -4502,35 +4568,38 @@ h('button', Object.assign({ class: 'themetog', type: 'button', role: 'switch', '
           k.append(h('div', { class: 'optrow' }, mark, txt, iconBtn('trash', 'Quitar la opción', () => { if (q.options.length > 2) edit(() => { q.options.splice(i, 1); }, null, { panel: true }); else toast('Hacen falta al menos 2 opciones.', true); }, 'icon danger')));
         });
         k.append(h('button', { class: 'btn small', onclick: () => edit(() => { q.options.push({ text: 'Opción ' + String.fromCharCode(65 + q.options.length) }); }, null, { panel: true }) }, ic('plus'), 'Añadir opción'));
-        k.append(checkField('Barajar las opciones', () => q.shuffle, (v) => { q.shuffle = v; }));
+        rules.push(checkField('Barajar las opciones', () => q.shuffle, (v) => { q.shuffle = v; }));
       }
       out.push(sec(kindName, k));
     }
-    const ops = h('div');
-    if (graded && q.kind !== 'free') ops.append(row(
+    if (rules.length) out.push(fold('Corrección', 'q:rules', ...rules));
+    const pts = h('div'), flow = h('div'), adv = h('div');
+    if (graded && q.kind !== 'free') pts.append(row(
       field('Puntos', 'number', () => q.points, (v) => { q.points = v == null ? 0 : v; }, { step: 1, min: 0, key: 'qpts' }),
       field('Intentos', 'number', () => q.attempts || 1, (v) => { q.attempts = Math.max(1, v || 1); }, { step: 1, min: 1, key: 'qatt', panel: true })));
+    pts.append(checkField('Hay que responder para continuar', () => (q.required !== undefined ? q.required : graded), (v) => { q.required = v; }));
     if (graded && q.kind !== 'free') {
       const dests = [['', 'Seguir con normalidad'], ['next', 'Ir a la siguiente diapositiva']].concat(allSlides().filter((x) => x !== sl).map((x) => [x.id, slideNo(x) + '. ' + (x.title || x.id)]));
       q.dest = q.dest || {};
-      ops.append(selectField('Si acierta, continuar en', dests, () => q.dest.correct || '', (v) => { if (v) q.dest.correct = v; else delete q.dest.correct; }, { full: true }));
-      ops.append(selectField('Si falla (sin más intentos), continuar en', dests, () => q.dest.incorrect || '', (v) => { if (v) q.dest.incorrect = v; else delete q.dest.incorrect; }, { full: true }));
-      ops.append(h('div', { class: 'hint' }, 'Tras el mensaje de acierto o fallo aparece un botón «Continuar» que lleva a esa diapositiva.'));
+      flow.append(selectField('Si acierta, continuar en', dests, () => q.dest.correct || '', (v) => { if (v) q.dest.correct = v; else delete q.dest.correct; }, { full: true }));
+      flow.append(selectField('Si falla (sin más intentos), continuar en', dests, () => q.dest.incorrect || '', (v) => { if (v) q.dest.incorrect = v; else delete q.dest.incorrect; }, { full: true }));
+      flow.append(h('div', { class: 'hint' }, 'Tras el mensaje de acierto o fallo aparece un botón «Continuar» que lleva a esa diapositiva.'));
     }
-    ops.append(checkField('Hay que responder para continuar', () => (q.required !== undefined ? q.required : graded), (v) => { q.required = v; }));
     if (q.kind !== 'free') {
       q.feedback = q.feedback || {};
       if (graded) {
-        ops.append(h('div', { class: 'row one' }, field('Mensaje si acierta', 'text', () => q.feedback.correct, (v) => { q.feedback.correct = v; }, { key: 'fbc', placeholder: '¡Correcto!' })));
-        ops.append(h('div', { class: 'row one' }, field('Mensaje si falla', 'text', () => q.feedback.incorrect, (v) => { q.feedback.incorrect = v; }, { key: 'fbi', placeholder: 'No es correcta.' })));
-        if ((q.attempts || 1) > 1) ops.append(h('div', { class: 'row one' }, field('Mensaje para reintentar', 'text', () => q.feedback.retry, (v) => { q.feedback.retry = v; }, { key: 'fbr', placeholder: 'No es correcta. Inténtalo de nuevo.' })));
-        ops.append(checkField('Mostrar la respuesta correcta al fallar', () => q.feedback.showCorrect !== false, (v) => { q.feedback.showCorrect = v; }));
-      } else ops.append(h('div', { class: 'row one' }, field('Mensaje de agradecimiento', 'text', () => q.feedback.survey, (v) => { q.feedback.survey = v; }, { key: 'fbs', placeholder: 'Gracias por tu respuesta.' })));
+        flow.append(h('div', { class: 'row one' }, field('Mensaje si acierta', 'text', () => q.feedback.correct, (v) => { q.feedback.correct = v; }, { key: 'fbc', placeholder: '¡Correcto!' })));
+        flow.append(h('div', { class: 'row one' }, field('Mensaje si falla', 'text', () => q.feedback.incorrect, (v) => { q.feedback.incorrect = v; }, { key: 'fbi', placeholder: 'No es correcta.' })));
+        if ((q.attempts || 1) > 1) flow.append(h('div', { class: 'row one' }, field('Mensaje para reintentar', 'text', () => q.feedback.retry, (v) => { q.feedback.retry = v; }, { key: 'fbr', placeholder: 'No es correcta. Inténtalo de nuevo.' })));
+        flow.append(checkField('Mostrar la respuesta correcta al fallar', () => q.feedback.showCorrect !== false, (v) => { q.feedback.showCorrect = v; }));
+      } else flow.append(h('div', { class: 'row one' }, field('Mensaje de agradecimiento', 'text', () => q.feedback.survey, (v) => { q.feedback.survey = v; }, { key: 'fbs', placeholder: 'Gracias por tu respuesta.' })));
     }
     const banks = course.banks || [];
-    ops.append(selectField('Banco de preguntas', [['', 'Ninguno']].concat(banks.map((b) => [b.id, b.title])), () => q.bank || '', (v) => { if (v) q.bank = v; else delete q.bank; }, { full: true }));
-    if (!banks.length) ops.append(h('div', { class: 'hint' }, 'Crea bancos en la sección «Curso», más abajo.'));
-    out.push(sec('Opciones', ops));
+    adv.append(selectField('Banco de preguntas', [['', 'Ninguno']].concat(banks.map((b) => [b.id, b.title])), () => q.bank || '', (v) => { if (v) q.bank = v; else delete q.bank; }, { full: true }));
+    if (!banks.length) adv.append(h('div', { class: 'hint' }, 'Crea bancos en la sección «Curso», más abajo.'));
+    out.push(fold(graded && q.kind !== 'free' ? 'Puntuación e intentos' : 'Respuesta', 'q:pts', pts));
+    if (flow.childNodes.length) out.push(fold(graded ? 'Al acertar o fallar' : 'Mensaje final', 'q:fb', flow));
+    out.push(fold('Opciones avanzadas', 'q:adv', adv));
     return out;
   }
   // Qué preguntas cuentan en esta diapositiva de resultados: todas o solo las elegidas.
